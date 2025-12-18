@@ -1,0 +1,135 @@
+#:kivy 2.2.0
+
+ScreenManager:
+    MenuScreen:
+        name: "menu"
+    CreatePlayerScreen:
+        name: "create"
+    PlayerSelectScreen:
+        name: "select"
+    GameScreen:
+        name: "game"
+    HistoryScreen:
+        name: "history"
+
+
+<MenuScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(12)
+
+        Label:
+            text: "Domino Scores"
+            font_size: "32sp"
+            size_hint_y: None
+            height: dp(60)
+
+        Button:
+            text: "New Game"
+            on_release: root.manager.current = "select"
+
+        Button:
+            text: "Create Player"
+            on_release: root.manager.current = "create"
+
+        Button:
+            text: "Game History"
+            on_release: root.manager.current = "history"
+
+
+<CreatePlayerScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(12)
+
+        TextInput:
+            id: name_input
+            hint_text: "Player name"
+            multiline: False
+            font_size: "20sp"
+
+        Button:
+            text: "Save Player"
+            on_release:
+                root.save_player(name_input.text)
+                name_input.text = ""
+
+        Button:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+
+
+<PlayerSelectScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+
+        ScrollView:
+            GridLayout:
+                id: player_list
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+
+        Button:
+            text: "Start Game"
+            size_hint_y: None
+            height: dp(60)
+            on_release:
+                app.start_game([b.text for b in player_list.children if b.state == "down"])
+                root.manager.current = "game"
+
+
+<GameScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(10)
+
+        ScrollView:
+            GridLayout:
+                id: scores
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+
+        Button:
+            text: "Finish Game"
+            size_hint_y: None
+            height: dp(60)
+            on_release:
+                app.finish_game()
+                root.manager.current = "menu"
+
+
+<HistoryScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: "Game History"
+            font_size: "24sp"
+            size_hint_y: None
+            height: dp(40)
+
+        ScrollView:
+            padding:10
+            spacing: dp(10)
+            GridLayout:
+                id: history_list
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 15
+                spacing: dp(15)
+
+        Button:
+            text: "Back"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.manager.current = "menu"
