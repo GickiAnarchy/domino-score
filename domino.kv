@@ -11,6 +11,8 @@ ScreenManager:
         name: "game"
     HistoryScreen:
         name: "history"
+    StatsScreen:
+    	name: "stats"
 
 
 <MenuScreen>:
@@ -18,6 +20,11 @@ ScreenManager:
         orientation: "vertical"
         padding: dp(20)
         spacing: dp(12)
+        
+        Image:
+        	source: "./data/icon_1024.png"
+        	size_hint: (0.8, 0.8)
+        	pos_hint: {'center_x': 0.5}
 
         Label:
             text: "Domino Scores"
@@ -36,6 +43,10 @@ ScreenManager:
         Button:
             text: "Game History"
             on_release: root.manager.current = "history"
+        
+        Button:
+            text: "Player Stats"
+            on_release: root.manager.current = "stats"
 
 
 <CreatePlayerScreen>:
@@ -128,6 +139,19 @@ ScreenManager:
                 padding: 15
                 spacing: dp(15)
 
+        Button:
+            text: "Back"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.manager.current = "menu"
+
+<StatsScreen>:
+	BoxLayout:
+		orientation:"vertical"
+		padding: dp(20)
+        spacing: dp(10)
+        
+        
         Button:
             text: "Back"
             size_hint_y: None

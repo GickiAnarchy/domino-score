@@ -52,6 +52,8 @@ class GameScore:
 class MenuScreen(Screen):
 	pass
 
+class StatsScreen(Screen):
+	pass
 
 class CreatePlayerScreen(Screen):
 	def save_player(self, name):
@@ -178,6 +180,7 @@ class DominoApp(App):
 		sm.add_widget(PlayerSelectScreen(name="select"))
 		sm.add_widget(GameScreen(name="game"))
 		sm.add_widget(HistoryScreen(name="history"))
+		sm.add_widget(StatsScreen(name="stats"))
 		return sm
 
 	# ---------- Persistence ----------
