@@ -104,6 +104,7 @@ class StatsScreen(Screen):
 
 
 class CreatePlayerScreen(Screen):
+    
     def save_player(self, name):
         app = App.get_running_app()
         name = name.strip()
@@ -205,12 +206,7 @@ class GameScreen(Screen):
         app = App.get_running_app()
         game = app.current_game
 
-        #if points <= 0:
-            # pass
-            # return
-
         game.add_points(name, points)
-
         if input_widget:
             input_widget.text = ""
 
