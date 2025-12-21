@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      # ---------- Checkout ----------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ---------- Java (MUST be first) ----------
+      # ---------- Java (REQUIRED FIRST) ----------
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -23,7 +24,7 @@ jobs:
       - name: Verify Java
         run: java -version
 
-      # ---------- Linux deps ----------
+      # ---------- Linux system dependencies ----------
       - name: Install Linux dependencies
         run: |
           sudo apt update
@@ -50,21 +51,22 @@ jobs:
 
       # ---------- Android SDK ----------
       - name: Set up Android SDK
-		uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v3
 
-	   - name: Install Android SDK packages
-     	run: |
-	        sdkmanager --install \
-	       "platform-tools" \
-	       "platforms;android-33" \
-	       "build-tools;33.0.2"
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2"
 
-	   - name: Add Android build-tools to PATH
- 	    run: |
-    		echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
+      # ---------- IMPORTANT FIX ----------
+      - name: Add Android build-tools to PATH
+        run: |
+          echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
 
-		- name: Accept Android licenses
-  		run: yes | sdkmanager --licenses
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses
 
       # ---------- Sanity checks ----------
       - name: Verify Android tools
@@ -73,11 +75,11 @@ jobs:
           which aidl
           aidl --version
 
-      # ---------- Build ----------
+      # ---------- Build APK ----------
       - name: Build APK
         run: buildozer android debug
 
-      # ---------- Upload ----------
+      # ---------- Upload artifact ----------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
