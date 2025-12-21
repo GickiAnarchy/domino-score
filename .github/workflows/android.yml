@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ---------- Java (REQUIRED FIRST) ----------
+      # ---------- Java ----------
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,7 +24,7 @@ jobs:
       - name: Verify Java
         run: java -version
 
-      # ---------- Linux system dependencies ----------
+      # ---------- Linux dependencies ----------
       - name: Install Linux dependencies
         run: |
           sudo apt update
@@ -43,13 +43,12 @@ jobs:
             build-essential
 
       # ---------- Python ----------
-      - name: Upgrade pip
-        run: python3 -m pip install --upgrade pip
-
       - name: Install Buildozer
-        run: python3 -m pip install buildozer cython
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install buildozer cython
 
-      # ---------- Android SDK (SYSTEM SDK) ----------
+      # ---------- Android SDK ----------
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -60,38 +59,36 @@ jobs:
             "platforms;android-33" \
             "build-tools;33.0.2"
 
-      # ---------- Accept licenses (SYSTEM SDK) ----------
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses
 
-      # ---------- Export SDK for Buildozer ----------
-      - name: Force Buildozer to use system Android SDK
+      # ---------- Force SDK for Buildozer ----------
+      - name: Export Android SDK environment
         run: |
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
 
-      # ---------- Expose build-tools (AIDL) ----------
+      # ---------- Expose build-tools ----------
       - name: Add build-tools to PATH
         run: |
-          BUILDTOOLS=$(ls -d $ANDROID_SDK_ROOT/build-tools/* | sort -V | tail -n 1)
-          echo "Using build-tools at: $BUILDTOOLS"
-          echo "$BUILDTOOLS" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/build-tools/33.0.2" >> $GITHUB_PATH
 
-      # ---------- Sanity checks ----------
+      # ---------- Verify ----------
       - name: Verify Android tools
         run: |
           command -v adb
           command -v aidl
           aidl --help >/dev/null
 
-      # ---------- Build APK ----------
+      # ---------- Build ----------
       - name: Build APK
         env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-        run: buildozer android debug
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: |
+          buildozer android debug
 
-      # ---------- Upload artifact ----------
+      # ---------- Upload ----------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
