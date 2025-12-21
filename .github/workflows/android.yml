@@ -52,21 +52,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK packages
+      - name: Install Android SDK packages (SDK + NDK)
         run: |
           sdkmanager --install \
             "platform-tools" \
             "platforms;android-33" \
-            "build-tools;33.0.2"
+            "build-tools;33.0.2" \
+            "ndk;25.2.9519653"
 
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses
 
-      # ---------- Force SDK for Buildozer ----------
-      - name: Export Android SDK environment
+      # ---------- Export SDK/NDK for Buildozer ----------
+      - name: Export Android paths
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
 
       # ---------- Expose build-tools ----------
       - name: Add build-tools to PATH
@@ -78,15 +80,15 @@ jobs:
         run: |
           command -v adb
           command -v aidl
-          aidl --help >/dev/null
+          ls /usr/local/lib/android/sdk/ndk/25.2.9519653
 
       # ---------- Build ----------
       - name: Build APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-        run: |
-          buildozer android debug
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/25.2.9519653
+        run: buildozer android debug
 
       # ---------- Upload ----------
       - name: Upload APK
