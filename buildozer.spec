@@ -105,7 +105,7 @@ fullscreen = 0
 
 android.api = 33
 android.build_tools_version = 33.0.2
-android.ndk = /usr/local/lib/android/sdk/ndk/25.2.9519653
+android.ndk = 25.2.9519653
 android.sdk = /usr/local/lib/android/sdk
 
 # (int) Minimum API your APK / AAB will support.
