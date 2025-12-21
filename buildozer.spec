@@ -101,7 +101,7 @@ fullscreen = 0
 #android.features = android.hardware.usb.host
 
 # (int) Target Android API, should be as high as possible.
-[app]
+
 
 android.api = 33
 android.build_tools_version = 33.0.2
