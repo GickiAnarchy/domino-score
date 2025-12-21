@@ -4,7 +4,6 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from datetime import datetime
@@ -14,7 +13,7 @@ import os
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
 
-MAX_POINTS = 300  # configurable win conadition
+MAX_POINTS = 100  # configurable win condition
 
 
 # ======================
@@ -68,11 +67,10 @@ class GameScore:
 
     def check_game_over(self):
         for score in self.totals.values():
-            if score <= MAX_POINTS:
-                self.finished = False
-                return False
-        self.finished = True
-        return True
+            if score >= MAX_POINTS:
+                self.finished = True
+                return True
+        return False
 
     def to_dict(self):
         return {
@@ -87,14 +85,6 @@ class GameScore:
 # ======================
 # SCREENS
 # ======================
-class OptionsScreen(Screen):
-	pass
-
-
-class AboutScreen(Screen):
-	pass
-
-
 class MenuScreen(Screen):
     pass
 
@@ -156,7 +146,7 @@ class GameScreen(Screen):
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=254,
+            height=180,
             padding=10,
             spacing=5
         )
@@ -164,25 +154,22 @@ class GameScreen(Screen):
         score_label = Label(
             text=f"{name} — Score: {game.totals[name]}",
             size_hint_y=None,
-            height=80
+            height=40
         )
 
         def update_label():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
-        btn_row = BoxLayout(size_hint_y=None, height=60, spacing=5)
+        btn_row = BoxLayout(size_hint_y=None, height=40, spacing=5)
 
         btn5 = Button(text="+5")
         btn10 = Button(text="+10")
-        btnmin5 = Button(text="-5")
 
         btn5.bind(on_release=lambda *_: self.add_score(name, 5, update_label))
         btn10.bind(on_release=lambda *_: self.add_score(name, 10, update_label))
-        btnmin5.bind(on_release=lambda *_:self.add_score(name, -5, update_label))
 
         btn_row.add_widget(btn5)
         btn_row.add_widget(btn10)
-        btn_row.add_widget(btnmin5)
 
         input_box = TextInput(
             multiline=False,
@@ -205,8 +192,8 @@ class GameScreen(Screen):
         app = App.get_running_app()
         game = app.current_game
 
-        #if points <= 0:
-            # pass
+        if points <= 0:
+            pass
             # return
 
         game.add_points(name, points)
@@ -269,8 +256,6 @@ class DominoApp(App):
         sm.add_widget(GameScreen(name="game"))
         sm.add_widget(HistoryScreen(name="history"))
         sm.add_widget(StatsScreen(name="stats"))
-        sm.add_widget(AboutScreen(name="about"))
-        sm.add_widget(OptionsScreen(name="options"))
         return sm
 
     # ---------- Persistence ----------

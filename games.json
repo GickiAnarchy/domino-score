@@ -1,0 +1,259 @@
+[
+  {
+    "date": "2025-12-19T18:47:17.161476",
+    "rounds": [
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-19T18:47:19.971681"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.093030"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.231317"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.445588"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.558415"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.864126"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-19T18:47:20.971980"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-19T18:47:21.100967"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-19T18:47:21.250488"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:22.097063"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:22.336963"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:22.589687"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:22.881767"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:23.212766"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:23.363974"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:23.491237"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:23.630243"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:23.960395"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.124340"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.263128"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.376527"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.477852"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.604248"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:24.922370"
+      },
+      {
+        "player": "Corey",
+        "points": -5,
+        "time": "2025-12-19T18:47:25.080793"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:25.470282"
+      },
+      {
+        "player": "Dale",
+        "points": -5,
+        "time": "2025-12-19T18:47:25.795101"
+      },
+      {
+        "player": "Dale",
+        "points": 300,
+        "time": "2025-12-19T18:47:30.803940"
+      }
+    ],
+    "totals": {
+      "Dale": 300,
+      "Corey": 0
+    },
+    "winner": "Dale",
+    "finished": true
+  },
+  {
+    "date": "2025-12-20T04:03:44.513079",
+    "rounds": [
+      {
+        "player": "Dale",
+        "points": 50,
+        "time": "2025-12-20T04:03:49.540165"
+      },
+      {
+        "player": "Corey",
+        "points": 59,
+        "time": "2025-12-20T04:03:52.514212"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-20T04:03:53.366735"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:03:53.632251"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-20T04:03:53.922897"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:03:54.627114"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:03:55.103626"
+      },
+      {
+        "player": "Dale",
+        "points": 5,
+        "time": "2025-12-20T04:03:55.280159"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-20T04:03:55.835541"
+      },
+      {
+        "player": "Corey",
+        "points": 10,
+        "time": "2025-12-20T04:03:56.463108"
+      },
+      {
+        "player": "Corey",
+        "points": 1,
+        "time": "2025-12-20T04:03:58.475674"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:00.220527"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:00.446597"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:00.671693"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:00.783709"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:00.884235"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:01.120972"
+      },
+      {
+        "player": "Dale",
+        "points": 10,
+        "time": "2025-12-20T04:04:01.221834"
+      },
+      {
+        "player": "Corey",
+        "points": 150,
+        "time": "2025-12-20T04:04:04.393563"
+      }
+    ],
+    "totals": {
+      "Dale": 155,
+      "Corey": 250
+    },
+    "winner": "Corey",
+    "finished": true
+  }
+]
