@@ -21,9 +21,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Verify Java
-        run: java -version
-
       # ---------- Linux dependencies ----------
       - name: Install Linux dependencies
         run: |
@@ -48,11 +45,11 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install buildozer cython
 
-      # ---------- Android SDK ----------
+      # ---------- Android SDK + NDK ----------
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK packages (SDK + NDK)
+      - name: Install Android SDK packages
         run: |
           sdkmanager --install \
             "platform-tools" \
@@ -63,24 +60,26 @@ jobs:
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses
 
-      # ---------- Export SDK/NDK for Buildozer ----------
-      - name: Export Android paths
+      # ---------- Export ALL Android paths ----------
+      - name: Export Android environment
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           echo "ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "NDK_HOME=/usr/local/lib/android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
 
-      # ---------- Expose build-tools ----------
+      # ---------- Expose build-tools (AIDL) ----------
       - name: Add build-tools to PATH
         run: |
           echo "/usr/local/lib/android/sdk/build-tools/33.0.2" >> $GITHUB_PATH
 
       # ---------- Verify ----------
-      - name: Verify Android tools
+      - name: Verify Android setup
         run: |
           command -v adb
           command -v aidl
-          ls /usr/local/lib/android/sdk/ndk/25.2.9519653
+          test -d /usr/local/lib/android/sdk/ndk/25.2.9519653
 
       # ---------- Build ----------
       - name: Build APK
@@ -88,6 +87,8 @@ jobs:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/25.2.9519653
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/25.2.9519653
+          NDK_HOME: /usr/local/lib/android/sdk/ndk/25.2.9519653
         run: buildozer android debug
 
       # ---------- Upload ----------
