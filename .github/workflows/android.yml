@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-    # OPTIONAL: only build if commit message contains [apk]
-    # remove this block if you want it to build on every push
-    paths-ignore:
-      - '**/*.md'
 
 jobs:
   build:
@@ -17,7 +13,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ---------- System dependencies ----------
+      # ---------- Java (MUST be first) ----------
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Verify Java
+        run: java -version
+
+      # ---------- Linux deps ----------
       - name: Install Linux dependencies
         run: |
           sudo apt update
@@ -27,7 +33,6 @@ jobs:
             python3-venv \
             zip \
             unzip \
-            openjdk-17-jdk \
             libffi-dev \
             libssl-dev \
             libsqlite3-dev \
@@ -57,19 +62,18 @@ jobs:
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses
 
-      # ---------- Sanity check ----------
+      # ---------- Sanity checks ----------
       - name: Verify Android tools
         run: |
           which adb
           which aidl
-          java -version
+          aidl --version
 
-      # ---------- Build APK ----------
+      # ---------- Build ----------
       - name: Build APK
-        run: |
-          buildozer android debug
+        run: buildozer android debug
 
-      # ---------- Upload artifact ----------
+      # ---------- Upload ----------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
