@@ -105,8 +105,8 @@ fullscreen = 0
 
 android.api = 33
 android.build_tools_version = 33.0.2
-android.ndk = 25.2.9519653
-android.sdk = /usr/local/lib/android/sdk
+#android.ndk = 25.2.9519653
+#android.sdk = /usr/local/lib/android/sdk
 android.allow_sdk_download = False
 android.allow_ndk_download = False
 android.accept_sdk_license = True
