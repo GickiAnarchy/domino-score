@@ -111,6 +111,14 @@ android.allow_sdk_download = False
 android.allow_ndk_download = False
 android.accept_sdk_license = True
 
+android.sdk_path = /usr/local/lib/android/sdk
+android.ndk_path = /usr/local/lib/android/sdk/ndk/25.2.9519653
+
+android.sdk = 33
+android.ndk = 25b
+
+android.skip_update = True
+
 
 # (int) Minimum API your APK / AAB will support.
 #android.minapi = 21
