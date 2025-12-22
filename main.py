@@ -10,7 +10,6 @@ from kivy.uix.button import Button
 from datetime import datetime
 import json
 import os
-import uuid
 
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
@@ -37,7 +36,7 @@ class Player:
 
 class GameScore:
 	def __init__(self, players):
-		self.id = uuid.uuid3
+		self.id = 199
 		self.date = datetime.now()
 		self.players = players
 		self.rounds = []
