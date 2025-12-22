@@ -41,7 +41,9 @@ jobs:
             zlib1g-dev \
             libncurses5 \
             libtinfo5 \
-            build-essential
+            build-essential \
+            uuid-dev \
+            liblzma-dev
 
       # ---------- Python tooling ----------
       - name: Install Buildozer (pinned)
