@@ -15,7 +15,7 @@ version = 0.1
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = python3,kivy,cython,pyjnius
+requirements = kivy,pyjnius
 
 orientation = portrait
 fullscreen = 0

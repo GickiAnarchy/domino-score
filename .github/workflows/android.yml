@@ -49,7 +49,7 @@ jobs:
       - name: Install Buildozer (pinned)
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install buildozer==1.5.0 cython
+          pip install buildozer==1.5.0 cython<3.0
 
       # ---------- Clean caches ----------
       - name: Clean build caches
