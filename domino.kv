@@ -12,7 +12,7 @@ ScreenManager:
     PlayerSelectScreen:
     GameScreen:
     HistoryScreen:
-    StatsScreen:#ll
+    StatsScreen:
     AboutScreen:
     OptionsScreen:
 
@@ -192,7 +192,7 @@ ScreenManager:
             text: "End Game"
             size_hint_y: None
             height: dp(50)
-            on_release: self.end_game()
+            on_release: root.end_game()
 
 
 # ======================
