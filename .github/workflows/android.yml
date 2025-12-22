@@ -13,8 +13,8 @@ jobs:
       # ---------- Checkout ----------
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      # ---------- Python (FIX 1) ----------
+
+      # ---------- Python ----------
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
@@ -22,10 +22,10 @@ jobs:
 
       # ---------- Java ----------
       - name: Set up JDK 8
-  	  uses: actions/setup-java@v4
-  	  with:
-    	  distribution: temurin
-    	  java-version: 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
 
       # ---------- Linux dependencies ----------
       - name: Install Linux dependencies
@@ -42,13 +42,13 @@ jobs:
             libtinfo5 \
             build-essential
 
-      # ---------- Python tooling (FIX 1) ----------
+      # ---------- Python tooling ----------
       - name: Install Buildozer (pinned)
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install buildozer==1.5.0 cython
 
-      # ---------- Clean caches (stability) ----------
+      # ---------- Clean caches ----------
       - name: Clean build caches
         run: |
           rm -rf ~/.buildozer ~/.android ~/.gradle
