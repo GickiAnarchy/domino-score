@@ -4,8 +4,12 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.metrics import dp
+import shutil
 from datetime import datetime
 import json
 import os
@@ -13,7 +17,7 @@ import os
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
 
-MAX_POINTS = 100  # configurable win condition
+MAX_POINTS = 350  # configurable win condition
 
 
 # ======================
@@ -35,6 +39,7 @@ class Player:
 
 class GameScore:
     def __init__(self, players):
+        self.id = 199
         self.date = datetime.now()
         self.players = players
         self.rounds = []
@@ -49,11 +54,13 @@ class GameScore:
         self.totals[player_name] += points
         self.undo_stack.append((player_name, points))
 
-        self.rounds.append({
-            "player": player_name,
-            "points": points,
-            "time": datetime.now().isoformat()
-        })
+        self.rounds.append(
+            {
+                "player": player_name,
+                "points": points,
+                "time": datetime.now().isoformat(),
+            }
+        )
 
     def undo_last(self):
         if not self.undo_stack:
@@ -67,24 +74,126 @@ class GameScore:
 
     def check_game_over(self):
         for score in self.totals.values():
-            if score >= MAX_POINTS:
-                self.finished = True
-                return True
-        return False
+            if score <= MAX_POINTS:
+                self.finished = False
+                return False
+        self.finished = True
+        return True
 
     def to_dict(self):
         return {
+            "id": self.id,
             "date": self.date.isoformat(),
             "rounds": self.rounds,
             "totals": self.totals,
             "winner": self.winner(),
-            "finished": self.finished
+            "finished": self.finished,
         }
 
 
 # ======================
 # SCREENS
 # ======================
+class OptionsScreen(Screen):
+    # app = App.get_running_app()
+
+    def export_saves(self):
+        layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
+        chooser = FileChooserIconView(path=".", dirselect=True)
+
+        btn = Button(text="Export Here", size_hint_y=None, height=50)
+
+        def do_export(_):
+            export_dir = chooser.path
+            backup = {"players": {}, "games": []}
+
+            if os.path.exists(SAVE_FILE):
+                with open(SAVE_FILE) as f:
+                    backup["players"] = json.load(f)
+
+            if os.path.exists(GAMES_FILE):
+                with open(GAMES_FILE) as f:
+                    backup["games"] = json.load(f)
+
+            filename = f"domino_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            full_path = os.path.join(export_dir, filename)
+
+            with open(full_path, "w") as f:
+                json.dump(backup, f, indent=2)
+
+            popup.dismiss()
+            Popup(
+                title="Export Complete",
+                content=Label(text=f"Saved to:\n{filename}"),
+                size_hint=(0.8, 0.3),
+            ).open()
+
+        btn.bind(on_release=do_export)
+
+        layout.add_widget(chooser)
+        layout.add_widget(btn)
+
+        popup = Popup(title="Export Saves", content=layout, size_hint=(0.9, 0.9))
+        popup.open()
+
+    def import_saves(self):
+        layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
+        chooser = FileChooserIconView(filters=["*.json"])
+
+        btn = Button(text="Import Selected", size_hint_y=None, height=50)
+
+        def do_import(_):
+            if not chooser.selection:
+                return
+
+            path = chooser.selection[0]
+            app = App.get_running_app()
+
+            with open(path) as f:
+                backup = json.load(f)
+
+            # ---- Players ----
+            for name, pdata in backup.get("players", {}).items():
+                if name not in app.players:
+                    app.players[name] = Player.from_dict(pdata)
+
+            app.save_players()
+
+            # ---- Games ----
+            games = []
+            if os.path.exists(GAMES_FILE):
+                with open(GAMES_FILE) as f:
+                    games = json.load(f)
+
+            existing_ids = {g["id"] for g in games if "id" in g}
+
+            for game in backup.get("games", []):
+                if game.get("id") not in existing_ids:
+                    games.append(game)
+
+            with open(GAMES_FILE, "w") as f:
+                json.dump(games, f, indent=2)
+
+            popup.dismiss()
+            Popup(
+                title="Import Complete",
+                content=Label(text="Saves merged successfully"),
+                size_hint=(0.7, 0.3),
+            ).open()
+
+        btn.bind(on_release=do_import)
+
+        layout.add_widget(chooser)
+        layout.add_widget(btn)
+
+        popup = Popup(title="Import Saves", content=layout, size_hint=(0.9, 0.9))
+        popup.open()
+
+
+class AboutScreen(Screen):
+    pass
+
+
 class MenuScreen(Screen):
     pass
 
@@ -94,6 +203,7 @@ class StatsScreen(Screen):
 
 
 class CreatePlayerScreen(Screen):
+
     def save_player(self, name):
         app = App.get_running_app()
         name = name.strip()
@@ -119,9 +229,7 @@ class PlayerSelectScreen(Screen):
 
         app = App.get_running_app()
         for name in app.players:
-            player_list.add_widget(
-                ToggleButton(text=name, size_hint_y=None, height=50)
-            )
+            player_list.add_widget(ToggleButton(text=name, size_hint_y=None, height=50))
 
 
 class GameScreen(Screen):
@@ -144,42 +252,38 @@ class GameScreen(Screen):
         game = app.current_game
 
         card = BoxLayout(
-            orientation="vertical",
-            size_hint_y=None,
-            height=180,
-            padding=10,
-            spacing=5
+            orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=5
         )
 
         score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}",
-            size_hint_y=None,
-            height=40
+            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, height=80
         )
 
         def update_label():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
-        btn_row = BoxLayout(size_hint_y=None, height=40, spacing=5)
+        btn_row = BoxLayout(size_hint_y=None, height=60, spacing=5)
 
-        btn5 = Button(text="+5")
-        btn10 = Button(text="+10")
+        btn5 = Button(text="+5", height=dp(75), size_hint_y=None)
+        btn10 = Button(text="+10", height=dp(75), size_hint_y=None)
+        btnmin5 = Button(text="-5", height=dp(75), size_hint_y = None)
 
         btn5.bind(on_release=lambda *_: self.add_score(name, 5, update_label))
         btn10.bind(on_release=lambda *_: self.add_score(name, 10, update_label))
+        btnmin5.bind(on_release=lambda *_: self.add_score(name, -5, update_label))
 
         btn_row.add_widget(btn5)
         btn_row.add_widget(btn10)
+        btn_row.add_widget(btnmin5)
 
         input_box = TextInput(
-            multiline=False,
-            input_filter="int",
-            hint_text="Enter points"
+            multiline=False, input_filter="int", hint_text="Enter points"
         )
 
         input_box.bind(
-            on_text_validate=lambda instance:
-            self.add_score(name, int(instance.text), update_label, instance)
+            on_text_validate=lambda instance: self.add_score(
+                name, int(instance.text), update_label, instance
+            )
         )
 
         card.add_widget(score_label)
@@ -192,12 +296,7 @@ class GameScreen(Screen):
         app = App.get_running_app()
         game = app.current_game
 
-        if points <= 0:
-            pass
-            # return
-
         game.add_points(name, points)
-
         if input_widget:
             input_widget.text = ""
 
@@ -207,22 +306,36 @@ class GameScreen(Screen):
             app.finish_game()
             self.manager.current = "menu"
 
+    def end_game(self, in_widget=None):
+        app = App.get_running_app()
+        app.finish_game()
+        self.manager.current = "menu"
+
 
 class HistoryScreen(Screen):
 
     def on_enter(self):
         history_list = self.ids.history_list
         history_list.clear_widgets()
+        games = []
 
         if not os.path.exists(GAMES_FILE):
             history_list.add_widget(Label(text="No games played yet."))
             return
 
         with open(GAMES_FILE) as f:
-            games = json.load(f)
+            try:
+                games = json.load(f)
+            except Exception as e:
+                print(f"oops: {e}")
 
-        for game in reversed(games):
-            history_list.add_widget(self.build_game_row(game))
+        # print(type(games[0] or None))
+
+        try:
+            for game in reversed(games):
+                history_list.add_widget(self.build_game_row(game))
+        except Exception as e:
+            print(f"oops : {e}")
 
     def build_game_row(self, game):
         box = BoxLayout(orientation="vertical", size_hint_y=None, height=110)
@@ -256,6 +369,8 @@ class DominoApp(App):
         sm.add_widget(GameScreen(name="game"))
         sm.add_widget(HistoryScreen(name="history"))
         sm.add_widget(StatsScreen(name="stats"))
+        sm.add_widget(AboutScreen(name="about"))
+        sm.add_widget(OptionsScreen(name="options"))
         return sm
 
     # ---------- Persistence ----------
@@ -273,15 +388,21 @@ class DominoApp(App):
     def save_game(self, game):
         games = []
         if os.path.exists(GAMES_FILE):
-            with open(GAMES_FILE) as f:
-                games = json.load(f)
+            try:
+                with open(GAMES_FILE) as f:
+                    games = json.load(f)
+            except Exception as e:
+                print(f"oops line 291: {e}")
 
-        games.append(game.to_dict())
+        try:
+            games.append(game.to_dict())
+        except Exception as ee:
+            print(f"ooops line 296: {ee}")
 
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
 
-    # ---------- Game Flow ----------
+    # ---------- Game Flow ----------()
     def start_game(self, names):
         if len(names) < 2:
             Popup(
