@@ -1,0 +1,60 @@
+{
+  "players": {
+    "Corey": {
+      "name": "Corey",
+      "wins": 3,
+      "losses": 1
+    },
+    "Dale": {
+      "name": "Dale",
+      "wins": 1,
+      "losses": 3
+    }
+  },
+  "games": [
+    {
+      "id": 199,
+      "date": "2025-12-22T17:46:48.691003",
+      "rounds": [
+        {
+          "player": "Dale",
+          "points": 285,
+          "time": "2025-12-22T17:46:53.428807"
+        },
+        {
+          "player": "Corey",
+          "points": 320,
+          "time": "2025-12-22T17:46:56.751509"
+        }
+      ],
+      "totals": {
+        "Dale": 285,
+        "Corey": 320
+      },
+      "winner": "Corey",
+      "finished": false
+    },
+    {
+      "id": 199,
+      "date": "2025-12-22T17:48:07.112797",
+      "rounds": [
+        {
+          "player": "Dale",
+          "points": 285,
+          "time": "2025-12-22T17:48:15.763097"
+        },
+        {
+          "player": "Corey",
+          "points": 320,
+          "time": "2025-12-22T17:48:19.243590"
+        }
+      ],
+      "totals": {
+        "Dale": 285,
+        "Corey": 320
+      },
+      "winner": "Corey",
+      "finished": false
+    }
+  ]
+}

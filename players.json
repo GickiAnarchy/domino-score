@@ -2,11 +2,11 @@
   "Corey": {
     "name": "Corey",
     "wins": 3,
-    "losses": 1
+    "losses": 4
   },
   "Dale": {
     "name": "Dale",
-    "wins": 1,
+    "wins": 4,
     "losses": 3
   }
 }
