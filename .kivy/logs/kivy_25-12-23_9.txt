@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-20_19.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-23_9.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -20,9 +20,9 @@
 [INFO   ] Window: auto add sdl2 input provider
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 333, in <module>
-[WARNING] stderr:     if __name__ == "__main__":
-[WARNING] stderr:         ^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 475, in <module>
+[WARNING] stderr:     DominoApp().run()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 955, in run
 [WARNING] stderr:     self._run_prepare()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~^^
@@ -48,13 +48,15 @@
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 345, in precompile
 [WARNING] stderr:     x.precompile()
 [WARNING] stderr:     ~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 345, in precompile
+[WARNING] stderr:     x.precompile()
+[WARNING] stderr:     ~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 341, in precompile
 [WARNING] stderr:     x.precompile()
 [WARNING] stderr:     ~~~~~~~~~~~~^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 188, in precompile
-[WARNING] stderr:     compile(value, self.ctx.filename or '<string>', 'eval')
-[WARNING] stderr:     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 33
-[WARNING] stderr:     (1.0, 0.3)1
-[WARNING] stderr:               ^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 194, in precompile
+[WARNING] stderr:     self.co_value = compile(value, self.ctx.filename or '<string>', mode)
+[WARNING] stderr:                     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 39
+[WARNING] stderr:     self.
 [WARNING] stderr: SyntaxError: invalid syntax

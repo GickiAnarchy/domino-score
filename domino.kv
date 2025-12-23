@@ -18,6 +18,38 @@ ScreenManager:
 
 
 # ======================
+# SPLASHSCREEN
+# ======================
+<SplashScreen>:
+	canvas.before:
+        Color:
+            rgba: 0.08, 0.08, 0.08, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            
+    FloatLayout:
+
+        Image:
+            id: logo
+            source: "data/splash.png"
+            size_hint: None, None
+            size: dp(300), dp(300)
+            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            allow_stretch: True
+            keep_ratio: True
+            opacity: 0
+            scale: 1
+
+        Label:
+            id: loading
+            text: "Loading..."
+            font_size: "18sp"
+            pos_hint: {"center_x": 0.5, "y": 0.2}
+            opacity: 0
+
+
+# ======================
 # MENUSCREEN 
 # ======================
 <MenuScreen>:
@@ -31,11 +63,12 @@ ScreenManager:
 	        orientation: "vertical"
 	        padding: dp(20)
 	        spacing: dp(15)
-	        size_hint: (1.0, 0.3)
+	        size_hint: (1.0, 0.4)
 	        
 	        Image:
 	        	source: "data/icon_1024.png"
 	        	size_hint: (1.0, 1.0)
+	        	pos_hint:{"center_x": 0.5}
 	        	#height: dp(50)
 	        Label:
 	            text: "Domino Scorebook"
@@ -51,7 +84,7 @@ ScreenManager:
 		
 	        Button:
 	            text: "Start Game"
-	            size_hint: (0.3, None)
+	            size_hint: (0.5, None)
 	            height: dp(30)
 	            pos_hint: {"center_x": 0.5}
 	            on_release: root.manager.current = "select"

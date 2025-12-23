@@ -9,6 +9,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.metrics import dp
+from kivy.animation import Animation
+from kivy.clock import Clock
 import shutil
 from datetime import datetime
 import json
@@ -107,6 +109,36 @@ class GameScore:
 # ======================
 # SCREENS
 # ======================
+class SplashScreen(Screen):
+
+    def on_enter(self):
+        logo = self.ids.logo
+        loading = self.ids.loading
+
+        # Reset state (important if screen reused)
+        logo.opacity = 0
+        logo.scale = 0.9
+        loading.opacity = 0
+
+        # Logo fade + scale
+        logo_anim = Animation(opacity=1, scale=1, duration=3, t="out_quad")
+
+        # Loading text pulse
+        loading_anim = Animation(opacity=1, duration=0.3) + Animation(
+            opacity=0.3, duration=0.4
+        )
+        loading_anim.repeat = True
+
+        loading_anim.start(loading)
+        logo_anim.start(logo)
+
+        # Move to menu after splash
+        Clock.schedule_once(self.go_to_menu, 5.5)
+
+    def go_to_menu(self, *args):
+        self.manager.current = "menu"
+
+
 class OptionsScreen(Screen):
 
     def export_saves(self):
@@ -394,6 +426,7 @@ class DominoApp(App):
         self.current_game = None
 
         sm = ScreenManager()
+        sm.add_widget(SplashScreen(name="splash"))
         sm.add_widget(MenuScreen(name="menu"))
         sm.add_widget(CreatePlayerScreen(name="create"))
         sm.add_widget(PlayerSelectScreen(name="select"))
@@ -402,7 +435,14 @@ class DominoApp(App):
         sm.add_widget(StatsScreen(name="stats"))
         sm.add_widget(AboutScreen(name="about"))
         sm.add_widget(OptionsScreen(name="options"))
+        sm.current = "splash"
+
+        Clock.schedule_once(self.post_build_init, 0)
+
         return sm
+
+    def post_build_init(self, *args):
+        self.players = self.load_players()
 
     # ---------- Persistence ----------
     def load_players(self):
