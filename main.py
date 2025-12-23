@@ -312,8 +312,9 @@ class GameScreen(Screen):
         # 		)
 
         score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, height=dp(60)
-        )
+            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, font_size = "26sp")
+        
+		
 
         def update_label():
             score_label.text = f"{name} — Score: {game.totals[name]}"
