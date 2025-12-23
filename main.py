@@ -39,7 +39,6 @@ class Player:
 
 class GameScore:
     def __init__(self, players):
-        self.id = 199
         self.date = datetime.now()
         self.players = players
         self.rounds = []
@@ -82,7 +81,6 @@ class GameScore:
 
     def to_dict(self):
         return {
-            "id": self.id,
             "date": self.date.isoformat(),
             "rounds": self.rounds,
             "totals": self.totals,
@@ -95,8 +93,7 @@ class GameScore:
 # SCREENS
 # ======================
 class OptionsScreen(Screen):
-    # app = App.get_running_app()
-
+    	
     def export_saves(self):
         layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
         chooser = FileChooserIconView(path=".", dirselect=True)
@@ -229,7 +226,7 @@ class PlayerSelectScreen(Screen):
 
         app = App.get_running_app()
         for name in app.players:
-            player_list.add_widget(ToggleButton(text=name, size_hint_y=None, height=50))
+            player_list.add_widget(ToggleButton(text=name, size_hint_y=None, height=75))
 
 
 class GameScreen(Screen):
@@ -250,23 +247,30 @@ class GameScreen(Screen):
     def build_player_card(self, name):
         app = App.get_running_app()
         game = app.current_game
-
+        
         card = BoxLayout(
-            orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=5
+            orientation="vertical", size_hint_y=0.4, padding=10, spacing=15
         )
+
+        #card = BoxLayout(
+#            orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=15
+#        )
 
         score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, height=80
-        )
+            text=f"{name} — Score: {game.totals[name]}", size_hint_y = None,  height = dp(60))
 
         def update_label():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
-        btn_row = BoxLayout(size_hint_y=None, height=60, spacing=5)
+        btn_row = BoxLayout(size_hint_y= 0.4, spacing=10, padding = 10)
 
-        btn5 = Button(text="+5", height=dp(75), size_hint_y=None)
-        btn10 = Button(text="+10", height=dp(75), size_hint_y=None)
-        btnmin5 = Button(text="-5", height=dp(75), size_hint_y = None)
+        btn5 = Button(text="+5", size_hint_y = 0.8)
+        btn10 = Button(text="+10", size_hint_y = 0.8)
+        btnmin5 = Button(text="-5", size_hint_y = 0.8)
+        
+#        btn5 = Button(text="+5", height=dp(65), size_hint_y=None)
+#        btn10 = Button(text="+10", height=dp(65), size_hint_y=None)
+#        btnmin5 = Button(text="-5", height=dp(65), size_hint_y = None)
 
         btn5.bind(on_release=lambda *_: self.add_score(name, 5, update_label))
         btn10.bind(on_release=lambda *_: self.add_score(name, 10, update_label))
@@ -277,7 +281,7 @@ class GameScreen(Screen):
         btn_row.add_widget(btnmin5)
 
         input_box = TextInput(
-            multiline=False, input_filter="int", hint_text="Enter points"
+            multiline=False, input_filter="int", hint_text="Enter points", size_hint_y = 0.3
         )
 
         input_box.bind(

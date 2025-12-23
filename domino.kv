@@ -110,17 +110,21 @@ ScreenManager:
             id: player_name_input
             hint_text: "Player name"
             multiline: False
+            size_hint_y: None 
+            height: dp(60)
 
         Button:
             text: "Save Player"
             size_hint_y: None
             height: dp(50)
+            pos_hint: {"bottom": 0.2}
             on_release: root.save_player(player_name_input.text)
 
         Button:
             text: "Back"
             size_hint_y: None
             height: dp(50)
+            pos_hint: {"bottom": 0.1}
             on_release: root.manager.current = "menu"
 
 
@@ -137,15 +141,15 @@ ScreenManager:
 
         Label:
             text: "Select Players"
-            font_size: "24sp"
+            font_size: "22sp"
             size_hint_y: None
-            height: dp(50)
+            height: dp(40)
 
         ScrollView:
             GridLayout:
                 id: player_list
                 cols: 1
-                spacing: dp(10)
+                spacing: dp(15)
                 size_hint_y: None
                 height: self.minimum_height
 
@@ -176,7 +180,7 @@ ScreenManager:
 
         Label:
             text: "Game In Progress"
-            font_size: "22sp"
+            font_size: "42sp"
             size_hint_y: None
             height: dp(40)
 
@@ -185,8 +189,7 @@ ScreenManager:
                 id: player_container
                 cols: 1
                 spacing: dp(10)
-                padding: dp(15)
-                size_hint_y: None
+                size_hint_y: 0.75
                 #height: self.minimum_height + 10
 
         Button:
@@ -289,13 +292,28 @@ ScreenManager:
 			spacing: dp(10)
 			
 			Button:
+				text: "Create a\nplayer"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
+				size_hint_y: None
+				height: dp(50)
+				on_release: root.manager.current = "create"
+			
+			Button:
 				text: "Import Saves"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
 				size_hint_y: None 
 				height: dp(50)
 				on_release: root.import_saves()
 			
 			Button:
 				text: "Export Saves"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
 				size_hint_y: None 
 				height: dp(50)
 				on_release: root.export_saves()
