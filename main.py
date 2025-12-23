@@ -17,15 +17,18 @@ import os
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
 
+
 def get_export_dir():
-	try:
-		# Android
-		from android.storage import primary_external_storage_path
-		base = primary_external_storage_path()
-		return os.path.join(base, "Download", "DominoScorebook")
-	except Exception:
-		# Desktop fallback
-		return os.path.join(os.getcwd(), "exports")
+    try:
+        # Android
+        from android.storage import primary_external_storage_path
+
+        base = primary_external_storage_path()
+        return os.path.join(base, "Download", "DominoScorebook")
+    except Exception:
+        # Desktop fallback
+        return os.path.join(os.getcwd(), "exports")
+
 
 MAX_POINTS = 300  # configurable win condition
 
@@ -80,7 +83,7 @@ class GameScore:
 
     def winner(self):
         if len(set(self.totals.values())) == 1:
-        	return "Tie Game"
+            return "Tie Game"
         return max(self.totals, key=self.totals.get)
 
     def check_game_over(self):
@@ -106,70 +109,65 @@ class GameScore:
 # ======================
 class OptionsScreen(Screen):
 
-	def export_saves(self):
-		export_dir = get_export_dir()
-		os.makedirs(export_dir, exist_ok=True)
+    def export_saves(self):
+        export_dir = get_export_dir()
+        os.makedirs(export_dir, exist_ok=True)
 
-		files = [SAVE_FILE, GAMES_FILE]
-		exported = []
+        files = [SAVE_FILE, GAMES_FILE]
+        exported = []
 
-		for fname in files:
-			if os.path.exists(fname):
-				dest = os.path.join(export_dir, fname)
-				with open(fname, "r") as src, open(dest, "w") as dst:
-					dst.write(src.read())
-				exported.append(fname)
+        for fname in files:
+            if os.path.exists(fname):
+                dest = os.path.join(export_dir, fname)
+                with open(fname, "r") as src, open(dest, "w") as dst:
+                    dst.write(src.read())
+                exported.append(fname)
 
-		if exported:
-			msg = (
-				"Exported:\n"
-				+ "\n".join(exported)
-				+ "\n\nLocation:\n"
-				+ export_dir
-			)
-		else:
-			msg = "Nothing to export yet."
+        if exported:
+            msg = "Exported:\n" + "\n".join(exported) + "\n\nLocation:\n" + export_dir
+        else:
+            msg = "Nothing to export yet."
 
-		Popup(
-			title="Export Complete",
-			content=Label(text=msg),
-			size_hint=(0.8, 0.5),
-		).open()
-	
-	def import_saves(self):
-		import_dir = get_export_dir()
+        Popup(
+            title="Export Complete",
+            content=Label(text=msg),
+            size_hint=(0.8, 0.5),
+        ).open()
 
-		if not os.path.exists(import_dir):
-			Popup(
-				title="Import Failed",
-				content=Label(text="No backup folder found."),
-				size_hint=(0.7, 0.3),
-			).open()
-			return
+    def import_saves(self):
+        import_dir = get_export_dir()
 
-		imported = []
+        if not os.path.exists(import_dir):
+            Popup(
+                title="Import Failed",
+                content=Label(text="No backup folder found."),
+                size_hint=(0.7, 0.3),
+            ).open()
+            return
 
-		for fname in [SAVE_FILE, GAMES_FILE]:
-			src = os.path.join(import_dir, fname)
-			if os.path.exists(src):
-				with open(src, "r") as s, open(fname, "w") as d:
-					d.write(s.read())
-				imported.append(fname)
+        imported = []
 
-		if imported:
-			msg = "Imported:\n" + "\n".join(imported)
-		else:
-			msg = "No valid save files found."
+        for fname in [SAVE_FILE, GAMES_FILE]:
+            src = os.path.join(import_dir, fname)
+            if os.path.exists(src):
+                with open(src, "r") as s, open(fname, "w") as d:
+                    d.write(s.read())
+                imported.append(fname)
 
-		Popup(
-			title="Import Complete",
-			content=Label(text=msg),
-			size_hint=(0.7, 0.4),
-		).open()
+        if imported:
+            msg = "Imported:\n" + "\n".join(imported)
+        else:
+            msg = "No valid save files found."
 
-		# Reload players immediately
-		app = App.get_running_app()
-		app.players = app.load_players()
+        Popup(
+            title="Import Complete",
+            content=Label(text=msg),
+            size_hint=(0.7, 0.4),
+        ).open()
+
+        # Reload players immediately
+        app = App.get_running_app()
+        app.players = app.load_players()
 
 
 class AboutScreen(Screen):
@@ -181,7 +179,45 @@ class MenuScreen(Screen):
 
 
 class StatsScreen(Screen):
-    pass
+
+    def on_enter(self):
+        container = self.ids.stats_list
+        container.clear_widgets()
+
+        app = App.get_running_app()
+
+        for player in app.players.values():
+            btn = Button(text=f"{player.name}", size_hint_y=None, height=50)
+            btn.bind(on_release=lambda _, p=player: self.show_player_stats(p))
+            container.add_widget(btn)
+
+    def show_player_stats(self, player):
+        app = App.get_running_app()
+
+        # calculate extra stats if you want
+        total_games = player.wins + player.losses
+        win_rate = (player.wins / total_games * 100) if total_games else 0
+
+        content = BoxLayout(orientation="vertical", padding=15, spacing=10)
+
+        content.add_widget(Label(text=f"[b]{player.name}[/b]", markup=True))
+        content.add_widget(Label(text=f"Wins: {player.wins}"))
+        content.add_widget(Label(text=f"Losses: {player.losses}"))
+        content.add_widget(Label(text=f"Games Played: {total_games}"))
+        content.add_widget(Label(text=f"Win Rate: {win_rate:.1f}%"))
+
+        close_btn = Button(text="Close", size_hint_y=None, height=40)
+        content.add_widget(close_btn)
+
+        popup = Popup(
+            title="Player Stats",
+            content=content,
+            size_hint=(0.75, 0.6),
+            auto_dismiss=False,
+        )
+
+        close_btn.bind(on_release=popup.dismiss)
+        popup.open()
 
 
 class CreatePlayerScreen(Screen):
@@ -189,6 +225,7 @@ class CreatePlayerScreen(Screen):
     def save_player(self, name):
         app = App.get_running_app()
         name = name.strip()
+        name_input = self.ids.player_name_input
 
         if not name or name in app.players:
             Popup(
@@ -200,6 +237,7 @@ class CreatePlayerScreen(Screen):
 
         app.players[name] = Player(name)
         app.save_players()
+        name_input.text = ""
         self.manager.current = "menu"
 
 
@@ -232,30 +270,31 @@ class GameScreen(Screen):
     def build_player_card(self, name):
         app = App.get_running_app()
         game = app.current_game
-        
+
         card = BoxLayout(
             orientation="vertical", size_hint_y=0.4, padding=10, spacing=15
         )
 
-        #card = BoxLayout(
-#            orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=15
-#        )
+        # card = BoxLayout(
+        # 			orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=15
+        # 		)
 
         score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}", size_hint_y = None,  height = dp(60))
+            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, height=dp(60)
+        )
 
         def update_label():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
-        btn_row = BoxLayout(size_hint_y= 0.4, spacing=10, padding = 10)
+        btn_row = BoxLayout(size_hint_y=0.4, spacing=10, padding=10)
 
-        btn5 = Button(text="+5", size_hint_y = 0.8)
-        btn10 = Button(text="+10", size_hint_y = 0.8)
-        btnmin5 = Button(text="-5", size_hint_y = 0.8)
-        
-#        btn5 = Button(text="+5", height=dp(65), size_hint_y=None)
-#        btn10 = Button(text="+10", height=dp(65), size_hint_y=None)
-#        btnmin5 = Button(text="-5", height=dp(65), size_hint_y = None)
+        btn5 = Button(text="+5", size_hint_y=0.8)
+        btn10 = Button(text="+10", size_hint_y=0.8)
+        btnmin5 = Button(text="-5", size_hint_y=0.8)
+
+        # 		btn5 = Button(text="+5", height=dp(65), size_hint_y=None)
+        # 		btn10 = Button(text="+10", height=dp(65), size_hint_y=None)
+        # 		btnmin5 = Button(text="-5", height=dp(65), size_hint_y = None)
 
         btn5.bind(on_release=lambda *_: self.add_score(name, 5, update_label))
         btn10.bind(on_release=lambda *_: self.add_score(name, 10, update_label))
@@ -266,7 +305,10 @@ class GameScreen(Screen):
         btn_row.add_widget(btnmin5)
 
         input_box = TextInput(
-            multiline=False, input_filter="int", hint_text="Enter points", size_hint_y = 0.3
+            multiline=False,
+            input_filter="int",
+            hint_text="Enter points",
+            size_hint_y=0.3,
         )
 
         input_box.bind(
@@ -409,11 +451,12 @@ class DominoApp(App):
         game = self.current_game
         winner = game.winner()
 
-        for player in game.players:
-            if player.name == winner:
-                player.wins += 1
-            else:
-                player.losses += 1
+        if winner != "Tie Game":
+            for player in game.players:
+                if player.name == winner:
+                    player.wins += 1
+                else:
+                    player.losses += 1
 
         self.save_players()
         self.save_game(game)

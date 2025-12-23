@@ -239,12 +239,22 @@ ScreenManager:
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(20)
+        padding: dp(10)
         spacing: dp(10)
 
         Label:
-            text: "Player Stats (Coming Soon)"
-            font_size: "22sp"
+            text: "Player Stats"
+            size_hint_y: None
+            height: dp(40)
+            font_size: "20sp"
+
+        ScrollView:
+            GridLayout:
+                id: stats_list
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(5)
 
         Button:
             text: "Back"
