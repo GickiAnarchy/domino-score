@@ -17,7 +17,17 @@ import os
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
 
-MAX_POINTS = 350  # configurable win condition
+def get_export_dir():
+	try:
+		# Android
+		from android.storage import primary_external_storage_path
+		base = primary_external_storage_path()
+		return os.path.join(base, "Download", "DominoScorebook")
+	except Exception:
+		# Desktop fallback
+		return os.path.join(os.getcwd(), "exports")
+
+MAX_POINTS = 300  # configurable win condition
 
 
 # ======================
@@ -69,6 +79,8 @@ class GameScore:
         self.rounds.pop()
 
     def winner(self):
+        if len(set(self.totals.values())) == 1:
+        	return "Tie Game"
         return max(self.totals, key=self.totals.get)
 
     def check_game_over(self):
@@ -93,98 +105,71 @@ class GameScore:
 # SCREENS
 # ======================
 class OptionsScreen(Screen):
-    	
-    def export_saves(self):
-        layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
-        chooser = FileChooserIconView(path=".", dirselect=True)
 
-        btn = Button(text="Export Here", size_hint_y=None, height=50)
+	def export_saves(self):
+		export_dir = get_export_dir()
+		os.makedirs(export_dir, exist_ok=True)
 
-        def do_export(_):
-            export_dir = chooser.path
-            backup = {"players": {}, "games": []}
+		files = [SAVE_FILE, GAMES_FILE]
+		exported = []
 
-            if os.path.exists(SAVE_FILE):
-                with open(SAVE_FILE) as f:
-                    backup["players"] = json.load(f)
+		for fname in files:
+			if os.path.exists(fname):
+				dest = os.path.join(export_dir, fname)
+				with open(fname, "r") as src, open(dest, "w") as dst:
+					dst.write(src.read())
+				exported.append(fname)
 
-            if os.path.exists(GAMES_FILE):
-                with open(GAMES_FILE) as f:
-                    backup["games"] = json.load(f)
+		if exported:
+			msg = (
+				"Exported:\n"
+				+ "\n".join(exported)
+				+ "\n\nLocation:\n"
+				+ export_dir
+			)
+		else:
+			msg = "Nothing to export yet."
 
-            filename = f"domino_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            full_path = os.path.join(export_dir, filename)
+		Popup(
+			title="Export Complete",
+			content=Label(text=msg),
+			size_hint=(0.8, 0.5),
+		).open()
+	
+	def import_saves(self):
+		import_dir = get_export_dir()
 
-            with open(full_path, "w") as f:
-                json.dump(backup, f, indent=2)
+		if not os.path.exists(import_dir):
+			Popup(
+				title="Import Failed",
+				content=Label(text="No backup folder found."),
+				size_hint=(0.7, 0.3),
+			).open()
+			return
 
-            popup.dismiss()
-            Popup(
-                title="Export Complete",
-                content=Label(text=f"Saved to:\n{filename}"),
-                size_hint=(0.8, 0.3),
-            ).open()
+		imported = []
 
-        btn.bind(on_release=do_export)
+		for fname in [SAVE_FILE, GAMES_FILE]:
+			src = os.path.join(import_dir, fname)
+			if os.path.exists(src):
+				with open(src, "r") as s, open(fname, "w") as d:
+					d.write(s.read())
+				imported.append(fname)
 
-        layout.add_widget(chooser)
-        layout.add_widget(btn)
+		if imported:
+			msg = "Imported:\n" + "\n".join(imported)
+		else:
+			msg = "No valid save files found."
 
-        popup = Popup(title="Export Saves", content=layout, size_hint=(0.9, 0.9))
-        popup.open()
+		Popup(
+			title="Import Complete",
+			content=Label(text=msg),
+			size_hint=(0.7, 0.4),
+		).open()
 
-    def import_saves(self):
-        layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
-        chooser = FileChooserIconView(filters=["*.json"])
-
-        btn = Button(text="Import Selected", size_hint_y=None, height=50)
-
-        def do_import(_):
-            if not chooser.selection:
-                return
-
-            path = chooser.selection[0]
-            app = App.get_running_app()
-
-            with open(path) as f:
-                backup = json.load(f)
-
-            # ---- Players ----
-            for name, pdata in backup.get("players", {}).items():
-                if name not in app.players:
-                    app.players[name] = Player.from_dict(pdata)
-
-            app.save_players()
-
-            # ---- Games ----
-            games = []
-            if os.path.exists(GAMES_FILE):
-                with open(GAMES_FILE) as f:
-                    games = json.load(f)
-
-            existing_ids = {g["id"] for g in games if "id" in g}
-
-            for game in backup.get("games", []):
-                if game.get("id") not in existing_ids:
-                    games.append(game)
-
-            with open(GAMES_FILE, "w") as f:
-                json.dump(games, f, indent=2)
-
-            popup.dismiss()
-            Popup(
-                title="Import Complete",
-                content=Label(text="Saves merged successfully"),
-                size_hint=(0.7, 0.3),
-            ).open()
-
-        btn.bind(on_release=do_import)
-
-        layout.add_widget(chooser)
-        layout.add_widget(btn)
-
-        popup = Popup(title="Import Saves", content=layout, size_hint=(0.9, 0.9))
-        popup.open()
+		# Reload players immediately
+		app = App.get_running_app()
+		app.players = app.load_players()
 
 
 class AboutScreen(Screen):
