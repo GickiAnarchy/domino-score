@@ -57,7 +57,6 @@ ScreenManager:
     
     BoxLayout:
     	orientation: "vertical"
-    	#size_hint: (None, None)
 
 	    BoxLayout:
 	        orientation: "vertical"
@@ -69,7 +68,7 @@ ScreenManager:
 	        	source: "data/icon_1024.png"
 	        	size_hint: (1.0, 1.0)
 	        	pos_hint:{"center_x": 0.5}
-	        	#height: dp(50)
+	        	
 	        Label:
 	            text: "Domino Scorebook"
 	            font_size: "28sp"
@@ -128,37 +127,41 @@ ScreenManager:
 <CreatePlayerScreen>:
     name: "create"
 
-    BoxLayout:
-        orientation: "vertical"
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "top"
         padding: dp(20)
-        spacing: dp(15)
 
-        Label:
-            text: "Create Player"
-            font_size: "24sp"
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(15)
             size_hint_y: None
-            height: dp(50)
+            height: self.minimum_height
 
-        TextInput:
-            id: player_name_input
-            hint_text: "Player name"
-            multiline: False
-            size_hint_y: None 
-            height: dp(60)
+            Label:
+                text: "Create Player"
+                font_size: "24sp"
+                size_hint_y: None
+                height: dp(50)
 
-        Button:
-            text: "Save Player"
-            size_hint_y: None
-            height: dp(50)
-            pos_hint: {"bottom": 0.2}
-            on_release: root.save_player(player_name_input.text)
+            TextInput:
+                id: player_name_input
+                hint_text: "Player name"
+                multiline: False
+                size_hint_y: None
+                height: dp(60)
 
-        Button:
-            text: "Back"
-            size_hint_y: None
-            height: dp(50)
-            pos_hint: {"bottom": 0.1}
-            on_release: root.manager.current = "menu"
+            Button:
+                text: "Save Player"
+                size_hint_y: None
+                height: dp(50)
+                on_release: root.save_player(player_name_input.text)
+
+            Button:
+                text: "Back"
+                size_hint_y: None
+                height: dp(50)
+                on_release: root.manager.current = "menu"
 
 
 # ======================
@@ -256,12 +259,24 @@ ScreenManager:
                 size_hint_x: 1.0
                 size_hint_y: None
                 height: self.minimum_height
-
-        Button:
-            text: "Back"
-            size_hint: (0.25, None)
-            height: dp(50)
-            on_release: root.manager.current = "menu"
+                
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(10)
+            padding: dp(15)
+            size_hint_y: None
+        
+            Button:
+                text: "Delete Selected"
+                size_hint: 0.25, None
+                height: dp(50)
+                on_release: root.delete_selected_games()
+            
+            Button:
+                text: "Back"
+                size_hint: (0.25, None)
+                height: dp(50)
+                on_release: root.manager.current = "menu"
 
 
 # ======================

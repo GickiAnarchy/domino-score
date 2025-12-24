@@ -10,6 +10,7 @@ from kivy.uix.button import Button
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.checkbox import CheckBox
 from kivy.metrics import dp
+from kivy.graphics import Color, Rectangle
 from kivy.animation import Animation
 from kivy.clock import Clock
 import shutil
@@ -53,6 +54,9 @@ class Player:
         return cls(**data)
 
 
+# ======================
+# GAMESCORE
+# ======================
 class GameScore:
     def __init__(self, players):
         self.date = datetime.now()
@@ -87,15 +91,18 @@ class GameScore:
     def winner(self):
         if len(set(self.totals.values())) == 1:
             return "Tie Game"
-        return max(self.totals, key=self.totals.get)
+        elif all(score <= MAX_POINTS for score in self.totals.values()):
+            return None
+        else:
+            return max(self.totals, key=self.totals.get)
 
     def check_game_over(self):
         for score in self.totals.values():
-            if score <= MAX_POINTS:
-                self.finished = False
-                return False
-        self.finished = True
-        return True
+            if score >= MAX_POINTS:
+                self.finished = True
+                return self.finished
+        self.finished = False
+        return self.finished 
 
     def to_dict(self):
         return {
@@ -108,7 +115,7 @@ class GameScore:
 
 
 # ======================
-# SCREENS
+# SPLASHSCREEN
 # ======================
 class SplashScreen(Screen):
 
@@ -141,7 +148,7 @@ class SplashScreen(Screen):
 
 
 # ======================
-#
+# OPTIONSSCREEN
 # ======================
 class OptionsScreen(Screen):
 
@@ -207,21 +214,21 @@ class OptionsScreen(Screen):
 
 
 # ======================
-#
+# ABOUTSCREEN
 # ======================
 class AboutScreen(Screen):
     pass
 
 
 # ======================
-#
+# MENUSCREEN
 # ======================
 class MenuScreen(Screen):
     pass
 
 
 # ======================
-#
+# STATSSCREEN
 # ======================
 class StatsScreen(Screen):
 
@@ -265,6 +272,9 @@ class StatsScreen(Screen):
         popup.open()
 
 
+# ======================
+# CREATEPLAYERSCREEN
+# ======================
 class CreatePlayerScreen(Screen):
 
     def save_player(self, name):
@@ -297,7 +307,9 @@ class PlayerSelectScreen(Screen):
 
         app = App.get_running_app()
         for name in app.players:
-            player_list.add_widget(ToggleButton(text=name, size_hint_y=None, height=75))
+            player_list.add_widget(
+                ToggleButton(text=name, size_hint_y=None, height=dp(60))
+            )
 
 
 # ======================
@@ -327,12 +339,12 @@ class GameScreen(Screen):
         game = app.current_game
 
         card = BoxLayout(
-		    orientation="vertical",
-		    size_hint = (1, None),
-		    height=dp(170),
-		    padding=10,
-		    spacing=12,
-		)
+            orientation="vertical",
+            size_hint=(1, None),
+            height=dp(170),
+            padding=10,
+            spacing=12,
+        )
 
         score_label = Label(
             text=f"{name} — Score: {game.totals[name]}",
@@ -340,7 +352,7 @@ class GameScreen(Screen):
             size_hint_y=None,
             height=dp(40),
         )
-
+        
         def refresh_score():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
@@ -353,6 +365,7 @@ class GameScreen(Screen):
             size_hint_y=None,
             height=dp(45),
         )
+        
 
         def adjust(delta):
             try:
@@ -397,7 +410,12 @@ class GameScreen(Screen):
 
     def end_game(self, in_widget=None):
         app = App.get_running_app()
-        app.finish_game()
+        game = app.current_game 
+        
+        if game.check_game_over():
+            app.finish_game()
+            self.manager.current = "menu"
+            
         self.manager.current = "menu"
 
     def submit_scores(self):
@@ -423,15 +441,12 @@ class GameScreen(Screen):
 
         self.refresh_ui()
 
-        if game.check_game_over():
-            app.finish_game()
-            self.manager.current = "menu"
-
 
 # ======================
 # HISTORYSCREEN
 # ======================
 class HistoryScreen(Screen):
+    selected_games = set()
 
     def on_enter(self):
         history_list = self.ids.history_list
@@ -448,8 +463,6 @@ class HistoryScreen(Screen):
             except Exception as e:
                 print(f"oops: {e}")
 
-        # print(type(games[0] or None))
-
         try:
             for game in reversed(games):
                 history_list.add_widget(self.build_game_row(game))
@@ -457,45 +470,52 @@ class HistoryScreen(Screen):
             print(f"oops : {e}")
 
     def build_game_row(self, game):
-        # OUTER ROW8l7
-        
         row = BoxLayout(
             orientation="horizontal",
-            size_hint = (1.0, None),
+            size_hint=(1, None),
             height=dp(110),
-            padding=(10, 5),
-            spacing=10,
+            padding=(dp(10), dp(5)),
+            spacing=dp(10),
         )
 
-        # CHECKBOX
-        checkbox = CheckBox(
-            size_hint=(None, None),
-            size=(40, 40),
-            pos_hint = {"center_y": 0.5},
-        )
+        # Background (for highlight)
+        with row.canvas.before:
+            bg_color = Color(0, 0, 0, 0)  # transparent initially
+            bg_rect = Rectangle(size=row.size, pos=row.pos)
 
-        # OPTIONAL: store game data on checkbox
-        checkbox.game_data = game
-        checkbox.bind(active=self.on_game_checked)
+        def update_bg(*_):
+            bg_rect.size = row.size
+            bg_rect.pos = row.pos
 
-        # INFO COLUMN
-        info_box = BoxLayout(
-            orientation="vertical",
-            size_hint_y=1,
-            spacing=4,
-        )
+        row.bind(pos=update_bg, size=update_bg)
+
+        # Checkbox
+        checkbox = CheckBox(size_hint=(None, None), size=(dp(40), dp(40)))
+        checkbox.pos_hint = {"center_y": 0.5}
+        checkbox.game_id = game["date"]
+
+        def on_toggle(instance, value):
+            if value:
+                self.selected_games.add(instance.game_id)
+                bg_color.rgba = (0.2, 0.6, 1, 0.25)  # blue highlight
+            else:
+                self.selected_games.discard(instance.game_id)
+                bg_color.a = 0
+
+        checkbox.bind(active=on_toggle)
+
+        # Info column
+        info_box = BoxLayout(orientation="vertical", spacing=dp(4))
 
         date = datetime.fromisoformat(game["date"]).strftime("%Y-%m-%d %H:%M")
         winner = game.get("winner", "Unknown")
         totals = game.get("totals", {})
-
         score_text = ", ".join(f"{k}: {v}" for k, v in totals.items())
 
         info_box.add_widget(Label(text=f"[b]{date}[/b]", markup=True))
         info_box.add_widget(Label(text=score_text))
         info_box.add_widget(Label(text=f"Winner: {winner}"))
 
-        # ASSEMBLE ROW
         row.add_widget(checkbox)
         row.add_widget(info_box)
 
@@ -507,6 +527,24 @@ class HistoryScreen(Screen):
             print("Selected game:", game["date"])
         else:
             print("Unselected game:", game["date"])
+
+    def delete_selected_games(self):
+        if not self.selected_games:
+            return
+
+        if not os.path.exists(GAMES_FILE):
+            return
+
+        with open(GAMES_FILE) as f:
+            games = json.load(f)
+
+        games = [g for g in games if g["date"] not in self.selected_games]
+
+        with open(GAMES_FILE, "w") as f:
+            json.dump(games, f, indent=2)
+
+        self.selected_games.clear()
+        self.on_enter()  # refresh list
 
 
 # ======================
@@ -582,9 +620,14 @@ class DominoApp(App):
 
     def finish_game(self):
         game = self.current_game
+
+        if not game.finished:
+            print(f"Game ended with no one over {str(MAX_POINTS)}")
+            return
+
         winner = game.winner()
 
-        if winner != "Tie Game":
+        if winner != "Tie Game" or winner != None:
             for player in game.players:
                 if player.name == winner:
                     player.wins += 1
@@ -596,7 +639,7 @@ class DominoApp(App):
 
         Popup(
             title="Game Over",
-            content=Label(text=f"🏆 Winner: {winner}"),
+            content=Label(text=f"🏆 Winner: {winner}", color="red"),
             size_hint=(0.7, 0.3),
         ).open()
 
