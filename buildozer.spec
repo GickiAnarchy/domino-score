@@ -5,12 +5,12 @@
 # --------------------------------------------------
 title = Domino Scorebook
 package.name = domscores
-package.domain = org.test
+package.domain = com.gicki
 
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf
 
-version = 0.1
+version = 0.2
 
 # --------------------------------------------------
 # Python / Kivy requirements

@@ -1,12 +1,12 @@
 {
-  "Corey": {
-    "name": "Corey",
-    "wins": 3,
-    "losses": 1
+  "c": {
+    "name": "c",
+    "wins": 0,
+    "losses": 0
   },
-  "Dale": {
-    "name": "Dale",
-    "wins": 1,
-    "losses": 3
+  "d": {
+    "name": "d",
+    "wins": 0,
+    "losses": 0
   }
 }

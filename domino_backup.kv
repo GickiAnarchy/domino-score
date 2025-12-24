@@ -1,6 +1,11 @@
 #:kivy 2.2.0
 #:import dp kivy.metrics.dp
+#
 
+
+# ======================
+# SCREENMANAGER
+# ======================
 ScreenManager:
     MenuScreen:
     CreatePlayerScreen:
@@ -8,39 +13,85 @@ ScreenManager:
     GameScreen:
     HistoryScreen:
     StatsScreen:
+    AboutScreen:
+    OptionsScreen:
 
 
+# ======================
+# MENUSCREEN 
+# ======================
 <MenuScreen>:
     name: "menu"
-
+    
     BoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(15)
+    	orientation: "vertical"
+    	#size_hint: (None, None)
 
-        Label:
-            text: "Domino Scorebook"
-            font_size: "28sp"
-            size_hint_y: None
-            height: dp(60)
+	    BoxLayout:
+	        orientation: "vertical"
+	        padding: dp(20)
+	        spacing: dp(15)
+	        size_hint: (1.0, 0.3)
+	        
+	        Image:
+	        	source: "data/icon_1024.png"
+	        	size_hint: (1.0, 1.0)
+	        	#height: dp(50)
+	        Label:
+	            text: "Domino Scorebook"
+	            font_size: "28sp"
+	            size_hint_y: 0.6
+	            height: dp(40)
+	
+		BoxLayout:
+			orientation:"vertical"
+			padding: dp(20)
+        	spacing: dp(15)
+        	size_hint: (1.0, 0.5)
+		
+	        Button:
+	            text: "Start Game"
+	            size_hint: (0.3, None)
+	            height: dp(30)
+	            pos_hint: {"center_x": 0.5}
+	            on_release: root.manager.current = "select"
+	            
+		    BoxLayout:
+				orientation:"horizontal"
+				padding: dp(20)
+	        	spacing: dp(15)
+		        
+		        Button:
+		        	text: "Options"
+		        	on_release: root.manager.current = "options"
+		        Button:
+		            text: "Game History"
+		            on_release: root.manager.current = "history"
+		        Button:
+		            text: "Player Stats"
+		            on_release: root.manager.current = "stats"
+        
+	    BoxLayout:
+			orientation:"horizontal"
+			padding: dp(20)
+	        spacing: dp(15)
+	        
+	        Button:
+	        	text: "About"
+	        	size_hint: (0.3, None)
+	        	height: dp(50)
+	        	on_release: root.manager.current = "about"
+	        
+	        Button:
+	        	text: "Exit"
+	        	size_hint: (0.3, None)
+	        	height: dp(50)
+	        	on_release: app.stop()
 
-        Button:
-            text: "Start Game"
-            on_release: root.manager.current = "select"
 
-        Button:
-            text: "Create Player"
-            on_release: root.manager.current = "create"
-
-        Button:
-            text: "Game History"
-            on_release: root.manager.current = "history"
-
-        Button:
-            text: "Stats"
-            on_release: root.manager.current = "stats"
-
-
+# ======================
+# CREATEPLAYERSCREEN 
+# ======================
 <CreatePlayerScreen>:
     name: "create"
 
@@ -59,20 +110,27 @@ ScreenManager:
             id: player_name_input
             hint_text: "Player name"
             multiline: False
+            size_hint_y: None 
+            height: dp(60)
 
         Button:
             text: "Save Player"
             size_hint_y: None
             height: dp(50)
+            pos_hint: {"bottom": 0.2}
             on_release: root.save_player(player_name_input.text)
 
         Button:
             text: "Back"
             size_hint_y: None
             height: dp(50)
+            pos_hint: {"bottom": 0.1}
             on_release: root.manager.current = "menu"
 
 
+# ======================
+# PLAYERSELECTSCREEN 
+# ======================
 <PlayerSelectScreen>:
     name: "select"
 
@@ -83,15 +141,15 @@ ScreenManager:
 
         Label:
             text: "Select Players"
-            font_size: "24sp"
+            font_size: "22sp"
             size_hint_y: None
-            height: dp(50)
+            height: dp(40)
 
         ScrollView:
             GridLayout:
                 id: player_list
                 cols: 1
-                spacing: dp(10)
+                spacing: dp(15)
                 size_hint_y: None
                 height: self.minimum_height
 
@@ -109,6 +167,9 @@ ScreenManager:
             on_release: root.manager.current = "menu"
 
 
+# ======================
+# GAMESCREEN 
+# ======================
 <GameScreen>:
     name: "game"
 
@@ -119,7 +180,7 @@ ScreenManager:
 
         Label:
             text: "Game In Progress"
-            font_size: "22sp"
+            font_size: "42sp"
             size_hint_y: None
             height: dp(40)
 
@@ -128,16 +189,19 @@ ScreenManager:
                 id: player_container
                 cols: 1
                 spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
+                size_hint_y: 0.75
+                #height: self.minimum_height + 10
 
         Button:
             text: "End Game"
             size_hint_y: None
             height: dp(50)
-            on_release: root.manager.current = "menu"
+            on_release: root.end_game()
 
 
+# ======================
+# HISTORYSCREEN
+# ======================
 <HistoryScreen>:
     name: "history"
 
@@ -167,6 +231,9 @@ ScreenManager:
             on_release: root.manager.current = "menu"
 
 
+# ======================
+# STATSSCREEN
+# ======================
 <StatsScreen>:
     name: "stats"
 
@@ -180,6 +247,78 @@ ScreenManager:
             font_size: "22sp"
 
         Button:
+            text: "Back"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.manager.current = "menu"
+
+
+# ======================
+# ABOUTSCREEN 
+# ======================
+<AboutScreen>:
+	name: "about"
+	
+	BoxLayout:
+		orientation: "vertical"
+		padding: dp(20)
+		spacing: dp(10)
+		
+		Label:
+            text: "About Screen (Coming Soon)"
+            font_size: "22sp"
+
+        Button:
+            text: "Back"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.manager.current = "menu"
+
+
+# ======================
+# OPTIONSSCREEN 
+# ======================
+<OptionsScreen>:
+	name: "options"
+	
+	BoxLayout:
+		orientation: "vertical"
+		padding: dp(20)
+		spacing: dp(10)
+		
+		BoxLayout:
+			orientation: "horizontal"
+			padding: dp(20)
+			spacing: dp(10)
+			
+			Button:
+				text: "Create a\nplayer"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
+				size_hint_y: None
+				height: dp(50)
+				on_release: root.manager.current = "create"
+			
+			Button:
+				text: "Import Saves"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
+				size_hint_y: None 
+				height: dp(50)
+				on_release: root.import_saves()
+			
+			Button:
+				text: "Export Saves"
+				halign: "center"
+    			valign: "middle"
+    			text_size: self.size
+				size_hint_y: None 
+				height: dp(50)
+				on_release: root.export_saves()
+		
+		Button:
             text: "Back"
             size_hint_y: None
             height: dp(50)
