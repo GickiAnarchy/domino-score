@@ -8,6 +8,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.checkbox import CheckBox
 from kivy.metrics import dp
 from kivy.animation import Animation
 from kivy.clock import Clock
@@ -133,12 +134,15 @@ class SplashScreen(Screen):
         logo_anim.start(logo)
 
         # Move to menu after splash
-        Clock.schedule_once(self.go_to_menu, 5.5)
+        Clock.schedule_once(self.go_to_menu, 4.0)
 
     def go_to_menu(self, *args):
         self.manager.current = "menu"
 
 
+# ======================
+#
+# ======================
 class OptionsScreen(Screen):
 
     def export_saves(self):
@@ -202,14 +206,23 @@ class OptionsScreen(Screen):
         app.players = app.load_players()
 
 
+# ======================
+#
+# ======================
 class AboutScreen(Screen):
     pass
 
 
+# ======================
+#
+# ======================
 class MenuScreen(Screen):
     pass
 
 
+# ======================
+#
+# ======================
 class StatsScreen(Screen):
 
     def on_enter(self):
@@ -273,6 +286,9 @@ class CreatePlayerScreen(Screen):
         self.manager.current = "menu"
 
 
+# ======================
+# PLAYERSELECTSCREEN
+# ======================
 class PlayerSelectScreen(Screen):
 
     def on_enter(self):
@@ -284,7 +300,11 @@ class PlayerSelectScreen(Screen):
             player_list.add_widget(ToggleButton(text=name, size_hint_y=None, height=75))
 
 
+# ======================
+# GAMESCREEN
+# ======================
 class GameScreen(Screen):
+    player_inputs = {}
 
     def on_enter(self):
         self.refresh_ui()
@@ -292,69 +312,74 @@ class GameScreen(Screen):
     def refresh_ui(self):
         container = self.ids.player_container
         container.clear_widgets()
+        self.player_inputs.clear()
 
         app = App.get_running_app()
         game = app.current_game
 
         for player in game.players:
-            container.add_widget(self.build_player_card(player.name))
+            card, input_box = self.build_player_card(player.name)
+            self.player_inputs[player.name] = input_box
+            container.add_widget(card)
 
     def build_player_card(self, name):
         app = App.get_running_app()
         game = app.current_game
 
         card = BoxLayout(
-            orientation="vertical", size_hint_y=0.4, padding=10, spacing=15
-        )
-
-        # card = BoxLayout(
-        # 			orientation="vertical", size_hint_y=None, height=254, padding=10, spacing=15
-        # 		)
+		    orientation="vertical",
+		    size_hint = (1, None),
+		    height=dp(170),
+		    padding=10,
+		    spacing=12,
+		)
 
         score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}", size_hint_y=None, font_size = "26sp")
-        
-		
+            text=f"{name} — Score: {game.totals[name]}",
+            font_size="26sp",
+            size_hint_y=None,
+            height=dp(40),
+        )
 
-        def update_label():
+        def refresh_score():
             score_label.text = f"{name} — Score: {game.totals[name]}"
 
-        btn_row = BoxLayout(size_hint_y=0.4, spacing=10, padding=10)
-
-        btn5 = Button(text="+5", size_hint_y=0.8)
-        btn10 = Button(text="+10", size_hint_y=0.8)
-        btnmin5 = Button(text="-5", size_hint_y=0.8)
-
-        # 		btn5 = Button(text="+5", height=dp(65), size_hint_y=None)
-        # 		btn10 = Button(text="+10", height=dp(65), size_hint_y=None)
-        # 		btnmin5 = Button(text="-5", height=dp(65), size_hint_y = None)
-
-        btn5.bind(on_release=lambda *_: self.add_score(name, 5, update_label))
-        btn10.bind(on_release=lambda *_: self.add_score(name, 10, update_label))
-        btnmin5.bind(on_release=lambda *_: self.add_score(name, -5, update_label))
-
-        btn_row.add_widget(btn5)
-        btn_row.add_widget(btn10)
-        btn_row.add_widget(btnmin5)
-
         input_box = TextInput(
+            text="0",
             multiline=False,
             input_filter="int",
-            hint_text="Enter points",
-            size_hint_y=0.3,
+            halign="center",
+            font_size="22sp",
+            size_hint_y=None,
+            height=dp(45),
         )
 
-        input_box.bind(
-            on_text_validate=lambda instance: self.add_score(
-                name, int(instance.text), update_label, instance
-            )
-        )
+        def adjust(delta):
+            try:
+                val = int(input_box.text or 0)
+            except ValueError:
+                val = 0
+            input_box.text = str(val + delta)
+
+        btn_row = BoxLayout(size_hint_y=None, height=dp(50), spacing=10)
+
+        btn_minus = Button(text="-5")
+        btn_plus5 = Button(text="+5")
+        btn_plus10 = Button(text="+10")
+
+        btn_minus.bind(on_release=lambda *_: adjust(-5))
+        btn_plus5.bind(on_release=lambda *_: adjust(5))
+        btn_plus10.bind(on_release=lambda *_: adjust(10))
+
+        btn_row.add_widget(btn_minus)
+        btn_row.add_widget(btn_plus5)
+        btn_row.add_widget(btn_plus10)
 
         card.add_widget(score_label)
-        card.add_widget(btn_row)
         card.add_widget(input_box)
+        card.add_widget(btn_row)
 
-        return card
+        return card, input_box
 
     def add_score(self, name, points, refresh_cb, input_widget=None):
         app = App.get_running_app()
@@ -375,7 +400,37 @@ class GameScreen(Screen):
         app.finish_game()
         self.manager.current = "menu"
 
+    def submit_scores(self):
+        app = App.get_running_app()
+        game = app.current_game
 
+        any_points = False
+
+        for name, input_box in self.player_inputs.items():
+            try:
+                points = int(input_box.text)
+            except ValueError:
+                points = 0
+
+            if points != 0:
+                game.add_points(name, points)
+                any_points = True
+
+            input_box.text = "0"
+
+        if not any_points:
+            return
+
+        self.refresh_ui()
+
+        if game.check_game_over():
+            app.finish_game()
+            self.manager.current = "menu"
+
+
+# ======================
+# HISTORYSCREEN
+# ======================
 class HistoryScreen(Screen):
 
     def on_enter(self):
@@ -402,7 +457,33 @@ class HistoryScreen(Screen):
             print(f"oops : {e}")
 
     def build_game_row(self, game):
-        box = BoxLayout(orientation="vertical", size_hint_y=None, height=110)
+        # OUTER ROW8l7
+        
+        row = BoxLayout(
+            orientation="horizontal",
+            size_hint = (1.0, None),
+            height=dp(110),
+            padding=(10, 5),
+            spacing=10,
+        )
+
+        # CHECKBOX
+        checkbox = CheckBox(
+            size_hint=(None, None),
+            size=(40, 40),
+            pos_hint = {"center_y": 0.5},
+        )
+
+        # OPTIONAL: store game data on checkbox
+        checkbox.game_data = game
+        checkbox.bind(active=self.on_game_checked)
+
+        # INFO COLUMN
+        info_box = BoxLayout(
+            orientation="vertical",
+            size_hint_y=1,
+            spacing=4,
+        )
 
         date = datetime.fromisoformat(game["date"]).strftime("%Y-%m-%d %H:%M")
         winner = game.get("winner", "Unknown")
@@ -410,11 +491,22 @@ class HistoryScreen(Screen):
 
         score_text = ", ".join(f"{k}: {v}" for k, v in totals.items())
 
-        box.add_widget(Label(text=f"[b]{date}[/b]", markup=True))
-        box.add_widget(Label(text=score_text))
-        box.add_widget(Label(text=f"Winner: {winner}"))
+        info_box.add_widget(Label(text=f"[b]{date}[/b]", markup=True))
+        info_box.add_widget(Label(text=score_text))
+        info_box.add_widget(Label(text=f"Winner: {winner}"))
 
-        return box
+        # ASSEMBLE ROW
+        row.add_widget(checkbox)
+        row.add_widget(info_box)
+
+        return row
+
+    def on_game_checked(self, checkbox, value):
+        game = checkbox.game_data
+        if value:
+            print("Selected game:", game["date"])
+        else:
+            print("Unselected game:", game["date"])
 
 
 # ======================

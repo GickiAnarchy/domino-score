@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-22_3.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-23_31.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -20,11 +20,15 @@
 [INFO   ] Window: auto add sdl2 input provider
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
 [INFO   ] GL: NPOT texture support is available
+[WARNING] Deprecated property "<BooleanProperty name=allow_stretch>" of object "<kivy.uix.image.Image object at 0x700bc52900>" was accessed, it will be removed in a future version
+[WARNING] Deprecated property "<BooleanProperty name=keep_ratio>" of object "<kivy.uix.image.Image object at 0x700bc52900>" was accessed, it will be removed in a future version
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 350, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 566, in <module>
+[WARNING] stderr:     DominoApp().run()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
 [WARNING] stderr:     runTouchApp()
 [WARNING] stderr:     ~~~~~~~~~~~^^
@@ -60,7 +64,13 @@
 [WARNING] stderr:     self.screen_in.dispatch('on_enter')
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 238, in on_enter
-[WARNING] stderr:     history_list.add_widget(self.build_game_row(game))
-[WARNING] stderr:            ^^^^^^^^
-[WARNING] stderr: IndexError: list index out of range
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 309, in on_enter
+[WARNING] stderr:     self.refresh_ui()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 320, in refresh_ui
+[WARNING] stderr:     card, input_box = self.build_player_card(player.name)
+[WARNING] stderr:                       ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 330, in build_player_card
+[WARNING] stderr:     size_hint_y=0.5(),
+[WARNING] stderr:                 ~~~^^
+[WARNING] stderr: TypeError: 'float' object is not callable

@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-21_17.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-24_1.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -20,6 +20,8 @@
 [INFO   ] Window: auto add sdl2 input provider
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
 [INFO   ] GL: NPOT texture support is available
+[WARNING] Deprecated property "<BooleanProperty name=allow_stretch>" of object "<kivy.uix.image.Image object at 0x7006767000>" was accessed, it will be removed in a future version
+[WARNING] Deprecated property "<BooleanProperty name=keep_ratio>" of object "<kivy.uix.image.Image object at 0x7006767000>" was accessed, it will be removed in a future version
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Base: Leaving application in progress...

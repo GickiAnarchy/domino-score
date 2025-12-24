@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-21_7.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-23_25.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -20,11 +20,13 @@
 [INFO   ] Window: auto add sdl2 input provider
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
 [INFO   ] GL: NPOT texture support is available
+[WARNING] Deprecated property "<BooleanProperty name=allow_stretch>" of object "<kivy.uix.image.Image object at 0x70068460b0>" was accessed, it will be removed in a future version
+[WARNING] Deprecated property "<BooleanProperty name=keep_ratio>" of object "<kivy.uix.image.Image object at 0x70068460b0>" was accessed, it will be removed in a future version
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 333, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 538, in <module>
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
 [WARNING] stderr:     runTouchApp()
 [WARNING] stderr:     ~~~~~~~~~~~^^
@@ -60,19 +62,8 @@
 [WARNING] stderr:     self.screen_in.dispatch('on_enter')
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 227, in on_enter
-[WARNING] stderr:     games = json.load(f)
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 293, in load
-[WARNING] stderr:     return loads(fp.read(),
-[WARNING] stderr:         cls=cls, object_hook=object_hook,
-[WARNING] stderr:         parse_float=parse_float, parse_int=parse_int,
-[WARNING] stderr:         parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 346, in loads
-[WARNING] stderr:     return _default_decoder.decode(s)
-[WARNING] stderr:            ~~~~~~~~~~~~~~~~~~~~~~~^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 345, in decode
-[WARNING] stderr:     obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-[WARNING] stderr:                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 363, in raw_decode
-[WARNING] stderr:     raise JSONDecodeError("Expecting value", s, err.value) from None
-[WARNING] stderr: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 309, in on_enter
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 320, in refresh_ui
+[WARNING] stderr:     score_label.text = f"{name} — Score: {game.totals[name]}"
+[WARNING] stderr:     ^^^^^^^^^^^^^^^
+[WARNING] stderr: TypeError: cannot unpack non-iterable BoxLayout object

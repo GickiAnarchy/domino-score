@@ -204,31 +204,29 @@ ScreenManager:
 # GAMESCREEN 
 # ======================
 <GameScreen>:
-    name: "game"
-
     BoxLayout:
         orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-
-        Label:
-            text: "Game In Progress"
-            font_size: "42sp"
-            size_hint_y: None
-            height: dp(40)
 
         ScrollView:
             GridLayout:
                 id: player_container
                 cols: 1
-                spacing: dp(10)
-                size_hint_y: 0.75
-                #height: self.minimum_height + 10
+                size_hint_y: None
+                height: self.minimum_height
+
+        Button:
+            text: "Submit Scores"
+            size_hint: (0.5, None)
+            height: dp(60)
+            font_size: "20sp"
+            pos_hint: {"center_x":0.5}
+            on_release: root.submit_scores()
 
         Button:
             text: "End Game"
-            size_hint_y: None
+            size_hint: (0.25, None)
             height: dp(50)
+            pos_hint: {"center_x":0.5}
             on_release: root.end_game()
 
 
@@ -250,16 +248,18 @@ ScreenManager:
             height: dp(50)
 
         ScrollView:
+            do_scroll_x: False
             GridLayout:
                 id: history_list
                 cols: 1
                 spacing: dp(10)
+                size_hint_x: 1.0
                 size_hint_y: None
                 height: self.minimum_height
 
         Button:
             text: "Back"
-            size_hint_y: None
+            size_hint: (0.25, None)
             height: dp(50)
             on_release: root.manager.current = "menu"
 
@@ -272,8 +272,8 @@ ScreenManager:
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
+        padding: dp(20)
+        spacing: dp(20)
 
         Label:
             text: "Player Stats"
