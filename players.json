@@ -8,5 +8,10 @@
     "name": "Dale",
     "wins": 1,
     "losses": 4
+  },
+  "Corey2": {
+    "name": "Corey2",
+    "wins": 0,
+    "losses": 0
   }
 }
