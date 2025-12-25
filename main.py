@@ -2,6 +2,7 @@ from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.card import MDCard
@@ -9,6 +10,7 @@ from kivymd.uix.dialog import MDDialog
 from kivy.uix.screenmanager import ScreenManager
 from kivy.metrics import dp
 from kivy.clock import Clock
+from kivy.utils import get_color_from_hex
 
 from datetime import datetime
 import json
@@ -16,8 +18,11 @@ import os
 
 SAVE_FILE = "players.json"
 GAMES_FILE = "games.json"
+UNFINISHED = ".unfinished.dom"
 MAX_POINTS = 300
 # --------------------------------------------------
+SELECTED_COLOR = get_color_from_hex("#4CAF50")   # green
+DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
 
 
 class Player:
@@ -63,6 +68,10 @@ class GameScore:
             "winner": self.winner(),
             "finished": self.finished,
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
 
 # --------------------------------------------------
@@ -97,15 +106,17 @@ class PlayerSelectScreen(MDScreen):
         for name in app.players:
             chip = MDRaisedButton(
                 text=name,
-                on_release=lambda x, n=name: self.toggle(n),
+                on_release=lambda x, n=name: self.toggle(n, x),
             )
             box.add_widget(chip)
 
-    def toggle(self, name):
+    def toggle(self, name, button):
         if name in self.selected:
             self.selected.remove(name)
+            button.md_bg_color = DEFAULT_COLOR
         else:
             self.selected.add(name)
+            button.md_bg_color = SELECTED_COLOR
 
     def start(self):
         MDApp.get_running_app().start_game(list(self.selected))
@@ -127,16 +138,37 @@ class GameScreen(MDScreen):
                 size_hint_y=None,
                 height=dp(120),
             )
-            card.add_widget(
+            topcard = MDBoxLayout(orientation="horizontal", size_hint = (0.9, None))
+            
+            topcard.add_widget(
                 MDLabel(text=f"{name} — {score}", font_style="H6")
             )
+            
+            #in_points = MDTextField()
+            btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None))
 
-            btn = MDRaisedButton(
+            btn5 = MDRaisedButton(
+                text="+5",
+                on_release=lambda x, n=name: self.add(n, 5),
+            )
+            btn10 = MDRaisedButton(
                 text="+10",
                 on_release=lambda x, n=name: self.add(n, 10),
             )
-            card.add_widget(btn)
-            box.add_widget(card)
+            btn20 = MDRaisedButton(
+                text="+20",
+                on_release=lambda x, n=name: self.add(n, 20),
+            )
+            btnm5 = MDRaisedButton(
+                text="-5",
+                on_release=lambda x, n=name: self.add(n, -5),
+            )
+            btncard.add_widget(btn5)
+            btncard.add_widget(btn10)
+            btncard.add_widget(btn20)
+            btncard.add_widget(btnm5)
+            box.add_widget(topcard)
+            box.add_widget(btncard)
 
     def add(self, name, pts):
         app = MDApp.get_running_app()
@@ -234,6 +266,16 @@ class DominoApp(MDApp):
         with open(SAVE_FILE, "w") as f:
             json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
 
+    def save_game(self):
+        with open(UNFINISHED, "w") as f:
+            json.dump(self.current_game.to_dict())
+
+    def reload_game(self):
+        if not os.path.exists(UNFINISHED):
+            return
+        with open(UNFINISHED) as f:
+            return GameScore(json.load(f))
+
     # ---------- game flow ----------
     def start_game(self, names):
         if len(names) < 2:
@@ -246,6 +288,9 @@ class DominoApp(MDApp):
     def finish_game(self):
         game = self.current_game
         winner = game.winner()
+        
+        if not game.is_finished:
+            
 
         if winner not in ("Tie Game", None):
             for p in game.players:
