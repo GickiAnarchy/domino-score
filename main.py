@@ -12,6 +12,7 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
 
+import pickle
 from datetime import datetime
 import json
 import os
@@ -67,7 +68,7 @@ class GameScore:
             "totals": self.totals,
             "winner": self.winner(),
             "finished": self.finished,
-        }
+        }        
     
     @classmethod
     def from_dict(cls, data):
@@ -125,6 +126,11 @@ class PlayerSelectScreen(MDScreen):
 class GameScreen(MDScreen):
     def on_enter(self):
         self.refresh()
+    
+    def end_pressed(self):
+        app = MDApp.get_running_app()
+        app.finish_game()
+        self.manager.current = "menu"
 
     def refresh(self):
         box = self.ids.player_container
@@ -233,6 +239,7 @@ class DominoApp(MDApp):
 
     def build(self):
         self.players = self.load_players()
+        self.save_game_available = self.check_for_save()
         self.current_game = None
 
         self.theme_cls.primary_palette = "Blue"
@@ -256,6 +263,18 @@ class DominoApp(MDApp):
         self.dialog.open()
 
     # ---------- persistence ----------
+    def check_for_save(self):
+        try:
+            with open(UNFINISHED, "rb") as f:
+                print(f.read())
+                if f.read() in [None, ""]:
+                    return False
+                else:
+                    return True
+        except:
+            print('error loading')
+            return
+    
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
             return {}
@@ -267,18 +286,29 @@ class DominoApp(MDApp):
             json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
 
     def save_game(self):
-        with open(UNFINISHED, "w") as f:
-            json.dump(self.current_game.to_dict())
+        with open(UNFINISHED, "wb") as f:
+            pickle.dump(self.current_game, f)
 
     def reload_game(self):
+        unfinished_game = None
         if not os.path.exists(UNFINISHED):
             return
-        with open(UNFINISHED) as f:
-            return GameScore(json.load(f))
+        with open(UNFINISHED, "rb") as f:
+            try:
+                self.current_game = pickle.load(f)
+            except EOFError as e:
+                print(e)
+                return
+            f.close()
+        open(UNFINISHED, "wb").close()
+        self.root.current = "game"
 
     # ---------- game flow ----------
     def start_game(self, names):
         if len(names) < 2:
+            if self.save_game_available:
+                self.reload_game()
+                return
             self.show_dialog("Error", "Select at least two players")
             return
 
@@ -289,8 +319,10 @@ class DominoApp(MDApp):
         game = self.current_game
         winner = game.winner()
         
-        if not game.is_finished:
-            
+        if not game.finished:
+            self.save_game()
+            print("unfinished game saved")
+            return
 
         if winner not in ("Tie Game", None):
             for p in game.players:
