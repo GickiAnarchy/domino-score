@@ -26,6 +26,18 @@ MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")   # green
 DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
 
+def get_export_dir():
+    try:
+        # Android
+        from android.storage import primary_external_storage_path
+
+        base = primary_external_storage_path()
+        return os.path.join(base, "Download", "DominoScorebook")
+    except Exception:
+        # Desktop fallback
+        return os.path.join(os.getcwd(), "exports")
+
+
 
 class Player:
     def __init__(self, name, wins=0, losses=0):
@@ -83,17 +95,76 @@ class MenuScreen(MDScreen):
 
 class OptionsScreen(MDScreen):
     
+    def export_saves(self):
+        export_dir = get_export_dir()
+        os.makedirs(export_dir, exist_ok=True)
+
+        files = [SAVE_FILE, GAMES_FILE]
+        exported = []
+
+        for fname in files:
+            if os.path.exists(fname):
+                dest = os.path.join(export_dir, fname)
+                with open(fname, "r") as src, open(dest, "w") as dst:
+                    dst.write(src.read())
+                exported.append(fname)
+
+        if exported:
+            msg = "Exported:\n" + "\n".join(exported) + "\n\nLocation:\n" + export_dir
+        else:
+            msg = "Nothing to export yet."
+
+        #MDDialog(
+#            title="Export Complete",
+#            content=MDLabel(text=msg),
+#            size_hint=(0.8, 0.5),
+#        ).open()
+
+    def import_saves(self):
+        import_dir = get_export_dir()
+
+        if not os.path.exists(import_dir):
+            #MDDialog(
+#                title="Import Failed",
+#                content=MDLabel(text="No backup folder found."),
+#                size_hint=(0.7, 0.3),
+#            ).open()
+            return
+
+        imported = []
+
+        for fname in [SAVE_FILE, GAMES_FILE]:
+            src = os.path.join(import_dir, fname)
+            if os.path.exists(src):
+                with open(src, "r") as s, open(fname, "w") as d:
+                    d.write(s.read())
+                imported.append(fname)
+
+        if imported:
+            msg = "Imported:\n" + "\n".join(imported)
+        else:
+            msg = "No valid save files found."
+
+        #MDDialog(
+#            title="Import Complete",
+#            content=MDLabel(text=msg),
+#            size_hint=(0.7, 0.4),
+#        ).open()
+
+        # Reload players immediately
+        app = MDApp.get_running_app()
+        app.players = app.load_players()
+    
     def reset_all(self):
         app = MDApp.get_running_app()
         app.players = []
-        
+
         with open(GAMES_FILE, "w") as f:
             f.write("")
             f.close()
         with open(SAVE_FILE, "w") as f:
             f.write("")
             f.close()
-        
         self.manager.current = "menu"
 
 
@@ -211,7 +282,6 @@ class HistoryScreen(MDScreen):
         box.clear_widgets()
         self.selected.clear()
         
-
         if not os.path.exists(GAMES_FILE):
             box.add_widget(MDLabel(text="No games yet"))
             return
