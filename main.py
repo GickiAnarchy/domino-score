@@ -1,3 +1,4 @@
+#pylint:disable= 'invalid decimal literal (main, line 428)'
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
@@ -11,17 +12,20 @@ from kivymd.uix.dialog import MDDialog
 from kivy.uix.screenmanager import ScreenManager
 from kivy.metrics import dp
 from kivy.clock import Clock
+ 
 from kivy.utils import get_color_from_hex
 from kivymd.uix.fitimage import FitImage
+from kivy.core.text import LabelBase
 
 import pickle
+import random
 from functools import partial
 from datetime import datetime
 import json
 import os
 
-SAVE_FILE = "players.json"
-GAMES_FILE = "games.json"
+SAVE_FILE = ".players.dom"
+GAMES_FILE = ".games.dom"
 UNFINISHED = ".unfinished.dom"
 MAX_POINTS = 300
 # --------------------------------------------------
@@ -34,7 +38,7 @@ def get_export_dir():
         from android.storage import primary_external_storage_path
 
         base = primary_external_storage_path()
-        return os.path.join(base, "Download", "DominoScorebook")
+        return os.path.join(base, "Download", ".DominoScorebook")
     except Exception:
         # Desktop fallback
         return os.path.join(os.getcwd(), "exports")
@@ -64,8 +68,6 @@ class GameScore:
         self.finished = False
 
     def add_points(self, name, pts):
-        if self.finished:
-            return
         self.totals[name] += pts
         self.rounds.append({"player": name, "points": pts})
 
@@ -268,7 +270,6 @@ class GameScreen(MDScreen):
                 MDLabel(text=f"{name} — {score}", font_style="H6")
             )
             
-            #in_points = MDTextField()
             btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None))
 
             btn5 = MDRaisedButton(
@@ -298,10 +299,6 @@ class GameScreen(MDScreen):
         app = MDApp.get_running_app()
         app.current_game.add_points(name, pts)
         self.refresh()
-
-        if app.current_game.finished:
-            app.finish_game()
-            self.manager.current = "menu"
 
 
 class HistoryCheckbox(MDCheckbox):
@@ -399,10 +396,37 @@ class DominoApp(MDApp):
         self.players = self.load_players()
         self.save_game_available = self.check_for_save()
         self.current_game = None
+        colors = [
+    "Red", 
+    "Pink", 
+    "Purple", 
+    "DeepPurple", 
+    "Indigo", 
+    "Blue", 
+    "LightBlue", 
+    "Cyan", 
+    "Teal", 
+    "Green", 
+    "LightGreen", 
+    "Lime", 
+    "Yellow", 
+    "Amber", 
+    "Orange", 
+    "DeepOrange", 
+    "Brown", 
+    "Gray", 
+    "BlueGray"
+]
 
-        self.theme_cls.primary_palette = "Blue"
+        self.theme_cls.primary_palette = random.choice(colors)
+        self.theme_cls.accent_palette = random.choice(colors)
         self.theme_cls.theme_style = "Dark"
-
+        
+        LabelBase.register(
+            name="BreakAway",
+            fn_regular="data/breakaway.ttf"
+        )
+        
         sm = ScreenManager()
         sm.add_widget(MenuScreen(name="menu"))
         sm.add_widget(CreatePlayerScreen(name="create"))
@@ -476,12 +500,17 @@ class DominoApp(MDApp):
 
     def finish_game(self):
         game = self.current_game
-        winner = game.winner()
+        winner = None
         
         if not game.finished:
-            self.save_game()
-            print("unfinished game saved")
-            return
+            if self.show_confirm("Unfinished Game","Do you want to save this game?"):
+                self.save_game()
+                print("Unfinished game saved")
+                return
+            else:
+                print("Unfinished game was not saved")
+        else:
+            winner = game.winner()
 
         if winner not in ("Tie Game", None):
             for p in game.players:
@@ -501,6 +530,28 @@ class DominoApp(MDApp):
             json.dump(games, f, indent=2)
 
         self.show_dialog("Game Over", f"Winner: {winner}")
+    
+    def show_confirm(self, title, text):
+        confirm_dialog = MDDialog(
+            title=title,
+            text=text,
+            buttons=[
+                MDFlatButton(
+                    text="No",
+                    on_release=lambda x: send_ok(False),
+                ),
+                MDFlatButton(
+                    text="Yes",
+                    text_color=(1, 0, 0, 1),  # red warning
+                    on_release=lambda x: send_ok(True)
+                ),
+            ],
+        )
+        def send_ok(answer):
+            confirm_dialog.dismiss()
+            return answer
+            
+        confirm_dialog.open()
 
 if __name__ == "__main__":
     DominoApp().run()

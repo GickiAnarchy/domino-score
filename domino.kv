@@ -16,8 +16,10 @@
                 pos_hint: {"center_x": 0.5}
 
             MDLabel:
-                text: "Domino Scorebook"
+                text: "Domino\nScorebook"
                 font_style: "H4"
+                font_name: "BreakAway"
+                font_size: "46sp"
                 halign: "center"
                 pos_hint: {"center_y":0.9}
 
@@ -39,39 +41,70 @@
 
 
 <OptionsScreen>:
-    MDBoxLayout:
+    BoxLayout:
         orientation: "vertical"
         padding: dp(20)
         spacing: dp(20)
-        
-        MDLabel:
-            text: "OPTIONS"
-            size_hint: (1.0 , None)
-            height: dp(20)
-        
-        MDGridLayout:
-            cols: 2
-            rows: 2
-            size_hint: {1.0, None}
-            height: self.minimum_height
-            
-            MDRaisedButton:
-                text: "Import Saves"
-                on_press: root.import_saves()
+
+        # --- TOP (title) ---
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            size_hint_x: 1
+
+            MDLabel:
+                text: "Options"
+                halign: "center"
+                font_style: "H5"
                 
-            MDRaisedButton:
-                text: "Export Saves"
-                on_press: root.export_saves()
-            
-            MDRaisedButton:
-                text: "button"
-                
-            MDRaisedButton:
-                text: "Reset All"
-                on_press: root.show_confirm_reset()
-            
+
+        # --- MIDDLE (button grid, centered) ---
+        MDBoxLayout:
+            orientation: "vertical"
+            size_hint_y: 1
+            pos_hint: {"center_x": 0.5}
+
+            Widget:  # spacer (push grid to vertical center)
+
+            MDGridLayout:
+                cols: 2
+                spacing: dp(12)
+                size_hint: None, None
+                width: dp(260)
+                height: self.minimum_height
+                pos_hint: {"center_x": 0.5}
+
+                MDRaisedButton:
+                    text: "Export Saves"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.export_saves()
+
+                MDRaisedButton:
+                    text: "Import Saves"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.import_saves()
+
+                MDRaisedButton:
+                    text: "Reset All"
+                    size_hint_x: None
+                    width: dp(120)
+                    md_bg_color: 1, 0, 0, 1
+                    on_release: root.show_confirm_reset()
+
+            Widget:  # spacer (balances centering)
+
+        # --- BOTTOM (back button pinned) ---
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(56)
+
             MDRaisedButton:
                 text: "Back"
+                size_hint_x: None
+                width: dp(120)
+                pos_hint: {"center_x": 0.5}
                 on_release: app.root.current = "menu"
             
 
@@ -88,6 +121,14 @@
         MDRaisedButton:
             text: "Save"
             on_release: root.save_player()
+        
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"
+        
+        MDBoxLayout:
+            orientation:"vertical"
+            size_hint:(1.0, 0.5)
 
 
 <PlayerSelectScreen>:
