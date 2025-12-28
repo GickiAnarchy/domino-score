@@ -14,6 +14,7 @@ from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
 
 import pickle
+from functools import partial
 from datetime import datetime
 import json
 import os
@@ -82,7 +83,7 @@ class GameScore:
             "winner": self.winner(),
             "finished": self.finished,
         }
-    
+
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
@@ -95,6 +96,14 @@ class MenuScreen(MDScreen):
 
 class OptionsScreen(MDScreen):
     
+    def show_dialog(self, title, text):
+        self.dialog = MDDialog(
+            title=title,
+            text=text,
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: self.dialog.dismiss())],
+        )
+        self.dialog.open()
+
     def export_saves(self):
         export_dir = get_export_dir()
         os.makedirs(export_dir, exist_ok=True)
@@ -113,22 +122,14 @@ class OptionsScreen(MDScreen):
             msg = "Exported:\n" + "\n".join(exported) + "\n\nLocation:\n" + export_dir
         else:
             msg = "Nothing to export yet."
-
-        #MDDialog(
-#            title="Export Complete",
-#            content=MDLabel(text=msg),
-#            size_hint=(0.8, 0.5),
-#        ).open()
+            
+            self.show_dialog("Export Complete", msg)
 
     def import_saves(self):
         import_dir = get_export_dir()
 
         if not os.path.exists(import_dir):
-            #MDDialog(
-#                title="Import Failed",
-#                content=MDLabel(text="No backup folder found."),
-#                size_hint=(0.7, 0.3),
-#            ).open()
+            self.show_dialog("Import Failed","No backup folder found")
             return
 
         imported = []
@@ -145,11 +146,7 @@ class OptionsScreen(MDScreen):
         else:
             msg = "No valid save files found."
 
-        #MDDialog(
-#            title="Import Complete",
-#            content=MDLabel(text=msg),
-#            size_hint=(0.7, 0.4),
-#        ).open()
+        self.show_dialog("Imported",msg)
 
         # Reload players immediately
         app = MDApp.get_running_app()
@@ -274,53 +271,89 @@ class GameScreen(MDScreen):
             self.manager.current = "menu"
 
 
+class HistoryCheckbox(MDCheckbox):
+    game_id = None
+
+
 class HistoryScreen(MDScreen):
-    selected = set()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.selected = set()
 
     def on_enter(self):
         box = self.ids.history_list
         box.clear_widgets()
         self.selected.clear()
-        
+    
         if not os.path.exists(GAMES_FILE):
             box.add_widget(MDLabel(text="No games yet"))
             return
-        
-        games = []
-        try:
-            with open(GAMES_FILE) as f:
-                games = json.load(f)
-        except Exception as e:
-            print(e)
-            
+    
+        with open(GAMES_FILE) as f:
+            games = json.load(f)
+    
         for g in reversed(games):
-            row = MDBoxLayout(height=dp(80), size_hint_y=None)
-            cb = MDCheckbox(
-                on_active=lambda c, v, d=g["date"]: self.toggle(d, v)
+            row = MDBoxLayout(
+                orientation="horizontal",
+                height=dp(56),
+                spacing=dp(12),
+                size_hint_y=None,
             )
+    
+            cb = HistoryCheckbox(size_hint=(0.3,0.3))
+            cb.game_id = g["date"]
+            cb.bind(active=self.on_checkbox_active)
+    
+            b = MDBoxLayout(orientation = "vertical")
+            label = MDLabel(
+                text=f'{g["date"][:16]} — {g["winner"]}',
+                valign="middle",
+            )
+            label2 = MDLabel(
+                text=f"{g['totals']}",
+                valign="middle",
+            )
+            b.add_widget(label)
+            b.add_widget(label2)
+    
             row.add_widget(cb)
-            row.add_widget(
-                MDLabel(text=f'{g["date"][:16]} — {g["winner"]}')
-            )
+            row.add_widget(b)
             box.add_widget(row)
-
-    def toggle(self, game_id, value):
+            
+    def on_checkbox_active(self, checkbox, value):
+        game_id = checkbox.game_id
+    
         if value:
             self.selected.add(game_id)
+            print(game_id, "added")
         else:
             self.selected.discard(game_id)
+            print(game_id, "removed")
+        
+        def toggle(self, game_id, checkbox, value):
+            if value:
+                self.selected.add(game_id)
+                print(game_id + " added")
+            else:
+                self.selected.discard(game_id)
+                print(game_id + " removed")
 
     def delete_selected(self):
         if not self.selected:
+            print("None selected?")
             return
+        
+        print(self.selected)
 
         with open(GAMES_FILE) as f:
             games = json.load(f)
+            f.close()
 
         games = [g for g in games if g["date"] not in self.selected]
 
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
+            f.close()
 
         self.on_enter()
 
