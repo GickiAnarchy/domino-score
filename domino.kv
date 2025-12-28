@@ -20,7 +20,46 @@
         MDRaisedButton:
             text: "History"
             on_release: app.root.current = "history"
+        
+        MDRaisedButton:
+            text: "Options"
+            on_release: app.root.current = "options"
 
+
+<OptionsScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+        
+        MDLabel:
+            text: "OPTIONS"
+            size_hint: (1.0 , None)
+            height: dp(20)
+        
+        MDGridLayout:
+            cols: 2
+            rows: 2
+            size_hint: {1.0, None}
+            height: self.minimum_height
+            
+            MDRaisedButton:
+                text: "button"
+                
+            MDRaisedButton:
+                text: "button"
+            
+            MDRaisedButton:
+                text: "button"
+                
+            MDRaisedButton:
+                text: "Reset All"
+                on_press: root.reset_all()
+            
+            MDRaisedButton:
+                text: "Back"
+                on_release: app.root.current = "menu"
+            
 
 <CreatePlayerScreen>:
     MDBoxLayout:
@@ -52,6 +91,10 @@
         MDRaisedButton:
             text: "Start Game"
             on_release: root.start()
+        
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"
 
 
 <GameScreen>:
@@ -82,3 +125,7 @@
         MDRaisedButton:
             text: "Delete Selected"
             on_release: root.delete_selected()
+            
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"

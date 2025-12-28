@@ -1,12 +1,14 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-23_31.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-26_11.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
 [INFO   ] Python: Interpreter at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/bin/python3"
 [INFO   ] Logger: Purge log fired. Processing...
 [INFO   ] Logger: Purge finished!
+[INFO   ] KivyMD: 1.2.0, git-Unknown, 2025-12-25 (installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivymd/__init__.py")
+[WARNING] KivyMD: Version 1.2.0 is deprecated and is no longer supported. Use KivyMD version 2.0.0 from the master branch (pip install https://github.com/kivymd/KivyMD/archive/master.zip)
 [INFO   ] Factory: 195 symbols loaded
-[INFO   ] Image: Providers: img_tex, img_dds, img_sdl2 (img_pil, img_ffpyplayer ignored)
+[INFO   ] Image: Providers: img_tex, img_dds, img_sdl2, img_pil (img_ffpyplayer ignored)
 [INFO   ] Text: Provider: sdl2
 [INFO   ] Window: Provider: sdl2
 [INFO   ] GL: Using the "OpenGL ES 2" graphics system
@@ -19,14 +21,13 @@
 [INFO   ] GL: Texture max units <64>
 [INFO   ] Window: auto add sdl2 input provider
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
+[INFO   ] Clipboard: Provider: android
 [INFO   ] GL: NPOT texture support is available
-[WARNING] Deprecated property "<BooleanProperty name=allow_stretch>" of object "<kivy.uix.image.Image object at 0x700bc52900>" was accessed, it will be removed in a future version
-[WARNING] Deprecated property "<BooleanProperty name=keep_ratio>" of object "<kivy.uix.image.Image object at 0x700bc52900>" was accessed, it will be removed in a future version
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 566, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 365, in <module>
 [WARNING] stderr:     DominoApp().run()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
@@ -64,13 +65,19 @@
 [WARNING] stderr:     self.screen_in.dispatch('on_enter')
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 309, in on_enter
-[WARNING] stderr:     self.refresh_ui()
-[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 320, in refresh_ui
-[WARNING] stderr:     card, input_box = self.build_player_card(player.name)
-[WARNING] stderr:                       ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 330, in build_player_card
-[WARNING] stderr:     size_hint_y=0.5(),
-[WARNING] stderr:                 ~~~^^
-[WARNING] stderr: TypeError: 'float' object is not callable
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 219, in on_enter
+[WARNING] stderr:     games = json.load(f)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 293, in load
+[WARNING] stderr:     return loads(fp.read(),
+[WARNING] stderr:         cls=cls, object_hook=object_hook,
+[WARNING] stderr:         parse_float=parse_float, parse_int=parse_int,
+[WARNING] stderr:         parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 346, in loads
+[WARNING] stderr:     return _default_decoder.decode(s)
+[WARNING] stderr:            ~~~~~~~~~~~~~~~~~~~~~~~^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 345, in decode
+[WARNING] stderr:     obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+[WARNING] stderr:                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 363, in raw_decode
+[WARNING] stderr:     raise JSONDecodeError("Expecting value", s, err.value) from None
+[WARNING] stderr: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)

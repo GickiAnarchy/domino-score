@@ -4,6 +4,7 @@ from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
@@ -68,7 +69,7 @@ class GameScore:
             "totals": self.totals,
             "winner": self.winner(),
             "finished": self.finished,
-        }        
+        }
     
     @classmethod
     def from_dict(cls, data):
@@ -78,6 +79,22 @@ class GameScore:
 # --------------------------------------------------
 class MenuScreen(MDScreen):
     pass
+
+
+class OptionsScreen(MDScreen):
+    
+    def reset_all(self):
+        app = MDApp.get_running_app()
+        app.players = []
+        
+        with open(GAMES_FILE, "w") as f:
+            f.write("")
+            f.close()
+        with open(SAVE_FILE, "w") as f:
+            f.write("")
+            f.close()
+        
+        self.manager.current = "menu"
 
 
 class CreatePlayerScreen(MDScreen):
@@ -193,14 +210,19 @@ class HistoryScreen(MDScreen):
         box = self.ids.history_list
         box.clear_widgets()
         self.selected.clear()
+        
 
         if not os.path.exists(GAMES_FILE):
             box.add_widget(MDLabel(text="No games yet"))
             return
-
-        with open(GAMES_FILE) as f:
-            games = json.load(f)
-
+        
+        games = []
+        try:
+            with open(GAMES_FILE) as f:
+                games = json.load(f)
+        except Exception as e:
+            print(e)
+            
         for g in reversed(games):
             row = MDBoxLayout(height=dp(80), size_hint_y=None)
             cb = MDCheckbox(
@@ -251,6 +273,7 @@ class DominoApp(MDApp):
         sm.add_widget(PlayerSelectScreen(name="select"))
         sm.add_widget(GameScreen(name="game"))
         sm.add_widget(HistoryScreen(name="history"))
+        sm.add_widget(OptionsScreen(name="options"))
         return sm
 
     # ---------- helpers ----------
@@ -342,7 +365,6 @@ class DominoApp(MDApp):
             json.dump(games, f, indent=2)
 
         self.show_dialog("Game Over", f"Winner: {winner}")
-
 
 if __name__ == "__main__":
     DominoApp().run()
