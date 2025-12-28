@@ -12,6 +12,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
+from kivymd.uix.fitimage import FitImage
 
 import pickle
 from functools import partial
@@ -93,8 +94,38 @@ class GameScore:
 class MenuScreen(MDScreen):
     pass
 
-
 class OptionsScreen(MDScreen):
+    confirm_dialog = None
+
+    def show_confirm_reset(self):
+        if self.confirm_dialog:
+            self.confirm_dialog.dismiss()
+
+        self.confirm_dialog = MDDialog(
+            title="Reset All Data?",
+            text=(
+                "This will permanently delete:\n\n"
+                "• All players\n"
+                "• All game history\n\n"
+                "This action cannot be undone."
+            ),
+            buttons=[
+                MDFlatButton(
+                    text="CANCEL",
+                    on_release=lambda x: self.confirm_dialog.dismiss(),
+                ),
+                MDFlatButton(
+                    text="RESET",
+                    text_color=(1, 0, 0, 1),  # red warning
+                    on_release=lambda x: self.confirm_reset(),
+                ),
+            ],
+        )
+        self.confirm_dialog.open()
+    
+    def confirm_reset(self):
+        self.confirm_dialog.dismiss()
+        self.reset_all()
     
     def show_dialog(self, title, text):
         self.dialog = MDDialog(
@@ -123,7 +154,7 @@ class OptionsScreen(MDScreen):
         else:
             msg = "Nothing to export yet."
             
-            self.show_dialog("Export Complete", msg)
+        self.show_dialog("Export Complete", msg)
 
     def import_saves(self):
         import_dir = get_export_dir()
@@ -140,7 +171,8 @@ class OptionsScreen(MDScreen):
                 with open(src, "r") as s, open(fname, "w") as d:
                     d.write(s.read())
                 imported.append(fname)
-
+        
+        msg =""
         if imported:
             msg = "Imported:\n" + "\n".join(imported)
         else:
@@ -154,16 +186,17 @@ class OptionsScreen(MDScreen):
     
     def reset_all(self):
         app = MDApp.get_running_app()
-        app.players = []
-
-        with open(GAMES_FILE, "w") as f:
-            f.write("")
-            f.close()
-        with open(SAVE_FILE, "w") as f:
-            f.write("")
-            f.close()
+        app.players = {}
+    
+        for fname in (SAVE_FILE, GAMES_FILE):
+            try:
+                if os.path.exists(fname):
+                    os.remove(fname)
+            except Exception as e:
+                print(f"Failed to delete {fname}: {e}")
+    
         self.manager.current = "menu"
-
+    
 
 class CreatePlayerScreen(MDScreen):
     def save_player(self):

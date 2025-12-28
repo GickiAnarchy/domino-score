@@ -3,11 +3,23 @@
         orientation: "vertical"
         padding: dp(20)
         spacing: dp(15)
+        
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(15)
+            
+            FitImage:
+                source: "data/icon_1024.png"
+                size_hint: None, None
+                size: dp(120), dp(120)
+                pos_hint: {"center_x": 0.5}
 
-        MDLabel:
-            text: "Domino Scorebook"
-            font_style: "H4"
-            halign: "center"
+            MDLabel:
+                text: "Domino Scorebook"
+                font_style: "H4"
+                halign: "center"
+                pos_hint: {"center_y":0.9}
 
         MDRaisedButton:
             text: "New Game"
@@ -56,7 +68,7 @@
                 
             MDRaisedButton:
                 text: "Reset All"
-                on_press: root.reset_all()
+                on_press: root.show_confirm_reset()
             
             MDRaisedButton:
                 text: "Back"
