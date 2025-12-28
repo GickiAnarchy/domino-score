@@ -8,21 +8,21 @@ package.name = domscores
 package.domain = com.gicki
 
 source.dir = .
-source.include_exts = py,kv,json,png,jpg,ttf
+source.include_exts = py,kv,json,png,jpg,ttf,dom
 
-version = 0.2
+version = 0.3
 
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,pyjnius
+requirements = kivy,kivymd,pyjnius
 
 orientation = portrait
-fullscreen = 0
+fullscreen = 1
 
 # App icon
 icon.filename = %(source.dir)s/data/icon.png
-
+presplash.filename = %(source.dir)s/data/splash.png
 
 # --------------------------------------------------
 # Android configuration (CLEAN)
