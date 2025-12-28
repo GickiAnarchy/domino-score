@@ -18,7 +18,7 @@ version = 0.3
 requirements = kivy,kivymd,pyjnius
 
 orientation = portrait
-fullscreen = 1
+fullscreen = 0
 
 # App icon
 icon.filename = %(source.dir)s/data/icon.png
@@ -47,6 +47,7 @@ android.accept_sdk_license = True
 # Enable auto-backup
 android.allow_backup = True
 
+bootstrap = sdl2
 
 # --------------------------------------------------
 # Python-for-Android (p4a)
