@@ -22,6 +22,11 @@
                 font_size: "46sp"
                 halign: "center"
                 pos_hint: {"center_y":0.9}
+            
+            MDLabel:
+                text: root.get_fact()
+                halign: "center"
+                pos_hint:{"center_y": 0.2}
 
         MDRaisedButton:
             text: "New Game"

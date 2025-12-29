@@ -32,6 +32,12 @@ MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")   # green
 DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
 
+
+# Quotes, Facts, Etc.
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six"]
+
+
+
 def get_export_dir():
     try:
         # Android
@@ -94,8 +100,10 @@ class GameScore:
 
 # --------------------------------------------------
 class MenuScreen(MDScreen):
-    pass
-
+     def get_fact(self):
+         return random.choice(FACTS)
+     
+     
 class OptionsScreen(MDScreen):
     confirm_dialog = None
 
