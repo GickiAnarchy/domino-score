@@ -1,4 +1,3 @@
-#pylint:disable= 'invalid decimal literal (main, line 428)'
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
@@ -36,6 +35,7 @@ DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
 # Quotes, Facts, Etc.
 FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six"]
 
+COLORS = ["Red","Pink","Purple","DeepPurple","Indigo","Blue","LightBlue","Cyan","Teal","Green","LightGreen","Lime","Yellow","Amber","Orange","DeepOrange","Brown","Gray","BlueGray"]
 
 
 def get_export_dir():
@@ -278,7 +278,7 @@ class GameScreen(MDScreen):
                 MDLabel(text=f"{name} — {score}", font_style="H6")
             )
             
-            btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None))
+            btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None), spacing=dp(15))
 
             btn5 = MDRaisedButton(
                 text="+5",
@@ -404,30 +404,10 @@ class DominoApp(MDApp):
         self.players = self.load_players()
         self.save_game_available = self.check_for_save()
         self.current_game = None
-        colors = [
-    "Red", 
-    "Pink", 
-    "Purple", 
-    "DeepPurple", 
-    "Indigo", 
-    "Blue", 
-    "LightBlue", 
-    "Cyan", 
-    "Teal", 
-    "Green", 
-    "LightGreen", 
-    "Lime", 
-    "Yellow", 
-    "Amber", 
-    "Orange", 
-    "DeepOrange", 
-    "Brown", 
-    "Gray", 
-    "BlueGray"
-]
+        
 
-        self.theme_cls.primary_palette = random.choice(colors)
-        self.theme_cls.accent_palette = random.choice(colors)
+        self.theme_cls.primary_palette = random.choice(COLORS)
+        self.theme_cls.accent_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
         
         LabelBase.register(
@@ -517,6 +497,7 @@ class DominoApp(MDApp):
                 return
             else:
                 print("Unfinished game was not saved")
+                return
         else:
             winner = game.winner()
 
@@ -560,6 +541,7 @@ class DominoApp(MDApp):
             return answer
             
         confirm_dialog.open()
+
 
 if __name__ == "__main__":
     DominoApp().run()
