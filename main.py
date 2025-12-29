@@ -9,6 +9,7 @@ from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
 from kivy.uix.screenmanager import ScreenManager
+from kivy.properties import NumericProperty, ListProperty
 from kivy.metrics import dp
 from kivy.clock import Clock
  
@@ -33,7 +34,7 @@ DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
 
 
 # Quotes, Facts, Etc.
-FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six"]
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a right vaginer"]
 
 COLORS = ["Red","Pink","Purple","DeepPurple","Indigo","Blue","LightBlue","Cyan","Teal","Green","LightGreen","Lime","Yellow","Amber","Orange","DeepOrange","Brown","Gray","BlueGray"]
 
@@ -48,7 +49,6 @@ def get_export_dir():
     except Exception:
         # Desktop fallback
         return os.path.join(os.getcwd(), "exports")
-
 
 
 class Player:
@@ -100,10 +100,39 @@ class GameScore:
 
 # --------------------------------------------------
 class MenuScreen(MDScreen):
+     
+     def on_enter(self):
+         cont_button = self.ids.cont_button
+         cont_button.disabled = not self.has_unfinished()
+     
+     def has_unfinished(self):
+         return os.path.exists(UNFINISHED)
+     
      def get_fact(self):
          return random.choice(FACTS)
      
      
+class MDSeparator(MDBoxLayout):
+    thickness = NumericProperty(dp(1))
+    color = ListProperty([1, 1, 1, 0.2])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint_y = None
+        self.height = self.thickness
+        self.md_bg_color = self.color
+
+        # react to property changes
+        self.bind(thickness=self._update_height)
+        self.bind(color=self._update_color)
+
+    def _update_height(self, *args):
+        self.height = self.thickness
+
+    def _update_color(self, *args):
+        self.md_bg_color = self.color
+    
+ 
 class OptionsScreen(MDScreen):
     confirm_dialog = None
 
@@ -278,7 +307,7 @@ class GameScreen(MDScreen):
                 MDLabel(text=f"{name} — {score}", font_style="H6")
             )
             
-            btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None), spacing=dp(15))
+            btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None), spacing=dp(15), pos_hint={"center_x":0.5})
 
             btn5 = MDRaisedButton(
                 text="+5",
@@ -302,6 +331,7 @@ class GameScreen(MDScreen):
             btncard.add_widget(btnm5)
             box.add_widget(topcard)
             box.add_widget(btncard)
+            box.add_widget(MDSeparator(thickness = dp(5)))
 
     def add(self, name, pts):
         app = MDApp.get_running_app()
@@ -469,6 +499,8 @@ class DominoApp(MDApp):
                 self.current_game = pickle.load(f)
             except EOFError as e:
                 print(e)
+                f.close()
+                os.remove(UNFINISHED)
                 return
             f.close()
         open(UNFINISHED, "wb").close()
@@ -491,13 +523,8 @@ class DominoApp(MDApp):
         winner = None
         
         if not game.finished:
-            if self.show_confirm("Unfinished Game","Do you want to save this game?"):
-                self.save_game()
-                print("Unfinished game saved")
-                return
-            else:
-                print("Unfinished game was not saved")
-                return
+            self.show_confirm("Unfinished Game","Do you want to save this game?", on_yes=self.save_game, on_no=lambda: None)
+            return
         else:
             winner = game.winner()
 
@@ -520,26 +547,28 @@ class DominoApp(MDApp):
 
         self.show_dialog("Game Over", f"Winner: {winner}")
     
-    def show_confirm(self, title, text):
+    def show_confirm(self, title, text, on_yes, on_no):
         confirm_dialog = MDDialog(
             title=title,
             text=text,
             buttons=[
                 MDFlatButton(
                     text="No",
-                    on_release=lambda x: send_ok(False),
+                    on_release=lambda x: (
+                        confirm_dialog.dismiss(),
+                        on_no()
+                    ),
                 ),
                 MDFlatButton(
                     text="Yes",
-                    text_color=(1, 0, 0, 1),  # red warning
-                    on_release=lambda x: send_ok(True)
+                    text_color=(1, 0, 0, 1),
+                    on_release=lambda x: (
+                        confirm_dialog.dismiss(),
+                        on_yes()
+                    ),
                 ),
             ],
         )
-        def send_ok(answer):
-            confirm_dialog.dismiss()
-            return answer
-            
         confirm_dialog.open()
 
 

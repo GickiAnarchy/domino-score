@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-26_11.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-29_20.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -25,9 +25,22 @@
 [INFO   ] GL: NPOT texture support is available
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
+[INFO   ] Loader: using a thread pool of 2 workers
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 365, in <module>
+[WARNING] stderr:   File "kivy/_event.pyx", line 235, in kivy._event.EventDispatcher.__init__
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivymd/uix/behaviors/backgroundcolor_behavior.py", line 244, in __init__
+[WARNING] stderr:     super().__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivymd/uix/behaviors/backgroundcolor_behavior.py", line 164, in __init__
+[WARNING] stderr:     super().__init__(**kwarg)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^^^^^^^^
+[WARNING] stderr: TypeError: object.__init__() takes exactly one argument (the instance to initialize)
+[WARNING] stderr: 
+[WARNING] stderr: The above exception was the direct cause of the following exception:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 576, in <module>
 [WARNING] stderr:     DominoApp().run()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
@@ -65,19 +78,25 @@
 [WARNING] stderr:     self.screen_in.dispatch('on_enter')
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 219, in on_enter
-[WARNING] stderr:     games = json.load(f)
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 293, in load
-[WARNING] stderr:     return loads(fp.read(),
-[WARNING] stderr:         cls=cls, object_hook=object_hook,
-[WARNING] stderr:         parse_float=parse_float, parse_int=parse_int,
-[WARNING] stderr:         parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 346, in loads
-[WARNING] stderr:     return _default_decoder.decode(s)
-[WARNING] stderr:            ~~~~~~~~~~~~~~~~~~~~~~~^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 345, in decode
-[WARNING] stderr:     obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-[WARNING] stderr:                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/decoder.py", line 363, in raw_decode
-[WARNING] stderr:     raise JSONDecodeError("Expecting value", s, err.value) from None
-[WARNING] stderr: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 285, in on_enter
+[WARNING] stderr:     self.refresh()
+[WARNING] stderr:     ~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 310, in refresh
+[WARNING] stderr:     btncard = MDBoxLayout(orientation = "horizontal", size_hint = (0.9, None), spacing=dp(15))
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivymd/uix/behaviors/declarative_behavior.py", line 311, in __init__
+[WARNING] stderr:     super().__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivymd/theming.py", line 1670, in __init__
+[WARNING] stderr:     super().__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/boxlayout.py", line 145, in __init__
+[WARNING] stderr:     super(BoxLayout, self).__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/layout.py", line 76, in __init__
+[WARNING] stderr:     super(Layout, self).__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/widget.py", line 357, in __init__
+[WARNING] stderr:     super(Widget, self).__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "kivy/_event.pyx", line 238, in kivy._event.EventDispatcher.__init__
+[WARNING] stderr: TypeError: Properties ['halign'] passed to __init__ may not be existing property names. Valid properties are ['_background_origin', '_background_x', '_background_y', '_md_bg_color', '_origin_line_color', '_origin_md_bg_color', 'adaptive_height', 'adaptive_size', 'adaptive_width', 'angle', 'background', 'background_hue', 'background_origin', 'background_palette', 'center', 'center_x', 'center_y', 'children', 'cls', 'device_ios', 'disabled', 'height', 'id', 'ids', 'line_color', 'line_width', 'md_bg_color', 'minimum_height', 'minimum_size', 'minimum_width', 'motion_filter', 'opacity', 'opposite_colors', 'orientation', 'padding', 'parent', 'pos', 'pos_hint', 'radius', 'right', 'size', 'size_hint', 'size_hint_max', 'size_hint_max_x', 'size_hint_max_y', 'size_hint_min', 'size_hint_min_x', 'size_hint_min_y', 'size_hint_x', 'size_hint_y', 'spacing', 'specific_secondary_text_color', 'specific_text_color', 'theme_cls', 'top', 'widget_style', 'width', 'x', 'y']

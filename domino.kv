@@ -31,6 +31,12 @@
         MDRaisedButton:
             text: "New Game"
             on_release: app.root.current = "select"
+        
+        MDRaisedButton:
+            id: cont_button
+            text: "Continue Game"
+            disabled: not root.has_unfinished()
+            on_release: app.reload_game()
 
         MDRaisedButton:
             text: "Create Player"
@@ -158,13 +164,24 @@
 
 
 <GameScreen>:
-    ScrollView:
-        MDBoxLayout:
-            id: player_container
-            orientation: "vertical"
-            adaptive_height: True
-            spacing: dp(10)
-            padding: dp(10)
+    MDBoxLayout:
+        orientation:"vertical"
+        
+        MDLabel:
+            text:"Player Cards"
+            size_hint:(1.0, None)
+            height: dp(50)
+            halign: "center"
+        
+        MDSeparator:
+            
+        ScrollView:
+            MDBoxLayout:
+                id: player_container
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: dp(10)
+                padding: dp(10)
     
     MDRaisedButton:
         text:"End Game"
