@@ -110,8 +110,14 @@ class GameScore:
 class MenuScreen(MDScreen):
      
      def on_enter(self):
-         cont_button = self.ids.cont_button
-         cont_button.disabled = not self.has_unfinished()
+        app = MDApp.get_running_app()
+
+        has_players = bool(app.players)
+        has_games = os.path.exists(GAMES_FILE)
+
+        self.ids.start_btn.disabled = not has_players
+        #self.ids.stats_btn.disabled = not has_players
+        self.ids.history_btn.disabled = not has_games
      
      def has_unfinished(self):
          return os.path.exists(UNFINISHED)
@@ -214,7 +220,7 @@ class OptionsScreen(MDScreen):
     
         for fname in [".players.dom", ".games.dom"]:
             src = os.path.join(import_dir, fname)
-            dst = os.path.join(app_data_path(), fname)
+            dst = os.path.join(get_data_dir(), fname)
     
             if os.path.exists(src):
                 with open(src, "r") as s, open(dst, "w") as d:

@@ -29,6 +29,7 @@
                 pos_hint:{"center_y": 0.2}
 
         MDRaisedButton:
+            id: start_btn
             text: "New Game"
             on_release: app.root.current = "select"
         
@@ -43,6 +44,7 @@
             on_release: app.root.current = "create"
 
         MDRaisedButton:
+            id: history_btn
             text: "History"
             on_release: app.root.current = "history"
         
