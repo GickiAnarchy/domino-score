@@ -16,6 +16,7 @@ from kivy.utils import platform
 from kivy.utils import get_color_from_hex
 from kivymd.uix.fitimage import FitImage
 from kivy.core.text import LabelBase
+from kivy.utils import platform
 
 import pickle
 import random
@@ -24,17 +25,18 @@ from datetime import datetime
 import json
 import os
 
-def app_data_path():
+
+def get_data_dir():
     if platform == "android":
         from android.storage import app_storage_path
         return app_storage_path()
     return os.getcwd()
 
-BASE_PATH = app_data_path()
+DATA_DIR = get_data_dir()
 
-SAVE_FILE = os.path.join(BASE_PATH, ".players.dom")
-GAMES_FILE = os.path.join(BASE_PATH, ".games.dom")
-UNFINISHED = os.path.join(BASE_PATH, ".unfinished.dom")
+SAVE_FILE = os.path.join(DATA_DIR, "players.json")
+GAMES_FILE = os.path.join(DATA_DIR, "games.json")
+UNFINISHED = os.path.join(DATA_DIR, ".unfinished.dom")
 MAX_POINTS = 300
 # --------------------------------------------------
 SELECTED_COLOR = get_color_from_hex("#4CAF50")   # green
@@ -47,16 +49,15 @@ COLORS = ["Red","Pink","Purple","DeepPurple","Indigo","Blue","LightBlue","Cyan",
 
 
 def get_export_dir():
-    try:
-        # Android
-        from android.storage import primary_external_storage_path
+    if platform == "android":
+        from android.storage import app_storage_path
+        base = app_storage_path()
+        export_dir = os.path.join(base, "exports")
+    else:
+        export_dir = os.path.join(os.getcwd(), "exports")
 
-        base = primary_external_storage_path()
-        return os.path.join(base, "Download", ".DominoScorebook")
-    except Exception:
-        # Desktop fallback
-        return os.path.join(os.getcwd(), "exports")
-
+    os.makedirs(export_dir, exist_ok=True)
+    return export_dir
 
 class Player:
     def __init__(self, name, wins=0, losses=0):
@@ -439,6 +440,7 @@ class DominoApp(MDApp):
     dialog = None
 
     def build(self):
+        os.makedirs(DATA_DIR, exist_ok=True)
         self.players = self.load_players()
         self.save_game_available = self.check_for_save()
         self.current_game = None
