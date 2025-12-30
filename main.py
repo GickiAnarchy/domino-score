@@ -367,41 +367,60 @@ class HistoryScreen(MDScreen):
         box = self.ids.history_list
         box.clear_widgets()
         self.selected.clear()
-    
+
         if not os.path.exists(GAMES_FILE):
             box.add_widget(MDLabel(text="No games yet"))
             return
-    
-        with open(GAMES_FILE) as f:
-            games = json.load(f)
-    
+
+        try:
+            with open(GAMES_FILE, "r") as f:
+                games = json.load(f)
+        except Exception as e:
+            print("❌ Failed to load games.json:", e)
+            box.add_widget(MDLabel(text="Corrupted game history"))
+            return
+
         for g in reversed(games):
-            row = MDBoxLayout(
-                orientation="horizontal",
-                height=dp(56),
-                spacing=dp(12),
-                size_hint_y=None,
-            )
-    
-            cb = HistoryCheckbox(size_hint=(0.3,0.3))
-            cb.game_id = g["date"]
-            cb.bind(active=self.on_checkbox_active)
-    
-            b = MDBoxLayout(orientation = "vertical")
-            label = MDLabel(
-                text=f'{g["date"][:16]} — {g["winner"]}',
-                valign="middle",
-            )
-            label2 = MDLabel(
-                text=f"{g['totals']}",
-                valign="middle",
-            )
-            b.add_widget(label)
-            b.add_widget(label2)
-    
-            row.add_widget(cb)
-            row.add_widget(b)
-            box.add_widget(row)
+            try:
+                # ---- validate required fields ----
+                date = g.get("date", "Unknown date")
+                winner = g.get("winner", "In Progress")
+                totals = g.get("totals", {})
+
+                row = MDBoxLayout(
+                    orientation="horizontal",
+                    height=dp(56),
+                    spacing=dp(12),
+                    size_hint_y=None,
+                )
+
+                cb = HistoryCheckbox(size_hint=(0.3, 0.3))
+                cb.game_id = date
+                cb.bind(active=self.on_checkbox_active)
+
+                b = MDBoxLayout(orientation="vertical")
+
+                label = MDLabel(
+                    text=f"{date[:16]} — {winner}",
+                    valign="middle",
+                )
+
+                label2 = MDLabel(
+                    text=str(totals),
+                    valign="middle",
+                )
+
+                b.add_widget(label)
+                b.add_widget(label2)
+
+                row.add_widget(cb)
+                row.add_widget(b)
+                box.add_widget(row)
+
+            except Exception as e:
+                # ---- THIS is Fix #3 ----
+                print("⚠️ Skipping bad game entry:", e)
+                continue
             
     def on_checkbox_active(self, checkbox, value):
         game_id = checkbox.game_id
@@ -495,12 +514,26 @@ class DominoApp(MDApp):
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
             return {}
-        with open(SAVE_FILE) as f:
-            return {k: Player.from_dict(v) for k, v in json.load(f).items()}
-
-    def save_players(self):
-        with open(SAVE_FILE, "w") as f:
-            json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
+    
+        try:
+            with open(SAVE_FILE, "r") as f:
+                data = json.load(f)
+    
+            if not isinstance(data, dict):
+                raise ValueError("players.json is not a dict")
+    
+            return {k: Player.from_dict(v) for k, v in data.items()}
+    
+        except Exception as e:
+            print("❌ Failed to load players:", e)
+    
+            # BACKUP the bad file so the app can recover
+            try:
+                os.rename(SAVE_FILE, SAVE_FILE + ".corrupt")
+            except Exception:
+                pass
+    
+            return {}
 
     def save_game(self):
         with open(UNFINISHED, "wb") as f:
@@ -557,7 +590,15 @@ class DominoApp(MDApp):
         if os.path.exists(GAMES_FILE):
             with open(GAMES_FILE) as f:
                 games = json.load(f)
-        games.append(game.to_dict())
+        game_data = game.to_dict()
+
+        # ensure required keys always exist
+        game_data.setdefault("totals", {})
+        game_data.setdefault("winner", None)
+        game_data.setdefault("rounds", [])
+        game_data.setdefault("finished", False)
+        
+        games.append(game_data)
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
 
