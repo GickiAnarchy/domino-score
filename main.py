@@ -56,20 +56,15 @@ def get_data_dir():
 
 
 DATA_DIR = get_data_dir()
-SAVE_FILE = os.path.join(DATA_DIR, "players.json")
-GAMES_FILE = os.path.join(DATA_DIR, "games.json")
+SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
+GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
 UNFINISHED = os.path.join(DATA_DIR, ".unfinished.dom")
 
 MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")
 
-FACTS = [
-    "All Hail King Dingle!!",
-    "Can you count to five?",
-    "Draw ya plenty of 'em.",
-    "Is it ridiculous yet?",
-]
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer"]
 
 COLORS = [
     "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",
@@ -169,11 +164,12 @@ class MenuScreen(MDScreen):
 
 class OptionsScreen(MDScreen):
     def show_dialog(self, title, text):
-        MDDialog(
+        opt_dialig = MDDialog(
             title=title,
             text=text,
-            buttons=[MDFlatButton(text="OK", on_release=lambda x: x.parent.parent.dismiss())],
-        ).open()
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: opt_dialig.dismiss())],
+        )
+        opt_dialig.open()
 
     def export_saves(self):
         export_dir = get_export_dir()
@@ -195,7 +191,7 @@ class OptionsScreen(MDScreen):
         import_dir = get_export_dir()
         imported = []
 
-        for name in ("players.json", "games.json"):
+        for name in ("players.dom", "games.dom"):
             src = os.path.join(import_dir, name)
             dst = os.path.join(DATA_DIR, name)
             if os.path.exists(src):
