@@ -1,0 +1,210 @@
+<MenuScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(15)
+        
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(15)
+            
+            FitImage:
+                source: "data/icon_1024.png"
+                size_hint: None, None
+                size: dp(120), dp(120)
+                pos_hint: {"center_x": 0.5}
+
+            MDLabel:
+                text: "Domino\nScorebook"
+                font_style: "H4"
+                font_name: "BreakAway"
+                font_size: "60sp"
+                halign: "center"
+                pos_hint: {"center_y":0.9}
+            
+            MDLabel:
+                text: root.get_fact()
+                halign: "center"
+                pos_hint:{"center_y": 0.2}
+
+        MDRaisedButton:
+            id: start_btn
+            text: "New Game"
+            on_release: app.root.current = "select"
+        
+        MDRaisedButton:
+            id: cont_button
+            text: "Continue Game"
+            disabled: not root.has_unfinished()
+            on_release: app.reload_game()
+
+        MDRaisedButton:
+            text: "Create Player"
+            on_release: app.root.current = "create"
+
+        MDRaisedButton:
+            id: history_btn
+            text: "History"
+            on_release: app.root.current = "history"
+        
+        MDRaisedButton:
+            text: "Options"
+            on_release: app.root.current = "options"
+
+
+<OptionsScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        # --- TOP (title) ---
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            size_hint_x: 1
+
+            MDLabel:
+                text: "Options"
+                halign: "center"
+                font_style: "H5"
+                
+
+        # --- MIDDLE (button grid, centered) ---
+        MDBoxLayout:
+            orientation: "vertical"
+            size_hint_y: 1
+            pos_hint: {"center_x": 0.5}
+
+            Widget:  # spacer (push grid to vertical center)
+
+            MDGridLayout:
+                cols: 2
+                spacing: dp(12)
+                size_hint: None, None
+                width: dp(260)
+                height: self.minimum_height
+                pos_hint: {"center_x": 0.5}
+
+                MDRaisedButton:
+                    text: "Export Saves"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.export_saves()
+
+                MDRaisedButton:
+                    text: "Import Saves"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.import_saves()
+
+                MDRaisedButton:
+                    text: "Reset All"
+                    size_hint_x: None
+                    width: dp(120)
+                    md_bg_color: 1, 0, 0, 1
+                    on_release: root.show_confirm_reset()
+
+            Widget:  # spacer (balances centering)
+
+        # --- BOTTOM (back button pinned) ---
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(56)
+
+            MDRaisedButton:
+                text: "Back"
+                size_hint_x: None
+                width: dp(120)
+                pos_hint: {"center_x": 0.5}
+                on_release: app.root.current = "menu"
+            
+
+<CreatePlayerScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        MDTextField:
+            id: player_name
+            hint_text: "Player name"
+
+        MDRaisedButton:
+            text: "Save"
+            on_release: root.save_player()
+        
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"
+        
+        MDBoxLayout:
+            orientation:"vertical"
+            size_hint:(1.0, 0.5)
+
+
+<PlayerSelectScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+
+        ScrollView:
+            MDBoxLayout:
+                id: player_list
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: dp(10)
+
+        MDRaisedButton:
+            text: "Start Game"
+            on_release: root.start()
+        
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"
+
+
+<GameScreen>:
+    MDBoxLayout:
+        orientation:"vertical"
+        
+        MDLabel:
+            text:"Player Cards"
+            size_hint:(1.0, None)
+            height: dp(50)
+            halign: "center"
+        
+        MDSeparator:
+            
+        ScrollView:
+            MDBoxLayout:
+                id: player_container
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: dp(10)
+                padding: dp(10)
+    
+    MDRaisedButton:
+        text:"End Game"
+        on_release: root.end_pressed()
+
+
+<HistoryScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: history_list
+                orientation: "vertical"
+                adaptive_height: True
+
+        MDRaisedButton:
+            text: "Delete Selected"
+            on_release: root.delete_selected()
+            
+        MDRaisedButton:
+            text: "Back"
+            on_release: app.root.current = "menu"
