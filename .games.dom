@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "date": "2025-12-28T19:53:03.607422",
+    "totals": {
+      "Corey": 340,
+      "Dale": 245
+    },
+    "winner": "Corey",
+    "finished": true
+  },
+  {
+    "date": "2025-12-28T20:25:13.062776",
+    "totals": {
+      "Corey": 260,
+      "Dale": 305
+    },
+    "winner": "Dale",
+    "finished": true
+  },
+  {
+    "date": "2025-12-29T13:32:09.474953",
+    "totals": {
+      "Dale": 350,
+      "Corey": 235
+    },
+    "winner": "Dale",
+    "finished": true
+  },
+  {
+    "date": "2025-12-29T14:13:15.045924",
+    "totals": {
+      "Dale": 275,
+      "Corey": 335
+    },
+    "winner": "Corey",
+    "finished": true
+  }
+]

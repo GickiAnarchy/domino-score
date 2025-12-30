@@ -12,7 +12,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.properties import NumericProperty, ListProperty
 from kivy.metrics import dp
 from kivy.clock import Clock
- 
+from kivy.utils import platform
 from kivy.utils import get_color_from_hex
 from kivymd.uix.fitimage import FitImage
 from kivy.core.text import LabelBase
@@ -24,14 +24,21 @@ from datetime import datetime
 import json
 import os
 
-SAVE_FILE = ".players.dom"
-GAMES_FILE = ".games.dom"
-UNFINISHED = ".unfinished.dom"
+def app_data_path():
+    if platform == "android":
+        from android.storage import app_storage_path
+        return app_storage_path()
+    return os.getcwd()
+
+BASE_PATH = app_data_path()
+
+SAVE_FILE = os.path.join(BASE_PATH, ".players.dom")
+GAMES_FILE = os.path.join(BASE_PATH, ".games.dom")
+UNFINISHED = os.path.join(BASE_PATH, ".unfinished.dom")
 MAX_POINTS = 300
 # --------------------------------------------------
 SELECTED_COLOR = get_color_from_hex("#4CAF50")   # green
 DEFAULT_COLOR  = get_color_from_hex("#1E88E5")   # blue
-
 
 # Quotes, Facts, Etc.
 FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a right vaginer"]
@@ -197,29 +204,30 @@ class OptionsScreen(MDScreen):
 
     def import_saves(self):
         import_dir = get_export_dir()
-
+    
         if not os.path.exists(import_dir):
-            self.show_dialog("Import Failed","No backup folder found")
+            self.show_dialog("Import Failed", "No backup folder found")
             return
-
+    
         imported = []
-
-        for fname in [SAVE_FILE, GAMES_FILE]:
+    
+        for fname in [".players.dom", ".games.dom"]:
             src = os.path.join(import_dir, fname)
+            dst = os.path.join(app_data_path(), fname)
+    
             if os.path.exists(src):
-                with open(src, "r") as s, open(fname, "w") as d:
+                with open(src, "r") as s, open(dst, "w") as d:
                     d.write(s.read())
                 imported.append(fname)
-        
-        msg =""
-        if imported:
-            msg = "Imported:\n" + "\n".join(imported)
-        else:
-            msg = "No valid save files found."
-
-        self.show_dialog("Imported",msg)
-
-        # Reload players immediately
+    
+        msg = (
+            "Imported:\n" + "\n".join(imported)
+            if imported else
+            "No valid save files found."
+        )
+    
+        self.show_dialog("Imported", msg)
+    
         app = MDApp.get_running_app()
         app.players = app.load_players()
     
