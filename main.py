@@ -24,6 +24,29 @@ from functools import partial
 from datetime import datetime
 import json
 import os
+import sys
+
+import logging
+import traceback
+
+def setup_logger():
+    if platform == "android":
+        from android.storage import app_storage_path
+        log_dir = app_storage_path()
+    else:
+        log_dir = os.getcwd()
+
+    log_file = os.path.join(log_dir, "domino.log")
+
+    logging.basicConfig(
+        filename=log_file,
+        filemode="a",
+        level=logging.DEBUG,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+
+    logging.info("=== App starting ===")
+    return log_file
 
 
 def get_data_dir():
@@ -254,6 +277,7 @@ class OptionsScreen(MDScreen):
 
 class CreatePlayerScreen(MDScreen):
     def save_player(self):
+        logging.info("In CreatePlayerScreen.save_player")
         app = MDApp.get_running_app()
         name = self.ids.player_name.text.strip()
 
@@ -471,6 +495,8 @@ class DominoApp(MDApp):
     dialog = None
 
     def build(self):
+        self.log_file = setup_logger()
+        logging.info("Build started")
         os.makedirs(DATA_DIR, exist_ok=True)
         self.players = self.load_players()
         self.save_game_available = self.check_for_save()
@@ -512,7 +538,35 @@ class DominoApp(MDApp):
                 return bool(data)
         except Exception:
             return False
+            
+    def save_players(self):
+        tmp_file = SAVE_FILE + ".tmp"
     
+        try:
+            logging.info("Saving players...")
+    
+            data = {name: player.to_dict() for name, player in self.players.items()}
+    
+            with open(tmp_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+    
+            # Atomic replace (Android-safe)
+            os.replace(tmp_file, SAVE_FILE)
+    
+            logging.info("Players saved successfully")
+    
+        except Exception as e:
+            logging.error("Failed to save players", exc_info=True)
+    
+            # Cleanup temp file if something went wrong
+            try:
+                if os.path.exists(tmp_file):
+                    os.remove(tmp_file)
+            except Exception:
+                pass
+        
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
             return {}
@@ -629,6 +683,19 @@ class DominoApp(MDApp):
             ],
         )
         confirm_dialog.open()
+
+
+
+
+def log_exception(exc_type, exc_value, exc_tb):
+    logging.error(
+        "Uncaught exception",
+        exc_info=(exc_type, exc_value, exc_tb),
+    )
+
+sys.excepthook = log_exception
+
+
 
 
 if __name__ == "__main__":
