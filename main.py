@@ -258,7 +258,13 @@ class CreatePlayerScreen(MDScreen):
         name = self.ids.player_name.text.strip()
 
         if not name or name in app.players:
-            app.show_dialog("Error", "Invalid or duplicate name")
+            MDDialog(
+                title="Error",
+                text="Invalid or duplicate name",
+                buttons=[
+                    MDFlatButton(text="OK", on_release=lambda x: x.parent.parent.dismiss())
+                ],
+            ).open()
             return
 
         app.players[name] = Player(name)
@@ -432,13 +438,13 @@ class HistoryScreen(MDScreen):
             self.selected.discard(game_id)
             print(game_id, "removed")
         
-        def toggle(self, game_id, checkbox, value):
-            if value:
-                self.selected.add(game_id)
-                print(game_id + " added")
-            else:
-                self.selected.discard(game_id)
-                print(game_id + " removed")
+        #def toggle(self, game_id, checkbox, value):
+#            if value:
+#                self.selected.add(game_id)
+#                print(game_id + " added")
+#            else:
+#                self.selected.discard(game_id)
+#                print(game_id + " removed")
 
     def delete_selected(self):
         if not self.selected:
@@ -502,14 +508,10 @@ class DominoApp(MDApp):
     def check_for_save(self):
         try:
             with open(UNFINISHED, "rb") as f:
-                print(f.read())
-                if f.read() in [None, ""]:
-                    return False
-                else:
-                    return True
-        except:
-            print('error loading')
-            return
+                data = f.read()
+                return bool(data)
+        except Exception:
+            return False
     
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
