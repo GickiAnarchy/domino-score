@@ -30,13 +30,19 @@ import logging
 import traceback
 
 def setup_logger():
-    if platform == "android":
-        from android.storage import app_storage_path
-        log_dir = app_storage_path()
-    else:
-        log_dir = os.getcwd()
+    try:
+        if platform == "android":
+            from android.storage import primary_external_storage_path
+            base = primary_external_storage_path()
+            log_dir = os.path.join(base, "Download", "DominoScorebook")
+        else:
+            log_dir = os.path.join(os.getcwd(), "logs")
 
-    log_file = os.path.join(log_dir, "domino.log")
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "domino.log")
+
+    except Exception:
+        log_file = os.path.join(os.getcwd(), "domino.log")
 
     logging.basicConfig(
         filename=log_file,
@@ -46,6 +52,8 @@ def setup_logger():
     )
 
     logging.info("=== App starting ===")
+    logging.info(f"Log file location: {log_file}")
+
     return log_file
 
 
@@ -54,6 +62,8 @@ def get_data_dir():
         from android.storage import app_storage_path
         return app_storage_path()
     return os.getcwd()
+
+
 
 DATA_DIR = get_data_dir()
 
