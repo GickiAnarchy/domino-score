@@ -51,11 +51,14 @@ def setup_logger():
 def get_data_dir():
     if platform == "android":
         from android.storage import app_storage_path
+        print(app_storage_path())
         return app_storage_path()
+    print(os.getcwd())
     return os.getcwd()
 
 
 DATA_DIR = get_data_dir()
+
 SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
 GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
 UNFINISHED = os.path.join(DATA_DIR, ".unfinished.dom")
@@ -64,7 +67,7 @@ MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")
 
-FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer"]
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer", "Ready for a spanking?"]
 
 COLORS = [
     "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",
