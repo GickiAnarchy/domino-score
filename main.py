@@ -156,13 +156,20 @@ class MDSeparator(MDBoxLayout):
 # --------------------------------------------------
 
 class MenuScreen(MDScreen):
+
+    def on_pre_enter(self,):
+        self.update_labels()
+
     def on_enter(self):
         app = MDApp.get_running_app()
         self.ids.start_btn.disabled = not bool(app.players)
         self.ids.history_btn.disabled = not os.path.exists(GAMES_FILE)
 
-    def get_fact(self):
-        return random.choice(FACTS)
+    def update_labels(self):
+        self.fact_label = self.ids.fact_label
+        self.title_label = self.ids.title_label
+        
+        self.fact_label.text = random.choice(FACTS)
 
 
 class OptionsScreen(MDScreen):

@@ -20,6 +20,7 @@
                 pos_hint: {"center_x": 0.5}
 
             MDLabel:
+                id: title_label
                 text: "Domino\nScorebook"
                 font_style: "H4"
                 font_name: "BreakAway"
@@ -28,7 +29,7 @@
                 pos_hint: {"center_y":0.9}
 
             MDLabel:
-                text: root.get_fact()
+                id: fact_label
                 halign: "center"
                 font_style: "H6"
                 size_hint_y: None
@@ -53,12 +54,26 @@
             size_hint_y: None
             height: dp(48)
             on_release: app.root.current = "history"
+        
+        MDBoxLayout:
+            orientation: "horizontal"
+            padding: dp(20)
+            spacing: dp(20)
+            size_hint: (1.0, None)
+            height: self.minimum_height
+            pos_hint: {"center_x": 0.5}
 
-        MDRaisedButton:
-            text: "Options"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "options"
+            MDRaisedButton:
+                text: "Options"
+                size_hint_y: None
+                height: dp(48)
+                on_release: app.root.current = "options"
+            
+            MDRaisedButton:
+                text: "Exit"
+                size_hint_y: None
+                height: dp(48)
+                on_release: app.stop()
 
 
 <CreatePlayerScreen>:
