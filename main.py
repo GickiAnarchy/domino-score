@@ -7,6 +7,7 @@ from datetime import datetime
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
+from kivy.uix.widget import Widget
 from kivy.properties import ListProperty, NumericProperty
 from kivy.utils import get_color_from_hex, platform
 from kivy.uix.screenmanager import ScreenManager
@@ -20,7 +21,7 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 
-# --------------------------------------------------
+# -------------------------------------------------- ()
 # Logging & Paths
 # --------------------------------------------------
 
@@ -67,7 +68,7 @@ MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")
 
-FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't\nmake any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer", "Ready for a spanking?"]
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't make any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer", "Ready for a spanking?"]
 
 COLORS = [
     "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",

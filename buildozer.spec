@@ -4,7 +4,7 @@
 # App metadata
 # --------------------------------------------------
 title = Domino Scorebook
-package.name = domscores
+package.name = dominoscores
 package.domain = com.gicki
 
 source.dir = .
@@ -18,7 +18,7 @@ version = 0.9
 requirements = kivy,kivymd,pyjnius
 
 orientation = portrait
-fullscreen = 0
+fullscreen = 1
 
 # App icon
 icon.filename = %(source.dir)s/data/icon.png
