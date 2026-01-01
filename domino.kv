@@ -58,6 +58,13 @@
             height: dp(48)
             on_release: app.root.current = "history"
         
+        MDRaisedButton:
+            id: edit_btn
+            text: "Edit Games"
+            size_hint_y: None
+            height: dp(48)
+            on_release: app.root.current = "edit"
+        
         Widget:
         
         MDBoxLayout:
@@ -67,7 +74,7 @@
             pos_hint: {"center_x": 0.5}
             size_hint_x: None
             width: dp(260)  # controls how far apart they are
-        
+
             MDRaisedButton:
                 text: "Options"
                 size_hint_x: 1
@@ -105,6 +112,75 @@
             on_release: app.root.current = "menu"
         
         MDWidget:
+
+
+<EditGameScreen>:
+    name: "edit"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        # ---------- TITLE ----------
+        MDLabel:
+            text: "ADD / EDIT GAMES"
+            halign: "center"
+            font_style: "H4"
+            bold: True
+            size_hint_y: None
+            height: self.texture_size[1] + dp(20)
+
+        # ---------- DATE / TIME ----------
+        MDTextField:
+            id: date_field
+            hint_text: "Date / Time"
+            mode: "rectangle"
+            size_hint_x: 0.9
+            pos_hint: {"center_x": 0.5}
+
+        # ---------- TABLE HEADER ----------
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            padding: (dp(10), 0)
+
+            MDLabel:
+                text: "Player"
+                halign: "center"
+                bold: True
+
+            MDLabel:
+                text: "Score"
+                halign: "center"
+                bold: True
+
+        MDSeparator:
+
+        # ---------- PLAYER / SCORE ROWS ----------
+        ScrollView:
+            MDBoxLayout:
+                id: score_table
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: dp(10)
+                padding: (dp(5), dp(10))
+
+        # ---------- BUTTONS ----------
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(20)
+            padding: (dp(10), 0)
+
+            MDRaisedButton:
+                text: "Save"
+                md_bg_color: app.theme_cls.primary_color
+                on_release: root.save_game()
+
+            MDRaisedButton:
+                text: "Cancel"
+                on_release: root.cancel()
 
 
 <PlayerSelectScreen>:

@@ -252,7 +252,8 @@ class PlayerSelectScreen(MDScreen):
             button.md_bg_color = SELECTED_COLOR
 
     def start(self):
-        MDApp.get_running_app().start_game(list(self.selected))
+        app = MDApp.get_running_app()
+        app.start_game(list(self.selected))
 
 
 class GameScreen(MDScreen):
@@ -351,7 +352,76 @@ class HistoryScreen(MDScreen):
             json.dump(games, f, indent=2)
 
         self.on_enter()
+    
+    def edit_selected(self):
+        if len(self.selected) != 1:
+            return    
+        game_id = next(iter(self.selected))
+        app = MDApp.get_running_app()
+        app.load_game_for_edit(game_id)
+        self.manager.current = "edit"
 
+
+class EditGameScreen(MDScreen):
+
+    def on_pre_enter(self):
+        self.populate()
+
+    def populate(self):
+        app = MDApp.get_running_app()
+        table = self.ids.score_table
+        table.clear_widgets()
+
+        game = app.current_game
+        if not game:
+            return
+
+        # Date
+        self.ids.date_field.text = game.date[:16]
+
+        # Rows
+        for name, score in game.totals.items():
+            row = MDBoxLayout(
+                size_hint_y=None,
+                height=dp(48),
+                spacing=dp(10)
+            )
+
+            row.add_widget(
+                MDLabel(
+                    text=name,
+                    halign="center"
+                )
+            )
+
+            score_field = MDTextField(
+                text=str(score),
+                input_filter="int",
+                halign="center",
+                mode="rectangle"
+            )
+            score_field.player_name = name
+            row.add_widget(score_field)
+
+            table.add_widget(row)
+
+    def save_game(self):
+        app = MDApp.get_running_app()
+        game = app.current_game
+
+        for row in self.ids.score_table.children:
+            field = row.children[0]
+            try:
+                game.totals[field.player_name] = int(field.text)
+            except ValueError:
+                pass
+
+        game.date = self.ids.date_field.text
+        app.finish_game()
+
+    def cancel(self):
+        self.manager.current = "history"
+        
 
 # --------------------------------------------------
 # Main App Class
@@ -368,7 +438,6 @@ class DominoApp(MDApp):
         self.theme_cls.primary_palette = random.choice(COLORS)
         self.theme_cls.accent_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
-
         try:
             LabelBase.register(name="BreakAway", fn_regular="data/breakaway.ttf")
         except Exception as e:
@@ -382,6 +451,7 @@ class DominoApp(MDApp):
             (GameScreen, "game"),
             (HistoryScreen, "history"),
             (OptionsScreen, "options"),
+            (EditGameScreen, "edit"),
         ]
         for cls, name in screens:
             sm.add_widget(cls(name=name))
@@ -407,6 +477,19 @@ class DominoApp(MDApp):
         except Exception as e:
             logging.error(f"Failed to load players: {e}")
             return {}
+            
+###
+    def load_game_for_edit(self, game_id):
+        if not os.path.exists(GAMES_FILE):
+            return
+    
+        with open(GAMES_FILE) as f:
+            games = json.load(f)
+    
+        for g in games:
+            if g.get("date") == game_id:
+                self.edit_game = g   # dict, not GameScore
+                return
 
 # GAME MECHANICS
     def start_game(self, names):
