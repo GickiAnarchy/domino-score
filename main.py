@@ -122,7 +122,7 @@ class GameScore:
             self.finished = True
 
     def winner(self):
-        if not self.totals:
+        if not self.finished or not self.totals:
             return None
         if len(set(self.totals.values())) == 1:
             return "Tie Game"
@@ -408,6 +408,7 @@ class DominoApp(MDApp):
             logging.error(f"Failed to load players: {e}")
             return {}
 
+# GAME MECHANICS
     def start_game(self, names):
         if len(names) < 2:
             return
