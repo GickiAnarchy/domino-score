@@ -134,38 +134,20 @@
         # ---------- DATE / TIME ----------
         MDTextField:
             id: date_field
-            hint_text: "Date / Time"
+            hint_text: "YYYY-MM-DDTHH:MM:SS"
+            helper_text: "ISO 8601 datetime"
+            helper_text_mode: "on_focus"
             mode: "rectangle"
-            size_hint_x: 0.9
-            pos_hint: {"center_x": 0.5}
-
-        # ---------- TABLE HEADER ----------
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(40)
-            padding: (dp(10), 0)
-
-            MDLabel:
-                text: "Player"
-                halign: "center"
-                bold: True
-
-            MDLabel:
-                text: "Score"
-                halign: "center"
-                bold: True
-
+        
         MDSeparator:
-
-        # ---------- PLAYER / SCORE ROWS ----------
+        
         ScrollView:
             MDBoxLayout:
                 id: score_table
                 orientation: "vertical"
                 adaptive_height: True
                 spacing: dp(10)
-                padding: (dp(5), dp(10))
-
+        
         # ---------- BUTTONS ----------
         MDBoxLayout:
             size_hint_y: None
@@ -177,6 +159,11 @@
                 text: "Save"
                 md_bg_color: app.theme_cls.primary_color
                 on_release: root.save_game()
+            
+            MDTextButton:
+                text: "+ Add Player"
+                pos_hint: {"center_x": 0.5}
+                on_release: root.add_row()
 
             MDRaisedButton:
                 text: "Cancel"

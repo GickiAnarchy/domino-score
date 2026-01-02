@@ -321,6 +321,8 @@ class HistoryScreen(MDScreen):
             totals = g.get("totals", {})
 
             row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
+            row.bind(on_touch_down=lambda w, t, g=g:
+                self.edit_game(g) if w.collide_point(*t.pos) else None)
             cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
             cb.game_id = date
             cb.bind(active=self.on_checkbox)
@@ -332,6 +334,18 @@ class HistoryScreen(MDScreen):
             row.add_widget(col)
 
             box.add_widget(row)
+
+    def edit_game(self, game_data):
+        app = MDApp.get_running_app()
+    
+        game = GameScore([])
+        game.date = game_data["date"]
+        game.totals = game_data["totals"]
+        game.finished = game_data.get("finished", False)
+        game.players = [Player(name) for name in game.totals.keys()]
+
+        app.current_game = game
+        self.manager.current = "edit"
 
     def on_checkbox(self, checkbox, value):
         if value:
@@ -376,52 +390,79 @@ class EditGameScreen(MDScreen):
         if not game:
             return
 
-        # Date
-        self.ids.date_field.text = game.date[:16]
+        # Date / Time
+        self.ids.date_field.text = game.date
 
-        # Rows
+        # Editable rows
         for name, score in game.totals.items():
-            row = MDBoxLayout(
-                size_hint_y=None,
-                height=dp(48),
-                spacing=dp(10)
-            )
+            self.add_row(name, score)
 
-            row.add_widget(
-                MDLabel(
-                    text=name,
-                    halign="center"
-                )
-            )
+    def add_row(self, player="", score=0):
+        row = MDBoxLayout(
+            size_hint_y=None,
+            height=dp(52),
+            spacing=dp(10)
+        )
 
-            score_field = MDTextField(
-                text=str(score),
-                input_filter="int",
-                halign="center",
-                mode="rectangle"
-            )
-            score_field.player_name = name
-            row.add_widget(score_field)
+        name_field = MDTextField(
+            text=player,
+            hint_text="Player",
+            mode="rectangle"
+        )
 
-            table.add_widget(row)
+        score_field = MDTextField(
+            text=str(score),
+            hint_text="Score",
+            mode="rectangle",
+            input_filter="int"
+        )
+
+        row.name_field = name_field
+        row.score_field = score_field
+
+        row.add_widget(name_field)
+        row.add_widget(score_field)
+
+        self.ids.score_table.add_widget(row)
 
     def save_game(self):
         app = MDApp.get_running_app()
         game = app.current_game
+        if not game:
+            return
+
+        new_totals = {}
 
         for row in self.ids.score_table.children:
-            field = row.children[0]
-            try:
-                game.totals[field.player_name] = int(field.text)
-            except ValueError:
-                pass
+            name = row.name_field.text.strip()
+            score = row.score_field.text.strip()
 
-        game.date = self.ids.date_field.text
+            if not name:
+                continue
+
+            try:
+                new_totals[name] = int(score)
+            except ValueError:
+                new_totals[name] = 0
+
+        if not new_totals:
+            return
+        
+        game.date = self.validate_datetime(self.ids.date_field.text)
+        game.players = [Player(name) for name in new_totals.keys()]
+        game.totals = new_totals
+        app.current_game = game
         app.finish_game()
 
     def cancel(self):
         self.manager.current = "history"
-        
+
+    def validate_datetime(self, text):
+        try:
+            dt = datetime.fromisoformat(text)
+            return dt.isoformat()
+        except ValueError:
+            return datetime.now().isoformat()
 
 # --------------------------------------------------
 # Main App Class
