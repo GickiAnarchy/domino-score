@@ -1,45 +1,98 @@
-from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.togglebutton import ToggleButton
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.filechooser import FileChooserIconView
-from kivy.uix.checkbox import CheckBox
-from kivy.metrics import dp
-from kivy.graphics import Color, Rectangle
-from kivy.animation import Animation
-from kivy.clock import Clock
-import shutil
-from datetime import datetime
 import json
+import logging
 import os
+import random
+import sys
+from datetime import datetime
 
-SAVE_FILE = "players.json"
-GAMES_FILE = "games.json"
+from kivy.core.text import LabelBase
+from kivy.metrics import dp
+from kivy.uix.widget import Widget
+from kivy.properties import ListProperty, NumericProperty
+from kivy.utils import get_color_from_hex, platform
+from kivy.uix.screenmanager import ScreenManager
+from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
+from kivymd.uix.card import MDCard
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.label import MDLabel
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.selectioncontrol import MDCheckbox
+from kivymd.uix.textfield import MDTextField
+
+# -------------------------------------------------- ()
+# Logging & Paths
+# --------------------------------------------------
+
+def setup_logger():
+    try:
+        if platform == "android":
+            from android.storage import primary_external_storage_path
+            base = primary_external_storage_path()
+            log_dir = os.path.join(base, "Download", "DominoScorebook")
+        else:
+            log_dir = os.path.join(os.getcwd(), "logs")
+
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "domino.log")
+    except Exception:
+        log_file = os.path.join(os.getcwd(), "domino.log")
+
+    logging.basicConfig(
+        filename=log_file,
+        filemode="a",
+        level=logging.DEBUG,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+    logging.info("=== App starting ===")
+    return log_file
+
+
+def get_data_dir():
+    if platform == "android":
+        from android.storage import app_storage_path
+        print(app_storage_path())
+        return app_storage_path()
+    print(os.getcwd())
+    return os.getcwd()
+
+
+DATA_DIR = get_data_dir()
+
+SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
+GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
+UNFINISHED = os.path.join(DATA_DIR, ".unfinished.dom")
+
+MAX_POINTS = 300
+SELECTED_COLOR = get_color_from_hex("#4CAF50")
+DEFAULT_COLOR = get_color_from_hex("#1E88E5")
+
+FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't make any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer", "Ready for a spanking?"]
+
+COLORS = [
+    "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",
+    "LightBlue", "Cyan", "Teal", "Green", "LightGreen", "Lime",
+    "Yellow", "Amber", "Orange", "DeepOrange", "Brown", "Gray", "BlueGray"
+]
 
 
 def get_export_dir():
-    try:
-        # Android
-        from android.storage import primary_external_storage_path
+    if platform == "android":
+        from android.storage import app_storage_path
+        base = app_storage_path()
+        export_dir = os.path.join(base, "exports")
+    else:
+        export_dir = os.path.join(os.getcwd(), "exports")
 
-        base = primary_external_storage_path()
-        return os.path.join(base, "Download", "DominoScorebook")
-    except Exception:
-        # Desktop fallback
-        return os.path.join(os.getcwd(), "exports")
-
-
-MAX_POINTS = 300  # configurable win condition
+    os.makedirs(export_dir, exist_ok=True)
+    return export_dir
 
 
-# ======================
-# DATA MODELS
-# ======================
+# --------------------------------------------------
+# Models
+# --------------------------------------------------
+
 class Player:
     def __init__(self, name, wins=0, losses=0):
         self.name = name
@@ -47,605 +100,465 @@ class Player:
         self.losses = losses
 
     def to_dict(self):
-        return {"name": self.name, "wins": self.wins, "losses": self.losses}
+        return self.__dict__
 
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
 
 
-# ======================
-# GAMESCORE
-# ======================
 class GameScore:
     def __init__(self, players):
-        self.date = datetime.now()
+        self.date = datetime.now().isoformat()
         self.players = players
-        self.rounds = []
         self.totals = {p.name: 0 for p in players}
-        self.undo_stack = []
+        self.rounds = []
         self.finished = False
 
-    def add_points(self, player_name, points):
-        if self.finished:
-            return
-
-        self.totals[player_name] += points
-        self.undo_stack.append((player_name, points))
-
-        self.rounds.append(
-            {
-                "player": player_name,
-                "points": points,
-                "time": datetime.now().isoformat(),
-            }
-        )
-
-    def undo_last(self):
-        if not self.undo_stack:
-            return
-        player, points = self.undo_stack.pop()
-        self.totals[player] -= points
-        self.rounds.pop()
+    def add_points(self, name, pts):
+        self.totals[name] += pts
+        self.rounds.append({"player": name, "points": pts})
+        if self.totals[name] >= MAX_POINTS:
+            self.finished = True
 
     def winner(self):
+        if not self.finished or not self.totals:
+            return None
         if len(set(self.totals.values())) == 1:
             return "Tie Game"
-        elif all(score <= MAX_POINTS for score in self.totals.values()):
-            return None
-        else:
-            return max(self.totals, key=self.totals.get)
-
-    def check_game_over(self):
-        for score in self.totals.values():
-            if score >= MAX_POINTS:
-                self.finished = True
-                return self.finished
-        self.finished = False
-        return self.finished 
+        return max(self.totals, key=self.totals.get)
 
     def to_dict(self):
         return {
-            "date": self.date.isoformat(),
-            "rounds": self.rounds,
+            "date": self.date,
             "totals": self.totals,
             "winner": self.winner(),
             "finished": self.finished,
         }
 
 
-# ======================
-# SPLASHSCREEN
-# ======================
-class SplashScreen(Screen):
+# --------------------------------------------------
+# UI Helpers
+# --------------------------------------------------
+
+class MDSeparator(MDBoxLayout):
+    thickness = NumericProperty(dp(1))
+    color = ListProperty([1, 1, 1, 0.2])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint_y = None
+        self.height = self.thickness
+        self.md_bg_color = self.color
+
+
+# --------------------------------------------------
+# Screens
+# --------------------------------------------------
+
+class MenuScreen(MDScreen):
+
+    def on_pre_enter(self,):
+        self.update_labels()
 
     def on_enter(self):
-        logo = self.ids.logo
-        loading = self.ids.loading
+        app = MDApp.get_running_app()
+        self.ids.start_btn.disabled = not bool(app.players)
+        self.ids.history_btn.disabled = not os.path.exists(GAMES_FILE)
 
-        # Reset state (important if screen reused)
-        logo.opacity = 0
-        logo.scale = 0.9
-        loading.opacity = 0
+    def update_labels(self):
+        self.fact_label = self.ids.fact_label
+        self.title_label = self.ids.title_label
+        
+        self.fact_label.text = random.choice(FACTS)
 
-        # Logo fade + scale
-        logo_anim = Animation(opacity=1, scale=1, duration=3, t="out_quad")
 
-        # Loading text pulse
-        loading_anim = Animation(opacity=1, duration=0.3) + Animation(
-            opacity=0.3, duration=0.4
+class OptionsScreen(MDScreen):
+    def show_dialog(self, title, text):
+        opt_dialig = MDDialog(
+            title=title,
+            text=text,
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: opt_dialig.dismiss())],
         )
-        loading_anim.repeat = True
-
-        loading_anim.start(loading)
-        logo_anim.start(logo)
-
-        # Move to menu after splash
-        Clock.schedule_once(self.go_to_menu, 4.0)
-
-    def go_to_menu(self, *args):
-        self.manager.current = "menu"
-
-
-# ======================
-# OPTIONSSCREEN
-# ======================
-class OptionsScreen(Screen):
+        opt_dialig.open()
 
     def export_saves(self):
         export_dir = get_export_dir()
-        os.makedirs(export_dir, exist_ok=True)
-
-        files = [SAVE_FILE, GAMES_FILE]
         exported = []
 
-        for fname in files:
-            if os.path.exists(fname):
-                dest = os.path.join(export_dir, fname)
-                with open(fname, "r") as src, open(dest, "w") as dst:
-                    dst.write(src.read())
-                exported.append(fname)
+        for src in (SAVE_FILE, GAMES_FILE):
+            if os.path.exists(src):
+                dst = os.path.join(export_dir, os.path.basename(src))
+                with open(src, "r") as s, open(dst, "w") as d:
+                    d.write(s.read())
+                exported.append(os.path.basename(src))
 
-        if exported:
-            msg = "Exported:\n" + "\n".join(exported) + "\n\nLocation:\n" + export_dir
-        else:
-            msg = "Nothing to export yet."
-
-        Popup(
-            title="Export Complete",
-            content=Label(text=msg),
-            size_hint=(0.8, 0.5),
-        ).open()
+        self.show_dialog(
+            "Export Complete",
+            "Exported:\n" + "\n".join(exported) if exported else "Nothing to export"
+        )
 
     def import_saves(self):
         import_dir = get_export_dir()
-
-        if not os.path.exists(import_dir):
-            Popup(
-                title="Import Failed",
-                content=Label(text="No backup folder found."),
-                size_hint=(0.7, 0.3),
-            ).open()
-            return
-
         imported = []
 
-        for fname in [SAVE_FILE, GAMES_FILE]:
-            src = os.path.join(import_dir, fname)
+        for name in ("players.dom", "games.dom"):
+            src = os.path.join(import_dir, name)
+            dst = os.path.join(DATA_DIR, name)
             if os.path.exists(src):
-                with open(src, "r") as s, open(fname, "w") as d:
+                with open(src, "r") as s, open(dst, "w") as d:
                     d.write(s.read())
-                imported.append(fname)
+                imported.append(name)
 
-        if imported:
-            msg = "Imported:\n" + "\n".join(imported)
-        else:
-            msg = "No valid save files found."
-
-        Popup(
-            title="Import Complete",
-            content=Label(text=msg),
-            size_hint=(0.7, 0.4),
-        ).open()
-
-        # Reload players immediately
-        app = App.get_running_app()
-        app.players = app.load_players()
+        MDApp.get_running_app().players = MDApp.get_running_app().load_players()
+        self.show_dialog("Import", "\n".join(imported) if imported else "Nothing imported")
 
 
-# ======================
-# ABOUTSCREEN
-# ======================
-class AboutScreen(Screen):
-    pass
-
-
-# ======================
-# MENUSCREEN
-# ======================
-class MenuScreen(Screen):
-    pass
-
-
-# ======================
-# STATSSCREEN
-# ======================
-class StatsScreen(Screen):
-
-    def on_enter(self):
-        container = self.ids.stats_list
-        container.clear_widgets()
-
-        app = App.get_running_app()
-
-        for player in app.players.values():
-            btn = Button(text=f"{player.name}", size_hint_y=None, height=50)
-            btn.bind(on_release=lambda _, p=player: self.show_player_stats(p))
-            container.add_widget(btn)
-
-    def show_player_stats(self, player):
-        app = App.get_running_app()
-
-        # calculate extra stats if you want
-        total_games = player.wins + player.losses
-        win_rate = (player.wins / total_games * 100) if total_games else 0
-
-        content = BoxLayout(orientation="vertical", padding=15, spacing=10)
-
-        content.add_widget(Label(text=f"[b]{player.name}[/b]", markup=True))
-        content.add_widget(Label(text=f"Wins: {player.wins}"))
-        content.add_widget(Label(text=f"Losses: {player.losses}"))
-        content.add_widget(Label(text=f"Games Played: {total_games}"))
-        content.add_widget(Label(text=f"Win Rate: {win_rate:.1f}%"))
-
-        close_btn = Button(text="Close", size_hint_y=None, height=40)
-        content.add_widget(close_btn)
-
-        popup = Popup(
-            title="Player Stats",
-            content=content,
-            size_hint=(0.75, 0.6),
-            auto_dismiss=False,
-        )
-
-        close_btn.bind(on_release=popup.dismiss)
-        popup.open()
-
-
-# ======================
-# CREATEPLAYERSCREEN
-# ======================
-class CreatePlayerScreen(Screen):
-
-    def save_player(self, name):
-        app = App.get_running_app()
-        name = name.strip()
-        name_input = self.ids.player_name_input
+class CreatePlayerScreen(MDScreen):
+    def save_player(self):
+        app = MDApp.get_running_app()
+        name = self.ids.player_name.text.strip()
 
         if not name or name in app.players:
-            Popup(
-                title="Error",
-                content=Label(text="Invalid or duplicate name"),
-                size_hint=(0.7, 0.3),
-            ).open()
             return
 
         app.players[name] = Player(name)
         app.save_players()
-        name_input.text = ""
+        self.ids.player_name.text = ""
         self.manager.current = "menu"
 
 
-# ======================
-# PLAYERSELECTSCREEN
-# ======================
-class PlayerSelectScreen(Screen):
+class PlayerSelectScreen(MDScreen):
+    selected = set()
 
     def on_enter(self):
-        player_list = self.ids.player_list
-        player_list.clear_widgets()
+        self.selected.clear()
+        box = self.ids.player_list
+        box.clear_widgets()
 
-        app = App.get_running_app()
-        for name in app.players:
-            player_list.add_widget(
-                ToggleButton(text=name, size_hint_y=None, height=dp(60))
+        for name in MDApp.get_running_app().players:
+            btn = MDRaisedButton(
+                text=name,
+                on_release=lambda x, n=name: self.toggle(n, x),
             )
+            box.add_widget(btn)
+
+    def toggle(self, name, button):
+        if name in self.selected:
+            self.selected.remove(name)
+            button.md_bg_color = DEFAULT_COLOR
+        else:
+            self.selected.add(name)
+            button.md_bg_color = SELECTED_COLOR
+
+    def start(self):
+        app = MDApp.get_running_app()
+        app.start_game(list(self.selected))
 
 
-# ======================
-# GAMESCREEN
-# ======================
-class GameScreen(Screen):
-    player_inputs = {}
-
+class GameScreen(MDScreen):
     def on_enter(self):
-        self.refresh_ui()
+        self.refresh()
 
-    def refresh_ui(self):
-        container = self.ids.player_container
-        container.clear_widgets()
-        self.player_inputs.clear()
-
-        app = App.get_running_app()
-        game = app.current_game
-
-        for player in game.players:
-            card, input_box = self.build_player_card(player.name)
-            self.player_inputs[player.name] = input_box
-            container.add_widget(card)
-
-    def build_player_card(self, name):
-        app = App.get_running_app()
-        game = app.current_game
-
-        card = BoxLayout(
-            orientation="vertical",
-            size_hint=(1, None),
-            height=dp(170),
-            padding=10,
-            spacing=12,
-        )
-
-        score_label = Label(
-            text=f"{name} — Score: {game.totals[name]}",
-            font_size="26sp",
-            size_hint_y=None,
-            height=dp(40),
-        )
-        
-        def refresh_score():
-            score_label.text = f"{name} — Score: {game.totals[name]}"
-
-        input_box = TextInput(
-            text="0",
-            multiline=False,
-            input_filter="int",
-            halign="center",
-            font_size="22sp",
-            size_hint_y=None,
-            height=dp(45),
-        )
-        
-
-        def adjust(delta):
-            try:
-                val = int(input_box.text or 0)
-            except ValueError:
-                val = 0
-            input_box.text = str(val + delta)
-
-        btn_row = BoxLayout(size_hint_y=None, height=dp(50), spacing=10)
-
-        btn_minus = Button(text="-5")
-        btn_plus5 = Button(text="+5")
-        btn_plus10 = Button(text="+10")
-
-        btn_minus.bind(on_release=lambda *_: adjust(-5))
-        btn_plus5.bind(on_release=lambda *_: adjust(5))
-        btn_plus10.bind(on_release=lambda *_: adjust(10))
-
-        btn_row.add_widget(btn_minus)
-        btn_row.add_widget(btn_plus5)
-        btn_row.add_widget(btn_plus10)
-
-        card.add_widget(score_label)
-        card.add_widget(input_box)
-        card.add_widget(btn_row)
-
-        return card, input_box
-
-    def add_score(self, name, points, refresh_cb, input_widget=None):
-        app = App.get_running_app()
-        game = app.current_game
-
-        game.add_points(name, points)
-        if input_widget:
-            input_widget.text = ""
-
-        refresh_cb()
-
-        if game.check_game_over():
-            app.finish_game()
-            self.manager.current = "menu"
-
-    def end_game(self, in_widget=None):
-        app = App.get_running_app()
-        game = app.current_game 
-        
-        if game.check_game_over():
-            app.finish_game()
-            self.manager.current = "menu"
-            
-        self.manager.current = "menu"
-
-    def submit_scores(self):
-        app = App.get_running_app()
-        game = app.current_game
-
-        any_points = False
-
-        for name, input_box in self.player_inputs.items():
-            try:
-                points = int(input_box.text)
-            except ValueError:
-                points = 0
-
-            if points != 0:
-                game.add_points(name, points)
-                any_points = True
-
-            input_box.text = "0"
-
-        if not any_points:
+    def refresh(self):
+        app = MDApp.get_running_app()
+        if not app.current_game:
             return
 
-        self.refresh_ui()
+        box = self.ids.player_container
+        box.clear_widgets()
+
+        for name, score in app.current_game.totals.items():
+            top = MDBoxLayout(orientation="horizontal", size_hint=(0.9, None), height=dp(40))
+            top.add_widget(MDLabel(text=f"{name} — {score}", font_style="H6"))
+
+            btns = MDBoxLayout(spacing=dp(15), size_hint=(0.9, None), height=dp(50))
+            for pts in (5, 10, 20, -5):
+                btns.add_widget(
+                    MDRaisedButton(
+                        text=f"{pts:+}",
+                        on_release=lambda x, n=name, p=pts: self.add(n, p),
+                    )
+                )
+
+            box.add_widget(top)
+            box.add_widget(btns)
+            box.add_widget(MDSeparator(thickness=dp(5)))
+
+    def add(self, name, pts):
+        MDApp.get_running_app().current_game.add_points(name, pts)
+        self.refresh()
 
 
-# ======================
-# HISTORYSCREEN
-# ======================
-class HistoryScreen(Screen):
-    selected_games = set()
+class HistoryCheckbox(MDCheckbox):
+    game_id = None
+
+
+class HistoryScreen(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.selected = set()
 
     def on_enter(self):
-        history_list = self.ids.history_list
-        history_list.clear_widgets()
-        games = []
+        box = self.ids.history_list
+        box.clear_widgets()
+        self.selected.clear()
 
         if not os.path.exists(GAMES_FILE):
-            history_list.add_widget(Label(text="No games played yet."))
+            box.add_widget(MDLabel(text="No games yet"))
             return
-
-        with open(GAMES_FILE) as f:
-            try:
-                games = json.load(f)
-            except Exception as e:
-                print(f"oops: {e}")
 
         try:
-            for game in reversed(games):
-                history_list.add_widget(self.build_game_row(game))
-        except Exception as e:
-            print(f"oops : {e}")
-
-    def build_game_row(self, game):
-        row = BoxLayout(
-            orientation="horizontal",
-            size_hint=(1, None),
-            height=dp(110),
-            padding=(dp(10), dp(5)),
-            spacing=dp(10),
-        )
-
-        # Background (for highlight)
-        with row.canvas.before:
-            bg_color = Color(0, 0, 0, 0)  # transparent initially
-            bg_rect = Rectangle(size=row.size, pos=row.pos)
-
-        def update_bg(*_):
-            bg_rect.size = row.size
-            bg_rect.pos = row.pos
-
-        row.bind(pos=update_bg, size=update_bg)
-
-        # Checkbox
-        checkbox = CheckBox(size_hint=(None, None), size=(dp(40), dp(40)))
-        checkbox.pos_hint = {"center_y": 0.5}
-        checkbox.game_id = game["date"]
-
-        def on_toggle(instance, value):
-            if value:
-                self.selected_games.add(instance.game_id)
-                bg_color.rgba = (0.2, 0.6, 1, 0.25)  # blue highlight
-            else:
-                self.selected_games.discard(instance.game_id)
-                bg_color.a = 0
-
-        checkbox.bind(active=on_toggle)
-
-        # Info column
-        info_box = BoxLayout(orientation="vertical", spacing=dp(4))
-
-        date = datetime.fromisoformat(game["date"]).strftime("%Y-%m-%d %H:%M")
-        winner = game.get("winner", "Unknown")
-        totals = game.get("totals", {})
-        score_text = ", ".join(f"{k}: {v}" for k, v in totals.items())
-
-        info_box.add_widget(Label(text=f"[b]{date}[/b]", markup=True))
-        info_box.add_widget(Label(text=score_text))
-        info_box.add_widget(Label(text=f"Winner: {winner}"))
-
-        row.add_widget(checkbox)
-        row.add_widget(info_box)
-
-        return row
-
-    def on_game_checked(self, checkbox, value):
-        game = checkbox.game_data
-        if value:
-            print("Selected game:", game["date"])
-        else:
-            print("Unselected game:", game["date"])
-
-    def delete_selected_games(self):
-        if not self.selected_games:
+            with open(GAMES_FILE) as f:
+                games = json.load(f)
+        except Exception:
+            box.add_widget(MDLabel(text="Corrupted game history"))
             return
 
-        if not os.path.exists(GAMES_FILE):
+        for g in reversed(games):
+            date = g.get("date", "Unknown")
+            winner = g.get("winner", "In Progress")
+            totals = g.get("totals", {})
+
+            row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
+            row.bind(on_touch_down=lambda w, t, g=g:
+                self.edit_game(g) if w.collide_point(*t.pos) else None)
+            cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
+            cb.game_id = date
+            cb.bind(active=self.on_checkbox)
+            row.add_widget(cb)
+
+            col = MDBoxLayout(orientation="vertical")
+            col.add_widget(MDLabel(text=f"{date[:16]} — {winner}"))
+            col.add_widget(MDLabel(text=str(totals), font_style="Caption"))
+            row.add_widget(col)
+
+            box.add_widget(row)
+
+    def edit_game(self, game_data):
+        app = MDApp.get_running_app()
+    
+        game = GameScore([])
+        game.date = game_data["date"]
+        game.totals = game_data["totals"]
+        game.finished = game_data.get("finished", False)
+        game.players = [Player(name) for name in game.totals.keys()]
+
+        app.current_game = game
+        self.manager.current = "edit"
+
+    def on_checkbox(self, checkbox, value):
+        if value:
+            self.selected.add(checkbox.game_id)
+        else:
+            self.selected.discard(checkbox.game_id)
+
+    def delete_selected(self):
+        if not self.selected:
             return
 
         with open(GAMES_FILE) as f:
             games = json.load(f)
 
-        games = [g for g in games if g["date"] not in self.selected_games]
+        games = [g for g in games if g.get("date") not in self.selected]
 
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
 
-        self.selected_games.clear()
-        self.on_enter()  # refresh list
+        self.on_enter()
+    
+    def edit_selected(self):
+        if len(self.selected) != 1:
+            return    
+        game_id = next(iter(self.selected))
+        app = MDApp.get_running_app()
+        app.load_game_for_edit(game_id)
+        self.manager.current = "edit"
 
 
-# ======================
-# APP
-# ======================
-class DominoApp(App):
+class EditGameScreen(MDScreen):
 
+    def on_pre_enter(self):
+        self.populate()
+
+    def populate(self):
+        app = MDApp.get_running_app()
+        table = self.ids.score_table
+        table.clear_widgets()
+
+        game = app.current_game
+        if not game:
+            return
+
+        # Date / Time
+        self.ids.date_field.text = game.date
+
+        # Editable rows
+        for name, score in game.totals.items():
+            self.add_row(name, score)
+
+    def add_row(self, player="", score=0):
+        row = MDBoxLayout(
+            size_hint_y=None,
+            height=dp(52),
+            spacing=dp(10)
+        )
+
+        name_field = MDTextField(
+            text=player,
+            hint_text="Player",
+            mode="rectangle"
+        )
+
+        score_field = MDTextField(
+            text=str(score),
+            hint_text="Score",
+            mode="rectangle",
+            input_filter="int"
+        )
+
+        row.name_field = name_field
+        row.score_field = score_field
+
+        row.add_widget(name_field)
+        row.add_widget(score_field)
+
+        self.ids.score_table.add_widget(row)
+
+    def save_game(self):
+        app = MDApp.get_running_app()
+        game = app.current_game
+        if not game:
+            return
+
+        new_totals = {}
+
+        for row in self.ids.score_table.children:
+            name = row.name_field.text.strip()
+            score = row.score_field.text.strip()
+
+            if not name:
+                continue
+
+            try:
+                new_totals[name] = int(score)
+            except ValueError:
+                new_totals[name] = 0
+
+        if not new_totals:
+            return
+        
+        game.date = self.validate_datetime(self.ids.date_field.text)
+        game.players = [Player(name) for name in new_totals.keys()]
+        game.totals = new_totals
+        app.current_game = game
+        app.finish_game()
+
+    def cancel(self):
+        self.manager.current = "history"
+
+    def validate_datetime(self, text):
+        try:
+            dt = datetime.fromisoformat(text)
+            return dt.isoformat()
+        except ValueError:
+            return datetime.now().isoformat()
+
+# --------------------------------------------------
+# Main App Class
+# --------------------------------------------------
+
+class DominoApp(MDApp):
     def build(self):
+        setup_logger()
+        os.makedirs(DATA_DIR, exist_ok=True)
+
         self.players = self.load_players()
         self.current_game = None
 
-        sm = ScreenManager()
-        sm.add_widget(SplashScreen(name="splash"))
-        sm.add_widget(MenuScreen(name="menu"))
-        sm.add_widget(CreatePlayerScreen(name="create"))
-        sm.add_widget(PlayerSelectScreen(name="select"))
-        sm.add_widget(GameScreen(name="game"))
-        sm.add_widget(HistoryScreen(name="history"))
-        sm.add_widget(StatsScreen(name="stats"))
-        sm.add_widget(AboutScreen(name="about"))
-        sm.add_widget(OptionsScreen(name="options"))
-        sm.current = "splash"
+        self.theme_cls.primary_palette = random.choice(COLORS)
+        self.theme_cls.accent_palette = random.choice(COLORS)
+        self.theme_cls.theme_style = "Dark"
+        try:
+            LabelBase.register(name="BreakAway", fn_regular="data/breakaway.ttf")
+        except Exception as e:
+            logging.warning(f"Font not found: {e}")
 
-        Clock.schedule_once(self.post_build_init, 0)
+        sm = ScreenManager()
+        screens = [
+            (MenuScreen, "menu"),
+            (CreatePlayerScreen, "create"),
+            (PlayerSelectScreen, "select"),
+            (GameScreen, "game"),
+            (HistoryScreen, "history"),
+            (OptionsScreen, "options"),
+            (EditGameScreen, "edit"),
+        ]
+        for cls, name in screens:
+            sm.add_widget(cls(name=name))
 
         return sm
 
-    def post_build_init(self, *args):
-        self.players = self.load_players()
+    def save_players(self):
+        tmp = SAVE_FILE + ".tmp"
+        try:
+            with open(tmp, "w") as f:
+                json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
+            os.replace(tmp, SAVE_FILE)
+        except Exception as e:
+            logging.error(f"Failed to save players: {e}")
 
-    # ---------- Persistence ----------
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
             return {}
-        with open(SAVE_FILE) as f:
-            data = json.load(f)
-        return {k: Player.from_dict(v) for k, v in data.items()}
+        try:
+            with open(SAVE_FILE) as f:
+                data = json.load(f)
+            return {k: Player.from_dict(v) for k, v in data.items()}
+        except Exception as e:
+            logging.error(f"Failed to load players: {e}")
+            return {}
+            
+###
+    def load_game_for_edit(self, game_id):
+        if not os.path.exists(GAMES_FILE):
+            return
+    
+        with open(GAMES_FILE) as f:
+            games = json.load(f)
+    
+        for g in games:
+            if g.get("date") == game_id:
+                self.edit_game = g   # dict, not GameScore
+                return
 
-    def save_players(self):
-        with open(SAVE_FILE, "w") as f:
-            json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
+# GAME MECHANICS
+    def start_game(self, names):
+        if len(names) < 2:
+            return
+        self.current_game = GameScore([self.players[n] for n in names])
+        self.root.current = "game"
 
-    def save_game(self, game):
+    def finish_game(self):
+        game = self.current_game
+        if not game:
+            return
+
         games = []
         if os.path.exists(GAMES_FILE):
             try:
                 with open(GAMES_FILE) as f:
                     games = json.load(f)
-            except Exception as e:
-                print(f"oops line 291: {e}")
+            except Exception:
+                pass
 
-        try:
-            games.append(game.to_dict())
-        except Exception as ee:
-            print(f"ooops line 296: {ee}")
-
+        games.append(game.to_dict())
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
 
-    # ---------- Game Flow ----------()
-    def start_game(self, names):
-        if len(names) < 2:
-            Popup(
-                title="Select Players",
-                content=Label(text="Select at least two players"),
-                size_hint=(0.7, 0.3),
-            ).open()
-            return
-
-        players = [self.players[n] for n in names]
-        self.current_game = GameScore(players)
-        self.root.current = "game"
-
-    def finish_game(self):
-        game = self.current_game
-
-        if not game.finished:
-            print(f"Game ended with no one over {str(MAX_POINTS)}")
-            return
-
-        winner = game.winner()
-
-        if winner != "Tie Game" or winner != None:
-            for player in game.players:
-                if player.name == winner:
-                    player.wins += 1
-                else:
-                    player.losses += 1
-
-        self.save_players()
-        self.save_game(game)
-
-        Popup(
-            title="Game Over",
-            content=Label(text=f"🏆 Winner: {winner}", color="red"),
-            size_hint=(0.7, 0.3),
-        ).open()
+        self.current_game = None
+        self.root.current = "menu"
 
 
-# ======================
-# RUN
-# ======================
 if __name__ == "__main__":
     DominoApp().run()
