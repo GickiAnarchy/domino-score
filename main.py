@@ -21,9 +21,9 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 
-# -------------------------------------------------- ()
+# ------------------------------------------
 # Logging & Paths
-# --------------------------------------------------
+# ------------------------------------------
 
 def setup_logger():
     try:
@@ -48,7 +48,6 @@ def setup_logger():
     logging.info("=== App starting ===")
     return log_file
 
-
 def get_data_dir():
     if platform == "android":
         from android.storage import app_storage_path
@@ -68,7 +67,17 @@ MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")
 
-FACTS = ["All Hail King Dingle!!","Can you count to five?","Draw ya plenty of 'em.","Is it ridiculous yet?","The opponent can't make any points\noff the 2-3 domino.","Careful holding on\nto that Double-Six","Just a nickel at a time.","Eight, skate, and donate.","Niner, Not a tight vaginer", "Ready for a spanking?"]
+FACTS = [
+    "All Hail King Dingle!!",
+    "Can you count to five?",
+    "Draw ya plenty of 'em.",
+    "Is it ridiculous yet?",
+    "The opponent can't make any points\noff the 2-3 domino.",
+    "Careful holding on\nto that Double-Six",
+    "Just a nickel at a time.",
+    "Eight, skate, and donate.",
+    "Niner, Not a tight vaginer",
+    "Ready for a spanking?"]
 
 COLORS = [
     "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",
@@ -83,15 +92,15 @@ def get_export_dir():
         base = app_storage_path()
         export_dir = os.path.join(base, "exports")
     else:
-        export_dir = os.path.join(os.getcwd(), "exports")
+        export_dir = os.path.join(os.getcwd(), "expor6ts")
 
     os.makedirs(export_dir, exist_ok=True)
     return export_dir
 
 
-# --------------------------------------------------
+# ------------------------------------------
 # Models
-# --------------------------------------------------
+# ------------------------------------------
 
 class Player:
     def __init__(self, name, wins=0, losses=0):
@@ -137,9 +146,9 @@ class GameScore:
         }
 
 
-# --------------------------------------------------
+# -----------------------------------------
 # UI Helpers
-# --------------------------------------------------
+# ------------------------------------------
 
 class MDSeparator(MDBoxLayout):
     thickness = NumericProperty(dp(1))
@@ -152,9 +161,9 @@ class MDSeparator(MDBoxLayout):
         self.md_bg_color = self.color
 
 
-# --------------------------------------------------
+# ------------------------------------------
 # Screens
-# --------------------------------------------------
+# -----------------------------------------
 
 class MenuScreen(MDScreen):
 
@@ -178,8 +187,7 @@ class OptionsScreen(MDScreen):
         opt_dialig = MDDialog(
             title=title,
             text=text,
-            buttons=[MDFlatButton(text="OK", on_release=lambda x: opt_dialig.dismiss())],
-        )
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: opt_dialig.dismiss())],)
         opt_dialig.open()
 
     def export_saves(self):
@@ -347,7 +355,7 @@ class HistoryScreen(MDScreen):
         app.current_game = game
         self.manager.current = "edit"
 
-    def on_checkbox(self, checkbox, value):
+    def on_checkbox(self, checkbox, value = None):
         if value:
             self.selected.add(checkbox.game_id)
         else:
@@ -464,9 +472,9 @@ class EditGameScreen(MDScreen):
         except ValueError:
             return datetime.now().isoformat()
 
-# --------------------------------------------------
+# ------------------------------------------
 # Main App Class
-# --------------------------------------------------
+# ------------------------------------------
 
 class DominoApp(MDApp):
     def build(self):
