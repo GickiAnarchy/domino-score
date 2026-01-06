@@ -98,9 +98,9 @@ def get_export_dir():
     return export_dir
 
 
-# ------------------------------------------
+# ----------------------------------------
 # Models
-# ------------------------------------------
+# ----------------------------------------
 
 class Player:
     def __init__(self, name, wins=0, losses=0):
@@ -130,6 +130,11 @@ class GameScore:
         if self.totals[name] >= MAX_POINTS:
             self.finished = True
 
+    def check_finished(self):
+        for k,v in self.totals.items():
+            if v >= MAX_POINTS:
+                self.finished = True
+
     def winner(self):
         if not self.finished or not self.totals:
             return None
@@ -138,6 +143,7 @@ class GameScore:
         return max(self.totals, key=self.totals.get)
 
     def to_dict(self):
+        self.check_finished()
         return {
             "date": self.date,
             "totals": self.totals,
@@ -146,9 +152,9 @@ class GameScore:
         }
 
 
-# -----------------------------------------
+# ----------------------------------------
 # UI Helpers
-# ------------------------------------------
+# ----------------------------------------
 
 class MDSeparator(MDBoxLayout):
     thickness = NumericProperty(dp(1))
@@ -161,9 +167,9 @@ class MDSeparator(MDBoxLayout):
         self.md_bg_color = self.color
 
 
-# ------------------------------------------
+# ----------------------------------------
 # Screens
-# -----------------------------------------
+# ----------------------------------------
 
 class MenuScreen(MDScreen):
 
@@ -379,8 +385,6 @@ class HistoryScreen(MDScreen):
         for g in games:
             if g.get("date") == game_id:
                 self.edit_game(g)
-            else:
-                return
             #app = MDApp.get_running_app()
             #app.load_game_for_edit(game_id)
             #self.manager.current = "edit"
@@ -560,8 +564,11 @@ class DominoApp(MDApp):
                 with open(GAMES_FILE) as f:
                     games = json.load(f)
             except Exception:
-                pass
-
+                pass 
+        for g in games:
+            if g.get("date") == game.date:
+                games.remove(g)       
+                print("removed game")
         games.append(game.to_dict())
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
