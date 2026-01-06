@@ -56,8 +56,21 @@ def get_data_dir():
     print(os.getcwd())
     return os.getcwd()
 
+def get_shared_data_dir():
+    if platform == "android":
+        from android.storage import primary_external_storage_path
+        package = "com.gicki.dominoscores"  # MUST match buildozer.spec
+        base = primary_external_storage_path()
+        path = os.path.join(base, "Android", "data", package, "files")
+    else:
+        # Desktop fallback
+        path = os.path.join(os.path.expanduser("~"), "DominoScore")
+    os.makedirs(path, exist_ok=True)
+    return path
 
-DATA_DIR = get_data_dir()
+
+
+DATA_DIR = get_shared_data_dir()
 
 SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
 GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
@@ -92,7 +105,7 @@ def get_export_dir():
         base = app_storage_path()
         export_dir = os.path.join(base, "exports")
     else:
-        export_dir = os.path.join(os.getcwd(), "expor6ts")
+        export_dir = os.path.join(os.getcwd(), "exports")
 
     os.makedirs(export_dir, exist_ok=True)
     return export_dir
