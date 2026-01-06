@@ -329,8 +329,8 @@ class HistoryScreen(MDScreen):
             totals = g.get("totals", {})
 
             row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
-            row.bind(on_touch_down=lambda w, t, g=g:
-                self.edit_game(g) if w.collide_point(*t.pos) else None)
+            #row.bind(on_touch_down=lambda w, t, g=g:
+                #self.edit_game(g) if w.collide_point(*t.pos) else None)
             cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
             cb.game_id = date
             cb.bind(active=self.on_checkbox)
@@ -340,18 +340,15 @@ class HistoryScreen(MDScreen):
             col.add_widget(MDLabel(text=f"{date[:16]} — {winner}"))
             col.add_widget(MDLabel(text=str(totals), font_style="Caption"))
             row.add_widget(col)
-
             box.add_widget(row)
 
     def edit_game(self, game_data):
         app = MDApp.get_running_app()
-    
         game = GameScore([])
         game.date = game_data["date"]
         game.totals = game_data["totals"]
         game.finished = game_data.get("finished", False)
         game.players = [Player(name) for name in game.totals.keys()]
-
         app.current_game = game
         self.manager.current = "edit"
 
@@ -364,24 +361,29 @@ class HistoryScreen(MDScreen):
     def delete_selected(self):
         if not self.selected:
             return
-
         with open(GAMES_FILE) as f:
             games = json.load(f)
-
         games = [g for g in games if g.get("date") not in self.selected]
-
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
-
         self.on_enter()
     
     def edit_selected(self):
         if len(self.selected) != 1:
-            return    
+            print("Can only edit one game.")
+            return
+        games = []
+        with open(GAMES_FILE) as f:
+            games = json.load(f)    
         game_id = next(iter(self.selected))
-        app = MDApp.get_running_app()
-        app.load_game_for_edit(game_id)
-        self.manager.current = "edit"
+        for g in games:
+            if g.get("date") == game_id:
+                self.edit_game(g)
+            else:
+                return
+            #app = MDApp.get_running_app()
+            #app.load_game_for_edit(game_id)
+            #self.manager.current = "edit"
 
 
 class EditGameScreen(MDScreen):
