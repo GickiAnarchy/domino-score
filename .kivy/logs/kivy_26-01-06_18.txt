@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-31_2.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-06_18.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -29,7 +29,7 @@
 [INFO   ] Loader: using a thread pool of 2 workers
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 438, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 527, in <module>
 [WARNING] stderr:     DominoApp().run()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
@@ -66,9 +66,10 @@
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 60, in custom_callback
 [WARNING] stderr:     exec(__kvlang__.co_value, idmap)
 [WARNING] stderr:     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 73, in <module>
-[WARNING] stderr:     on_release: app.exit()
-[WARNING] stderr:     
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/parser.py", line 83, in __getattribute__
-[WARNING] stderr:     return getattr(object.__getattribute__(self, '_obj'), name)
-[WARNING] stderr: AttributeError: 'DominoApp' object has no attribute 'exit'
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 276, in <module>
+[WARNING] stderr:     on_release: root.import_saves()
+[WARNING] stderr:     ^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 207, in import_saves
+[WARNING] stderr:     "\n".join(imported) if imported else "Nothing imported"
+[WARNING] stderr:                            ^^^^^^^^
+[WARNING] stderr: NameError: name 'imported' is not defined

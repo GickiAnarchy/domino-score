@@ -176,91 +176,18 @@ class OptionsScreen(MDScreen):
         d = MDDialog(
             title=title,
             text=text,
-            buttons=[MDFlatButton(text="OK", on_release=lambda x: d.dismiss())]
-        )
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: d.dismiss())])
         d.open()
 
     def export_saves(self):
-        export_dir = get_export_dir()
-        exported = []
-
-        for src in (SAVE_FILE, GAMES_FILE):
-            if os.path.exists(src):
-                dst = os.path.join(export_dir, os.path.basename(src))
-                with open(src, "r") as s, open(dst, "w") as d:
-                    d.write(s.read())
-                exported.append(os.path.basename(src))
-
-        self.show_dialog(
-            "Export Complete",
-            "\n".join(exported) if exported else "Nothing to export"
-        )
+        app = MDApp.get_running_app()
+        app.save_players()
+        self.manager.current = "menu"
 
     def import_saves(self):
-        import_dir = get_export_dir()
-        imported = []
-
-        for name in ("players.dom", "games.dom"):
-            src = os.path.join(import_dir, name)
-            dst = os.path.join(DATA_DIR, name)
-            if os.path.exists(src):
-                with open(src, "r") as s, open(dst, "w") as d:
-                    d.write(s.read())
-                imported.append(name)
-
         app = MDApp.get_running_app()
         app.players = app.load_players()
-
-        self.show_dialog(
-            "Import Complete",
-            "\n".join(imported) if imported else "Nothing imported"
-        )
-
-
-class OptionsScreen(MDScreen):
-    def show_dialog(self, title, text):
-        d = MDDialog(
-            title=title,
-            text=text,
-            buttons=[MDFlatButton(text="OK", on_release=lambda x: d.dismiss())],
-        )
-        d.open()
-
-    def export_saves(self):
-        export_dir = get_export_dir()
-        exported = []
-
-        for src in (SAVE_FILE, GAMES_FILE):
-            if os.path.exists(src):
-                dst = os.path.join(export_dir, os.path.basename(src))
-                with open(src, "r") as s, open(dst, "w") as d:
-                    d.write(s.read())
-                exported.append(os.path.basename(src))
-
-        self.show_dialog(
-            "Export Complete",
-            "\n".join(exported) if exported else "Nothing to export",
-        )
-
-    def import_saves(self):
-        import_dir = get_export_dir()
-        imported = []
-
-        for name in ("players.dom", "games.dom"):
-            src = os.path.join(import_dir, name)
-            dst = os.path.join(DATA_DIR, name)
-            if os.path.exists(src):
-                with open(src, "r") as s, open(dst, "w") as d:
-                    d.write(s.read())
-                imported.append(name)
-
-        app = MDApp.get_running_app()
-        app.players = app.load_players()
-
-        self.show_dialog(
-            "Import Complete",
-            "\n".join(imported) if imported else "Nothing imported",
-        )
+        self.manager.current = "menu"
 
 
 class HistoryCheckbox(MDCheckbox):
@@ -463,13 +390,24 @@ class GameScreen(MDScreen):
         game = app.current_game
         if not game:
             return
-
         box = self.ids.player_container
         box.clear_widgets()
+        for name, score in app.current_game.totals.items():
+            top = MDBoxLayout(orientation="horizontal", size_hint=(0.9, None), height=dp(40))
+            top.add_widget(MDLabel(text=f"{name} — {score}", font_style="H6"))
+            btns = MDBoxLayout(spacing=dp(15), size_hint=(0.9, None), height=dp(50))
+            for pts in (5, 10, 20, -5):
+                btns.add_widget(
+                    MDRaisedButton(
+                        text=f"{pts:+}",
+                        on_release=lambda x, n=name, p=pts: self.add(n, p),))
+            box.add_widget(top)
+            box.add_widget(btns)
+            box.add_widget(MDSeparator(thickness=dp(5)))
 
-        for name, score in game.totals.items():
-            box.add_widget(MDLabel(text=f"{name}: {score}", font_style="H6"))
-
+    def add(self, name, pts):
+        MDApp.get_running_app().current_game.add_points(name, pts)
+        self.refresh()
 
 # --------------------------------------------------
 # App
@@ -503,37 +441,52 @@ class DominoApp(MDApp):
         ]:
             sm.add_widget(cls(name=name))
         return sm
-
+        
     def save_players(self):
-        with open(SAVE_FILE, "w") as f:
-            json.dump({k: v.to_dict() for k, v in self.players.items()}, f, indent=2)
-
+        data = {
+            "version": 1,
+            "players": {
+                name: {
+                    "wins": player.wins,
+                    "losses": player.losses,}
+                for name, player in self.players.items()}}
+        try:
+            with open(SAVE_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logging.exception("Failed to save players")
+        
     def load_players(self):
         if not os.path.exists(SAVE_FILE):
-            return {}
-        # 1️⃣ Check file size FIRST
+            return {}    
+        # Empty file guard
         if os.path.getsize(SAVE_FILE) == 0:
-            print("Save file is empty:", SAVE_FILE)
-            return {}
-    
+            logging.warning("Players save file is empty")
+            return {}    
         try:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-    
-        except json.JSONDecodeError as e:
-            print("Invalid JSON in save file:", SAVE_FILE)
-            print(e)
+        except json.JSONDecodeError:
+            logging.error("Players save file contains invalid JSON")
             return {}
+        except Exception:
+            logging.exception("Unexpected error loading players")
+            return {}    
+        players_data = data.get("players")
+        if not isinstance(players_data, dict):
+            logging.error("Players save file has invalid schema")
+            return {}    
+        players = {}
+        for name, stats in players_data.items():
+            try:
+                players[name] = Player(
+                    name=name,
+                    wins=int(stats.get("wins", 0)),
+                    losses=int(stats.get("losses", 0)),)
+            except Exception:
+                logging.warning(f"Skipping invalid player entry: {name}")    
+        return players
     
-        except Exception as e:
-            print("Unexpected error loading save:", e)
-            return {}
-    
-        # ✅ Only proceed if data is valid
-        self.players = data.get("players", [])
-        self.scores = data.get("scores", [])        
-        return {k: Player.from_dict(v) for k, v in data.items()}
-
     def start_game(self, names):
         if len(names) < 2:
             return
@@ -548,8 +501,7 @@ class DominoApp(MDApp):
         if os.path.exists(GAMES_FILE):
             try:
                 with open(GAMES_FILE) as f:
-                    games = json.load(f)
-                
+                    games = json.load(f)                
                 games = [g for g in games if g.get("date") != game.date]
             except json.decoder.JSONDecodeError as e:
                 print(e)
