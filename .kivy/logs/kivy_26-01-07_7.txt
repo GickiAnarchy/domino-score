@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-30_6.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-07_7.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -29,9 +29,8 @@
 [INFO   ] Loader: using a thread pool of 2 workers
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 432, in <module>
-[WARNING] stderr:     DominoApp().run()
-[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 642, in <module>
+[WARNING] stderr:     else:
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
 [WARNING] stderr:     runTouchApp()
 [WARNING] stderr:     ~~~~~~~~~~~^^
@@ -62,8 +61,23 @@
 [WARNING] stderr:     ~~~~~~~~~~~~~^^^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 727, in kivy._event.EventDispatcher.dispatch
 [WARNING] stderr:   File "kivy/_event.pyx", line 1307, in kivy._event.EventObservers.dispatch
-[WARNING] stderr:   File "kivy/_event.pyx", line 1231, in kivy._event.EventObservers._dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 175, in <lambda>
-[WARNING] stderr:     buttons=[MDFlatButton(text="OK", on_release=lambda x: x.dismiss())],
-[WARNING] stderr:                                                           ^^^^^^^^^
-[WARNING] stderr: AttributeError: 'MDFlatButton' object has no attribute 'dismiss'
+[WARNING] stderr:   File "kivy/_event.pyx", line 1191, in kivy._event.EventObservers._dispatch
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 60, in custom_callback
+[WARNING] stderr:     exec(__kvlang__.co_value, idmap)
+[WARNING] stderr:     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 154, in <module>
+[WARNING] stderr:     on_release: root.save_game()
+[WARNING] stderr:     
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 431, in save_game
+[WARNING] stderr:     game.date = datetime.fromisoformat(self.ids.date_field.text).isoformat()
+[WARNING] stderr:     ^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 599, in save_edited_game
+[WARNING] stderr:     def save_edited_game(self, edited_game):
+[WARNING] stderr:                            ^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 226, in to_dict
+[WARNING] stderr:     "high_score": high_score,
+[WARNING] stderr:           ^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 217, in get_results
+[WARNING] stderr:     losers = [
+[WARNING] stderr:     
+[WARNING] stderr: TypeError: 'str' object is not callable

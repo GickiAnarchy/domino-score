@@ -3,6 +3,7 @@ import logging
 import os
 import random
 from datetime import datetime
+from uuid import uuid4
 from android.permissions import request_permissions
 
 from kivy.core.text import LabelBase
@@ -150,6 +151,10 @@ class Player:
         self.name = name
         self.wins = wins
         self.losses = losses
+    
+    def reset_stats(self):
+        self.wins = 0
+        self.losses = 0
 
     def to_dict(self):
         return self.__dict__
@@ -160,7 +165,8 @@ class Player:
 
 
 class GameScore:
-    def __init__(self, players):
+    def __init__(self, players, id = None):
+        self.id = id or str(uuid4())
         self.date = datetime.now().isoformat()
         self.players = players
         self.totals = {p.name: 0 for p in players}
@@ -179,12 +185,51 @@ class GameScore:
             return None
         return max(self.totals.items(), key=lambda x: x[1])[0]
         
-    def to_dict(self):
+    def check_finished(self):
+        """Return True if any player has reached MAX_POINTS"""
+        return any(score >= MAX_POINTS for score in self.totals.values())
+    
+    def get_results(self):
+        """
+        Returns:
+            {"finished": bool,
+             "winners": [names],
+             "losers": [names],
+             "high_score": int}
+        """
+        if not self.totals:
+            return None
+
+        finished = self.check_finished()
+        if not finished:
+            return {
+                "finished": False,
+                "winners": None,
+                "losers": [],
+                "high_score": None,}
+        
+        high_score = max(self.totals.values())
+        winners = max(self.totals, key=self.totals.get)
+        losers = [
+            name for name in self.totals.keys()
+            if name not in winners]
+        
         return {
+            "finished": True,
+            "winners": winners,
+            "losers": losers,
+            "high_score": high_score,
+        }
+    
+    def to_dict(self):
+        results = self.get_results()
+        return {
+            "id": self.id,
             "date": self.date,
             "totals": self.totals,
-            "winner": self.winner(),
-            "finished": self.finished,}
+            "finished": results["finished"] if results else False,
+            "winners": results["winners"] if results else None,
+            "losers": results["losers"] if results else [],}
 
 
 # --------------------------------------------------
@@ -214,8 +259,7 @@ class MenuScreen(MDScreen):
         app = MDApp.get_running_app()
         self.ids.start_btn.disabled = not bool(app.players)
         self.ids.history_btn.disabled = not (
-            GAMES_FILE and os.path.exists(GAMES_FILE)
-        )
+            GAMES_FILE and os.path.exists(GAMES_FILE))
         app = MDApp.get_running_app()
         self.ids.start_btn.disabled = not bool(app.players)
         self.ids.history_btn.disabled = not (
@@ -252,32 +296,33 @@ class HistoryScreen(MDScreen):
 
     def on_enter(self):
         if not ids_ready(self, "history_list"):
-            return
-        
+            return        
         box = self.ids.history_list
         box.clear_widgets()
         self.selected.clear()
-
         if not os.path.exists(GAMES_FILE):
             box.add_widget(MDLabel(text="No games yet"))
             return
-
         try:
-            with open(GAMES_FILE) as f:
-                games = json.load(f)
+            games = safe_load_json(GAMES_FILE, [])
+            changed = False
+            for g in games:
+                if "id" not in g:
+                    g["id"] = str(uuid4())
+                    changed = True
+            if changed:
+                atomic_write_json(GAMES_FILE, games)
         except Exception:
             box.add_widget(MDLabel(text="Corrupted game history"))
             return
-
         for g in reversed(games):
             row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
             cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
-            cb.game_id = g.get("date")
+            cb.game_id = g.get("id")
             cb.bind(active=self.on_checkbox)
             row.add_widget(cb)
-
             col = MDBoxLayout(orientation="vertical")
-            col.add_widget(MDLabel(text=f"{g.get('date')[:16]} — {g.get('winner')}"))
+            col.add_widget(MDLabel(text=f"{g.get('date')[:16]} — {g.get('winners')}"))
             col.add_widget(MDLabel(text=str(g.get('totals')), font_style="Caption"))
             row.add_widget(col)
             box.add_widget(row)
@@ -285,8 +330,7 @@ class HistoryScreen(MDScreen):
     def on_checkbox(self, checkbox, value):
         game_id = checkbox.game_id
         if not game_id:
-            return
-    
+            return    
         if value:
             self.selected.add(game_id)
         else:
@@ -296,29 +340,23 @@ class HistoryScreen(MDScreen):
         self.selected.discard(None)
         if not self.selected:
             return
-
         games = safe_load_json(GAMES_FILE, [])
-
-        games = [g for g in games if g.get("date") not in self.selected]
-
+        games = [g for g in games if g.get("id") not in self.selected]
         with open(GAMES_FILE, "w") as f:
             json.dump(games, f, indent=2)
-
         self.on_enter()
 
     def edit_selected(self):
         self.selected.discard(None)
         if len(self.selected) != 1:
             return
-
         game_id = next(iter(self.selected))
-
         games = safe_load_json(GAMES_FILE, []) 
-
         for g in games:
-            if g.get("date") == game_id:
+            if g.get("id") == game_id:
                 app = MDApp.get_running_app()
                 game = GameScore([])
+                game.id=g["id"]
                 game.date = g["date"]
                 game.totals = g["totals"]
                 game.finished = g.get("finished", False)
@@ -385,9 +423,10 @@ class EditGameScreen(MDScreen):
         try:
             game.date = datetime.fromisoformat(self.ids.date_field.text).isoformat()
         except ValueError:
-            game.date = datetime.now().isoformat()
+            game.date = "Corrupted Date"
         game.totals = new_totals
         game.players = [Player(n) for n in new_totals.keys()]
+        game.get_results()
         app.save_edited_game(game)
 
     def cancel(self):
@@ -417,7 +456,6 @@ class PlayerSelectScreen(MDScreen):
             return
         box = self.ids.player_list
         box.clear_widgets()
-
         for name in MDApp.get_running_app().players:
             btn = MDRaisedButton(
                 text=name,
@@ -470,9 +508,9 @@ class GameScreen(MDScreen):
         app.current_game.add_points(name, pts)
         self.refresh()
 
-# --------------------------------------------------
+# ----------------------------------------------
 # App
-# --------------------------------------------------
+# ----------------------------------------------
 
 class DominoApp(MDApp):
     def build(self):
@@ -552,22 +590,18 @@ class DominoApp(MDApp):
         return players
 
     def save_edited_game(self, edited_game):
-        games = safe_load_json(GAMES_FILE, [])
-    
+        games = safe_load_json(GAMES_FILE, [])    
         # Replace game with same date
         replaced = False
         for i, g in enumerate(games):
-            if g.get("date") == edited_game.date:
+            if g.get("id") == edited_game.id:
                 games[i] = edited_game.to_dict()
                 replaced = True
-                break
-    
+                break    
         # Fallback: append if not found
         if not replaced:
-            games.append(edited_game.to_dict())
-    
-        atomic_write_json(GAMES_FILE, games)
-    
+            games.append(edited_game.to_dict())    
+        atomic_write_json(GAMES_FILE, games)    
         self.current_game = None
         self.root.current = "history"    
             
@@ -578,13 +612,11 @@ class DominoApp(MDApp):
         for name in names:
             player = self.players.get(name)
             if player:
-                players.append(player)
-    
+                players.append(player)    
         if len(players) < 2:
             logging.warning("Not enough valid players to start game")
-            return
-    
-        self.current_game = GameScore(players)
+            return    
+        self.current_game = GameScore(players)        
         self.root.current = "game"
 
     def finish_game(self):
@@ -592,9 +624,15 @@ class DominoApp(MDApp):
         if not game:
             return
         games = safe_load_json(GAMES_FILE, [])
-        games = [g for g in games if g.get("date") != game.date]
+        games = [g for g in games if g.get("id") != game.id]
         games.append(game.to_dict())
         atomic_write_json(GAMES_FILE, games)
+        res = game.get_results()
+        for p in game.players:
+            if p.name in res["winners"]:
+                p.wins += 1
+            else:
+                p.losses += 1
         self.current_game = None
         self.root.current = "menu"
 
