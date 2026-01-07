@@ -4,13 +4,13 @@
 # App metadata
 # --------------------------------------------------
 title = Domino Scorebook
-package.name = domscores
+package.name = dominoscores
 package.domain = com.gicki
 
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 
-version = 0.5
+version = 0.9.2
 
 # --------------------------------------------------
 # Python / Kivy requirements
@@ -18,7 +18,7 @@ version = 0.5
 requirements = kivy,kivymd,pyjnius
 
 orientation = portrait
-fullscreen = 0
+fullscreen = 1
 
 # App icon
 icon.filename = %(source.dir)s/data/icon.png
@@ -27,6 +27,7 @@ presplash.filename = %(source.dir)s/data/splash.png
 # --------------------------------------------------
 # Android configuration (CLEAN)
 # --------------------------------------------------
+android.permissions = READ_MEDIA_FILES, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
 # Target Android SDK
 android.api = 33

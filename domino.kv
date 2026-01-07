@@ -1,13 +1,19 @@
+#:import dp kivy.metrics.dp
+
 <MenuScreen>:
+    name: "menu"
+
     MDBoxLayout:
         orientation: "vertical"
         padding: dp(20)
-        spacing: dp(15)
-        
+        spacing: dp(20)
+  
         MDBoxLayout:
             orientation: "vertical"
             padding: dp(20)
             spacing: dp(15)
+            size_hint_y: None
+            height: dp(260)   # <-- creates space for logo + title + fact
             
             FitImage:
                 source: "data/icon_1024.png"
@@ -16,104 +22,66 @@
                 pos_hint: {"center_x": 0.5}
 
             MDLabel:
-                text: "Domino\nScorebook"
+                id: title_label
+                text: "Domino Scorebook"
                 font_style: "H4"
-                font_name: "BreakAway"
-                font_size: "60sp"
                 halign: "center"
-                pos_hint: {"center_y":0.9}
-            
-            MDLabel:
-                text: root.get_fact()
-                halign: "center"
-                pos_hint:{"center_y": 0.2}
+                size_hint_y: None
+                height: self.texture_size[1]
 
+            MDLabel:
+                id: fact_label
+                text: ""
+                halign: "center"
+                theme_text_color: "Secondary"
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+    
         MDRaisedButton:
-            text: "New Game"
+            id: start_btn
+            text: "Start Game"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "select"
 
         MDRaisedButton:
             text: "Create Player"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "create"
 
         MDRaisedButton:
+            id: history_btn
             text: "History"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "history"
         
-        MDRaisedButton:
-            text: "Options"
-            on_release: app.root.current = "options"
-
-
-<OptionsScreen>:
-    BoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-
-        # --- TOP (title) ---
+        Widget:
+        
         MDBoxLayout:
             size_hint_y: None
-            height: dp(60)
-            size_hint_x: 1
-
-            MDLabel:
-                text: "Options"
-                halign: "center"
-                font_style: "H5"
-                
-
-        # --- MIDDLE (button grid, centered) ---
-        MDBoxLayout:
-            orientation: "vertical"
-            size_hint_y: 1
+            height: dp(48)
+            spacing: dp(20)
             pos_hint: {"center_x": 0.5}
-
-            Widget:  # spacer (push grid to vertical center)
-
-            MDGridLayout:
-                cols: 2
-                spacing: dp(12)
-                size_hint: None, None
-                width: dp(260)
-                height: self.minimum_height
-                pos_hint: {"center_x": 0.5}
-
-                MDRaisedButton:
-                    text: "Export Saves"
-                    size_hint_x: None
-                    width: dp(120)
-                    on_release: root.export_saves()
-
-                MDRaisedButton:
-                    text: "Import Saves"
-                    size_hint_x: None
-                    width: dp(120)
-                    on_release: root.import_saves()
-
-                MDRaisedButton:
-                    text: "Reset All"
-                    size_hint_x: None
-                    width: dp(120)
-                    md_bg_color: 1, 0, 0, 1
-                    on_release: root.show_confirm_reset()
-
-            Widget:  # spacer (balances centering)
-
-        # --- BOTTOM (back button pinned) ---
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(56)
+            size_hint_x: None
+            width: dp(260)  # controls how far apart they are
 
             MDRaisedButton:
-                text: "Back"
-                size_hint_x: None
-                width: dp(120)
-                pos_hint: {"center_x": 0.5}
-                on_release: app.root.current = "menu"
-            
+                text: "Options"
+                size_hint_x: 1
+                on_release: app.root.current = "options"
+        
+            MDRaisedButton:
+                text: "Exit"
+                size_hint_x: 1
+                on_release: app.stop()
+
 
 <CreatePlayerScreen>:
+    name: "create"
+
     MDBoxLayout:
         orientation: "vertical"
         padding: dp(20)
@@ -121,71 +89,200 @@
 
         MDTextField:
             id: player_name
-            hint_text: "Player name"
+            hint_text: "Player Name"
+            multiline: False
 
         MDRaisedButton:
             text: "Save"
+            size_hint_y: None
+            height: dp(48)
             on_release: root.save_player()
-        
+
         MDRaisedButton:
             text: "Back"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "menu"
         
-        MDBoxLayout:
-            orientation:"vertical"
-            size_hint:(1.0, 0.5)
+        MDWidget:
 
 
-<PlayerSelectScreen>:
+<EditGameScreen>:
+    name: "edit"
+
     MDBoxLayout:
         orientation: "vertical"
         padding: dp(20)
+        spacing: dp(20)
+
+        # ---------- TITLE ----------
+        MDLabel:
+            text: "ADD / EDIT GAMES"
+            halign: "center"
+            font_style: "H4"
+            bold: True
+            size_hint_y: None
+            height: self.texture_size[1] + dp(20)
+
+        # ---------- DATE / TIME ----------
+        MDTextField:
+            id: date_field
+            hint_text: "YYYY-MM-DDTHH:MM:SS"
+            helper_text: "ISO 8601 datetime"
+            helper_text_mode: "on_focus"
+            mode: "rectangle"
+        
+        MDSeparator:
+        
+        ScrollView:
+            MDBoxLayout:
+                id: score_table
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: dp(10)
+        
+        # ---------- BUTTONS ----------
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(20)
+            padding: (dp(10), 0)
+
+            MDRaisedButton:
+                text: "Save"
+                md_bg_color: app.theme_cls.primary_color
+                on_release: root.save_game()
+            
+            MDTextButton:
+                text: "+ Add Player"
+                pos_hint: {"center_x": 0.5}
+                on_release: root.add_row()
+
+            MDRaisedButton:
+                text: "Cancel"
+                on_release: root.cancel()
+
+
+<PlayerSelectScreen>:
+    name: "select"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
 
         ScrollView:
             MDBoxLayout:
                 id: player_list
                 orientation: "vertical"
-                adaptive_height: True
                 spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
 
         MDRaisedButton:
-            text: "Start Game"
+            text: "Start"
+            size_hint_y: None
+            height: dp(48)
             on_release: root.start()
-        
+
         MDRaisedButton:
             text: "Back"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "menu"
 
 
 <GameScreen>:
-    ScrollView:
-        MDBoxLayout:
-            id: player_container
-            orientation: "vertical"
-            adaptive_height: True
-            spacing: dp(10)
-            padding: dp(10)
-    
-    MDRaisedButton:
-        text:"End Game"
-        on_release: root.end_pressed()
+    name: "game"
 
-
-<HistoryScreen>:
     MDBoxLayout:
         orientation: "vertical"
         padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: player_container
+                orientation: "vertical"
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDRaisedButton:
+            text: "End Game"
+            size_hint_y: None
+            height: dp(48)
+            on_release: app.finish_game()
+
+
+<HistoryScreen>:
+    name: "history"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
 
         ScrollView:
             MDBoxLayout:
                 id: history_list
                 orientation: "vertical"
-                adaptive_height: True
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDBoxLayout:
+            orientation:"horizontal"
+            padding: dp(10)
+            spacing: dp(10)
+        
+            MDRaisedButton:
+                text: "Delete Selected"
+                size_hint_y: None
+                height: dp(48)
+                on_release: root.delete_selected()
+            
+            MDRaisedButton:
+                text: "Edit Selected"
+                size_hint_y: None
+                height: dp(48)
+                on_release: root.edit_selected()
 
         MDRaisedButton:
-            text: "Delete Selected"
-            on_release: root.delete_selected()
-            
+            text: "Back"
+            size_hint_y: None
+            height: dp(48)
+            on_release: app.root.current = "menu"
+
+
+<OptionsScreen>:
+    name: "options"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        MDRaisedButton:
+            text: "Export Saves"
+            size_hint_y: None
+            height: dp(48)
+            on_release: root.export_saves()
+
+        MDRaisedButton:
+            text: "Import Saves"
+            size_hint_y: None
+            height: dp(48)
+            on_release: root.import_saves()
+        
+        MDSeparator:
+
         MDRaisedButton:
             text: "Back"
+            size_hint_y: None
+            height: dp(48)
             on_release: app.root.current = "menu"
+        
+        MDBoxLayout:
+            orientation:"vertical"
+            size_hint:(1.0, 0.5)
