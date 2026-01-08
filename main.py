@@ -11,6 +11,7 @@ from kivy.metrics import dp
 from kivy.properties import ListProperty, NumericProperty
 from kivy.utils import get_color_from_hex, platform
 from kivy.uix.screenmanager import ScreenManager
+from kivymd.toast import toast
 
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -304,12 +305,20 @@ class OptionsScreen(MDScreen):
     
         players_src = os.path.join(export_dir, "players.dom")
         games_src = os.path.join(export_dir, "games.dom")
-    
-        if os.path.exists(players_src):
-            atomic_write_json(SAVE_FILE, safe_load_json(players_src, {}))
-    
-        if os.path.exists(games_src):
-            atomic_write_json(GAMES_FILE, safe_load_json(games_src, []))
+        try:
+            safe_load_json(players_src, "Player")
+            toast("Imported players")      
+            safe_load_json(games_src, "GameScore")
+            toast("Imported Games")
+        except Exception as e:
+            print(e)
+            return
+        
+        #if os.path.exists(players_src):
+#            atomic_write_json(SAVE_FILE, safe_load_json(players_src, {}))
+#    
+#        if os.path.exists(games_src):
+#            atomic_write_json(GAMES_FILE, safe_load_json(games_src, []))
     
         app.players = app.load_players()
         app.sync_players_from_games()
