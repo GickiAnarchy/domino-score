@@ -4,7 +4,7 @@ import os
 import random
 from datetime import datetime
 from uuid import uuid4
-from android.permissions import request_permissions
+#from android.permissions import request_permissions
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
@@ -80,6 +80,19 @@ def atomic_write_json(path, data):
                 os.remove(tmp_path)
         except Exception:
             pass
+
+def request_storage_permissions():
+    if platform != "android":
+        return
+
+    try:
+        from android.permissions import request_permissions, Permission
+        request_permissions([
+            Permission.READ_EXTERNAL_STORAGE,
+            Permission.WRITE_EXTERNAL_STORAGE,
+        ])
+    except Exception as e:
+        logging.warning(f"Permission request skipped: {e}")
 
 def get_data_dir():
     if platform == "android":
@@ -269,13 +282,37 @@ class OptionsScreen(MDScreen):
         d.open()
 
     def export_saves(self):
+        request_storage_permissions()
+    
         app = MDApp.get_running_app()
-        app.save_players()
+        export_dir = get_export_dir()
+    
+        atomic_write_json(
+            os.path.join(export_dir, "players.dom"),
+            safe_load_json(SAVE_FILE, {})
+        )
+        atomic_write_json(
+            os.path.join(export_dir, "games.dom"),
+            safe_load_json(GAMES_FILE, [])
+        )
+    
         self.manager.current = "menu"
 
     def import_saves(self):
         app = MDApp.get_running_app()
+        export_dir = get_export_dir()
+    
+        players_src = os.path.join(export_dir, "players.dom")
+        games_src = os.path.join(export_dir, "games.dom")
+    
+        if os.path.exists(players_src):
+            atomic_write_json(SAVE_FILE, safe_load_json(players_src, {}))
+    
+        if os.path.exists(games_src):
+            atomic_write_json(GAMES_FILE, safe_load_json(games_src, []))
+    
         app.players = app.load_players()
+        app.sync_players_from_games()
         self.manager.current = "menu"
 
 
@@ -336,8 +373,7 @@ class HistoryScreen(MDScreen):
             return
         games = safe_load_json(GAMES_FILE, [])
         games = [g for g in games if g.get("id") not in self.selected]
-        with open(GAMES_FILE, "w") as f:
-            json.dump(games, f, indent=2)
+        atomic_write_json(GAMES_FILE, games)
         self.on_enter()
 
     def edit_selected(self):
@@ -512,7 +548,7 @@ class DominoApp(MDApp):
     def build(self):
         setup_logger()
         global DATA_DIR, SAVE_FILE, GAMES_FILE
-        DATA_DIR = get_export_dir()
+        DATA_DIR = get_data_dir()
         os.makedirs(DATA_DIR, exist_ok=True)
         SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
         GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
