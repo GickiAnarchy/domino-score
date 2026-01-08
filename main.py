@@ -34,19 +34,16 @@ def setup_logger():
             base = app_storage_path()
         else:
             base = os.getcwd()
-
         log_dir = os.path.join(base, "logs")
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, "domino.log")
     except Exception:
         log_file = "domino.log"
-
     logging.basicConfig(
         filename=log_file,
         filemode="a",
         level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-    )
+        format="%(asctime)s | %(levelname)s | %(message)s",)
     logging.info("=== App starting ===")
 
 def ids_ready(screen, *names):
@@ -108,8 +105,8 @@ def get_export_dir():
     except Exception:
         path = os.getcwd()
     return path
-  
-      
+
+
 DATA_DIR = None
 SAVE_FILE = None
 GAMES_FILE = None
@@ -140,8 +137,9 @@ FACTS = [
 COLORS = [
     "Red", "Pink", "Purple", "DeepPurple", "Indigo", "Blue",
     "LightBlue", "Cyan", "Teal", "Green", "LightGreen", "Lime",
-    "Yellow", "Amber", "Orange", "DeepOrange", "Brown", "Gray", "BlueGray"
-]
+    "Yellow", "Amber", "Orange", "DeepOrange", "Brown", "Gray", "BlueGray"]
+
+THEME_BLK_RED = ["Black", "Red", "Gray"]
 
 
 # --------------------------------------------------
@@ -207,7 +205,7 @@ class GameScore:
                 "finished": False,
                 "winner": None,
                 "losers": [],
-                "high_score": None,}        
+                "high_score": None,}    
         high_score = max(self.totals.values())
         winner = max(self.totals.items(), key=lambda x: x[1])[0]
         losers = [name for name in self.totals if name != winner]        
@@ -623,8 +621,8 @@ class DominoApp(MDApp):
         game = self.current_game
         if not game:
             return    
-        games = safe_load_json(GAMES_FILE, [])
-        games = [g for g in games if g.get("id") != game.id]
+        games1 = safe_load_json(GAMES_FILE, [])
+        games = [g for g in games1 if g.get("id") != game.id]
         games.append(game.to_dict())
         atomic_write_json(GAMES_FILE, games)   
         self.current_game = None
@@ -632,19 +630,15 @@ class DominoApp(MDApp):
 
     def compute_player_stats(self):
         stats = {}
-        games = safe_load_json(GAMES_FILE, [])
-    
+        games = safe_load_json(GAMES_FILE, [])    
         for g in games:
             if not g.get("finished"):
-                continue
-    
+                continue    
             winner = g.get("winner")
             if not winner:
-                continue
-    
+                continue  
             for name in g.get("totals", {}):
-                stats.setdefault(name, {"wins": 0, "losses": 0})
-    
+                stats.setdefault(name, {"wins": 0, "losses": 0})   
             stats[winner]["wins"] += 1
             for name in g["totals"]:
                 if name != winner:
