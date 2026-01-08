@@ -10,7 +10,7 @@ package.domain = com.gicki
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 
-version = 0.9.2
+version = 0.9.4
 
 # --------------------------------------------------
 # Python / Kivy requirements

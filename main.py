@@ -132,7 +132,9 @@ FACTS = [
     "Just a nickel at a time.",
     "Eight, skate, and donate.",
     "Niner, Not a tight vaginer",
-    "Ready for a spanking?"
+    "Ready for a spanking?",
+    "Too many doubles in your hand?\nYou might be able to call for\na redraw!",
+    "Whoever leads the hand\nchooses how many dominoes \nto start with."
 ]
 
 COLORS = [
@@ -193,33 +195,27 @@ class GameScore:
         """
         Returns:
             {"finished": bool,
-             "winners": [names],
+             "winner": [names],
              "losers": [names],
              "high_score": int}
         """
         if not self.totals:
             return None
-
         finished = self.check_finished()
         if not finished:
             return {
                 "finished": False,
-                "winners": None,
+                "winner": None,
                 "losers": [],
-                "high_score": None,}
-        
+                "high_score": None,}        
         high_score = max(self.totals.values())
-        winners = max(self.totals, key=self.totals.get)
-        losers = [
-            name for name in self.totals.keys()
-            if name not in winners]
-        
+        winner = max(self.totals.items(), key=lambda x: x[1])[0]
+        losers = [name for name in self.totals if name != winner]        
         return {
             "finished": True,
-            "winners": winners,
+            "winner": winner,
             "losers": losers,
-            "high_score": high_score,
-        }
+            "high_score": high_score,}
     
     def to_dict(self):
         results = self.get_results()
@@ -228,7 +224,7 @@ class GameScore:
             "date": self.date,
             "totals": self.totals,
             "finished": results["finished"] if results else False,
-            "winners": results["winners"] if results else None,
+            "winner": results["winner"] if results else None,
             "losers": results["losers"] if results else [],}
 
 
@@ -322,7 +318,7 @@ class HistoryScreen(MDScreen):
             cb.bind(active=self.on_checkbox)
             row.add_widget(cb)
             col = MDBoxLayout(orientation="vertical")
-            col.add_widget(MDLabel(text=f"{g.get('date')[:16]} — {g.get('winners')}"))
+            col.add_widget(MDLabel(text=f"{g.get('date')[:16]} — {g.get('winner')}"))
             col.add_widget(MDLabel(text=str(g.get('totals')), font_style="Caption"))
             row.add_widget(col)
             box.add_widget(row)
@@ -406,8 +402,6 @@ class EditGameScreen(MDScreen):
         game = app.current_game
         if not game:
             return
-        if not game:
-            return
         new_totals = {}
         for row in self.ids.score_table.children:
             name = row.name_field.text.strip()
@@ -443,6 +437,10 @@ class CreatePlayerScreen(MDScreen):
         app.save_players()
         self.ids.player_name.text = ""
         self.manager.current = "menu"
+
+
+class StatsScreen(MDScreen):
+    pass
 
 
 class PlayerSelectScreen(MDScreen):
@@ -521,6 +519,7 @@ class DominoApp(MDApp):
         SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
         GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
         self.players = self.load_players()
+        self.sync_players_from_games()
         self.current_game = None
         self.theme_cls.primary_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
@@ -544,6 +543,7 @@ class DominoApp(MDApp):
             (OptionsScreen, "options"),
             (HistoryScreen,"history"),
             (EditGameScreen,"edit"),
+            (StatsScreen, "stats"),
         ]:
             sm.add_widget(cls(name=name))
         return sm
@@ -622,20 +622,47 @@ class DominoApp(MDApp):
     def finish_game(self):
         game = self.current_game
         if not game:
-            return
+            return    
         games = safe_load_json(GAMES_FILE, [])
         games = [g for g in games if g.get("id") != game.id]
         games.append(game.to_dict())
-        atomic_write_json(GAMES_FILE, games)
-        res = game.get_results()
-        for p in game.players:
-            if p.name in res["winners"]:
-                p.wins += 1
-            else:
-                p.losses += 1
+        atomic_write_json(GAMES_FILE, games)   
         self.current_game = None
         self.root.current = "menu"
 
+    def compute_player_stats(self):
+        stats = {}
+        games = safe_load_json(GAMES_FILE, [])
+    
+        for g in games:
+            if not g.get("finished"):
+                continue
+    
+            winner = g.get("winner")
+            if not winner:
+                continue
+    
+            for name in g.get("totals", {}):
+                stats.setdefault(name, {"wins": 0, "losses": 0})
+    
+            stats[winner]["wins"] += 1
+            for name in g["totals"]:
+                if name != winner:
+                    stats[name]["losses"] += 1    
+        return stats
 
+    def sync_players_from_games(self):
+        computed = self.compute_player_stats()
+        for name, player in self.players.items():
+            if name in computed:
+                player.wins = computed[name]["wins"]
+                player.losses = computed[name]["losses"]
+            else:
+                player.wins = 0
+                player.losses = 0
+    
+    
+    
+    
 if __name__ == "__main__":
     DominoApp().run()
