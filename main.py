@@ -589,6 +589,7 @@ class DominoApp(MDApp):
             (StatsScreen, "stats"),
         ]:
             sm.add_widget(cls(name=name))
+        toast("version 0.9.4")
         return sm
         
     def save_players(self):
