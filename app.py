@@ -165,6 +165,5 @@ class DominoApp(MDApp):
             else:
                 player.wins = 0
                 player.losses = 0
-    
-    
- 
+
+

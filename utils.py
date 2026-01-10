@@ -28,8 +28,10 @@ def setup_logger():
         format="%(asctime)s | %(levelname)s | %(message)s",)
     logging.info("=== App starting ===")
 
+
 def ids_ready(screen, *names):
     return all(name in screen.ids for name in names)
+
 
 def safe_load_json(path, default):
     if not path or not os.path.exists(path):
@@ -47,6 +49,7 @@ def safe_load_json(path, default):
         logging.exception(f"Failed to load JSON: {path}")
         return default
 
+
 def atomic_write_json(path, data):
     tmp_path = f"{path}.tmp"
     try:
@@ -63,18 +66,18 @@ def atomic_write_json(path, data):
         except Exception:
             pass
 
+
 def request_storage_permissions():
     if platform != "android":
         return
-
     try:
         from android.permissions import request_permissions, Permission
         request_permissions([
             Permission.READ_EXTERNAL_STORAGE,
-            Permission.WRITE_EXTERNAL_STORAGE,
-        ])
+            Permission.WRITE_EXTERNAL_STORAGE,])
     except Exception as e:
         logging.warning(f"Permission request skipped: {e}")
+
 
 def get_data_dir():
     if platform == "android":
@@ -100,3 +103,4 @@ def get_export_dir():
     except Exception:
         path = os.getcwd()
     return path
+
