@@ -2,6 +2,7 @@ from utils import *
 from constants import *
 from ui_helpers import *
 from models import *
+import logging
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp

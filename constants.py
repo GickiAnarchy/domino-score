@@ -1,11 +1,6 @@
 from kivy.utils import get_color_from_hex
 
 
-
-DATA_DIR = None
-SAVE_FILE = None
-GAMES_FILE = None
-
 MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")

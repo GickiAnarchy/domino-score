@@ -6,7 +6,7 @@ import random
 from screens import ALL_SCREENS
 from models import Player, GameScore
 from utils import setup_logger, get_data_dir, get_export_dir, atomic_write_json, safe_load_json 
-from constants import DATA_DIR, SAVE_FILE, GAMES_FILE, MAX_POINTS, COLORS
+from constants import MAX_POINTS, COLORS
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
@@ -29,11 +29,10 @@ from kivymd.uix.textfield import MDTextField
 class DominoApp(MDApp):
     def build(self):
         setup_logger()
-        global DATA_DIR, SAVE_FILE, GAMES_FILE
-        DATA_DIR = get_data_dir()
-        os.makedirs(DATA_DIR, exist_ok=True)
-        SAVE_FILE = os.path.join(DATA_DIR, "players.dom")
-        GAMES_FILE = os.path.join(DATA_DIR, "games.dom")
+        self.data_dir = get_data_dir()
+        os.makedirs(self.data_dir, exist_ok=True)
+        self.save_file = os.path.join(self.data_dir, "players.dom")
+        self.games_file = os.path.join(self.data_dir, "games.dom")
         self.players = self.load_players()
         self.sync_players_from_games()
         self.current_game = None
@@ -65,17 +64,17 @@ class DominoApp(MDApp):
                     "wins": player.wins,
                     "losses": player.losses,}
                 for name, player in self.players.items()}}
-        atomic_write_json(SAVE_FILE, data)
+        atomic_write_json(self.save_file, data)
         
     def load_players(self):
-        if not os.path.exists(SAVE_FILE):
+        if not os.path.exists(self.save_file):
             return {}    
         # Empty file guard
-        if os.path.getsize(SAVE_FILE) == 0:
+        if os.path.getsize(self.save_file) == 0:
             logging.warning("Players save file is empty")
             return {}    
         try:
-            with open(SAVE_FILE, "r", encoding="utf-8") as f:
+            with open(self.save_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError:
             logging.error("Players save file contains invalid JSON")
@@ -99,7 +98,7 @@ class DominoApp(MDApp):
         return players
 
     def save_edited_game(self, edited_game):
-        games = safe_load_json(GAMES_FILE, [])    
+        games = safe_load_json(self.games_file, [])    
         # Replace game with same date
         replaced = False
         for i, g in enumerate(games):
@@ -110,7 +109,7 @@ class DominoApp(MDApp):
         # Fallback: append if not found
         if not replaced:
             games.append(edited_game.to_dict())    
-        atomic_write_json(GAMES_FILE, games)    
+        atomic_write_json(self.games_file, games)    
         self.current_game = None
         self.root.current = "history"    
             
@@ -132,16 +131,16 @@ class DominoApp(MDApp):
         game = self.current_game
         if not game:
             return    
-        games1 = safe_load_json(GAMES_FILE, [])
+        games1 = safe_load_json(self.games_file, [])
         games = [g for g in games1 if g.get("id") != game.id]
         games.append(game.to_dict())
-        atomic_write_json(GAMES_FILE, games)   
+        atomic_write_json(self.games_file, games)   
         self.current_game = None
         self.root.current = "menu"
 
     def compute_player_stats(self):
         stats = {}
-        games = safe_load_json(GAMES_FILE, [])    
+        games = safe_load_json(self.games_file, [])    
         for g in games:
             if not g.get("finished"):
                 continue    

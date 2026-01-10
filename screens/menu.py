@@ -1,5 +1,6 @@
 from utils import *
 from constants import *
+import os
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
@@ -23,6 +24,7 @@ from kivymd.uix.textfield import MDTextField
 
 class MenuScreen(MDScreen):
     def on_enter(self):
+        GAMES_FILE = MDApp.get_running_app().games_file
         if not ids_ready(self, "fact_label", "start_btn", "history_btn"):
             return
         self.ids.fact_label.text = random.choice(FACTS)

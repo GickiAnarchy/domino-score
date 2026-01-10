@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_25-12-30_16.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-10_4.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -25,17 +25,7 @@
 [INFO   ] === App starting ===
 [INFO   ] GL: NPOT texture support is available
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "kivy/properties.pyx", line 2229, in kivy.properties.ColorProperty.convert
-[WARNING] stderr:   File "kivy/properties.pyx", line 2240, in kivy.properties.ColorProperty.parse_str
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/utils.py", line 98, in get_color_from_hex
-[WARNING] stderr:     value = [int(x, 16) / 255.
-[WARNING] stderr:              ~~~^^^^^^^
-[WARNING] stderr: ValueError: invalid literal for int() with base 16: 'blue'
-[WARNING] stderr: 
-[WARNING] stderr: The above exception was the direct cause of the following exception:
-[WARNING] stderr: 
-[WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 441, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 6, in <module>
 [WARNING] stderr:     DominoApp().run()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 955, in run
@@ -43,7 +33,7 @@
 [WARNING] stderr:     ~~~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 925, in _run_prepare
 [WARNING] stderr:     root = self.build()
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 389, in build
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/app.py", line 54, in build
 [WARNING] stderr:     sm.add_widget(cls(name=name))
 [WARNING] stderr:     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/screenmanager.py", line 1001, in add_widget
@@ -54,18 +44,11 @@
 [WARNING] stderr:   File "kivy/properties.pyx", line 606, in kivy.properties.Property._dispatch
 [WARNING] stderr:   File "kivy/_event.pyx", line 1307, in kivy._event.EventObservers.dispatch
 [WARNING] stderr:   File "kivy/_event.pyx", line 1213, in kivy._event.EventObservers._dispatch
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/screenmanager.py", line 1068, in on_current
-[WARNING] stderr:     screen.dispatch('on_pre_enter')
-[WARNING] stderr:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/screenmanager.py", line 1069, in on_current
+[WARNING] stderr:     screen.dispatch('on_enter')
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^
 [WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 165, in on_pre_enter
-[WARNING] stderr:     self.update_labels()
-[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 173, in update_labels
-[WARNING] stderr:     self.title_label.color = random.choice(COLORS)
-[WARNING] stderr:     ^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "kivy/weakproxy.pyx", line 35, in kivy.weakproxy.WeakProxy.__setattr__
-[WARNING] stderr:   File "kivy/properties.pyx", line 520, in kivy.properties.Property.__set__
-[WARNING] stderr:   File "kivy/properties.pyx", line 549, in kivy.properties.Property.set
-[WARNING] stderr:   File "kivy/properties.pyx", line 2232, in kivy.properties.ColorProperty.convert
-[WARNING] stderr: ValueError: MDLabel.color has an invalid format (got 'Blue')
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/menu.py", line 32, in on_enter
+[WARNING] stderr:     GAMES_FILE and os.path.exists(GAMES_FILE))
+[WARNING] stderr:     ^^^^^^^^^^
+[WARNING] stderr: NameError: name 'GAMES_FILE' is not defined
