@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-07_0.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-10_3.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -27,24 +27,4 @@
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Loader: using a thread pool of 2 workers
-[ERROR  ] Failed atomic write: /storage/emulated/0/Download/DominoScorebook/games.dom
-Traceback (most recent call last):
-  File "/storage/emulated/0/Documents/domino-score/main.py", line 76, in atomic_write_json
-    os.fsync(f.fileno())
-    ~~~~~~~~^^^^^^^^^^^^
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/__init__.py", line 179, in dump
-    for chunk in iterable:
-                 ^^^^^^^^
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/encoder.py", line 430, in _iterencode
-    yield from _iterencode_list(o, _current_indent_level)
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/encoder.py", line 326, in _iterencode_list
-    yield from chunks
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/encoder.py", line 406, in _iterencode_dict
-    yield from chunks
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/encoder.py", line 439, in _iterencode
-    o = _default(o)
-  File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/json/encoder.py", line 180, in default
-    raise TypeError(f'Object of type {o.__class__.__name__} '
-                    f'is not JSON serializable')
-TypeError: Object of type function is not JSON serializable
 [INFO   ] Base: Leaving application in progress...
