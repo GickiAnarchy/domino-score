@@ -1,10 +1,11 @@
-from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 from kivymd.toast import toast
 
 from models import GameScore
 
 
-class EditGameScreen(Screen):
+class EditGameScreen(MDScreen):
 
     # ======================================================
     # LIFECYCLE
@@ -70,4 +71,4 @@ class EditGameScreen(Screen):
 
     @property
     def app(self):
-        return self.manager.app
+        return MDApp.get_running_app()

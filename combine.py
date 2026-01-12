@@ -1,7 +1,7 @@
 import os
 
 SOURCE_DIR = "."          # directory to scan (current dir by default)
-OUTPUT_FILE = "combined_source.txt"
+OUTPUT_FILE = "main.txt"
 EXTENSIONS = (".py", ".kv")
 
 def combine_files(source_dir, output_file):

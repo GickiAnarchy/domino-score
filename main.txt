@@ -10,35 +10,36 @@
 
 import os
 import logging
-import json
 import random
 
 from screens import ALL_SCREENS
 from models import Player, GameScore
-from utils import *
-from constants import MAX_POINTS, COLORS
+from utils import (
+    setup_logger,
+    get_export_dir,
+    load_players,
+    save_players,
+    load_games,
+    save_games,
+)
+
+from constants import COLORS
 
 from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
 from kivy.uix.screenmanager import ScreenManager
-from kivymd.toast import toast
-
 from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
-
+from kivymd.toast import toast
 
 
 class DominoApp(MDApp):
+
+    # ======================================================
+    # APP BOOT
+    # ======================================================
+
     def build(self):
         setup_logger()
+
         self.data_dir = get_export_dir()
         self.players_file = os.path.join(self.data_dir, "players.dom")
         self.games_file = os.path.join(self.data_dir, "games.dom")
@@ -46,106 +47,145 @@ class DominoApp(MDApp):
         self.players = load_players(self.players_file)
         self.games = load_games(self.games_file)
 
-        self.sync_players_from_games()
         self.current_game = None
+
+        self.sync_players_from_games()
+
         self.theme_cls.primary_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
-        font_path = os.path.join(os.path.dirname(__file__), "data", "breakaway.ttf")
-        if os.path.exists(font_path):
-            try:
-                LabelBase.register(
-                    name="BreakAway",
-                    fn_regular=font_path
-                )
-            except Exception:
-                logging.exception("Failed to register BreakAway font")
-        else:
-            logging.warning("BreakAway font not found, using default")
+
+        self._register_fonts()
+
         sm = ScreenManager()
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
 
         toast("version 0.9.4")
         return sm
-        
+
+    # ======================================================
+    # FONTS
+    # ======================================================
+
+    def _register_fonts(self):
+        font_path = os.path.join(
+            os.path.dirname(__file__), "data", "breakaway.ttf"
+        )
+        if os.path.exists(font_path):
+            try:
+                LabelBase.register(
+                    name="BreakAway",
+                    fn_regular=font_path,
+                )
+            except Exception:
+                logging.exception("Font registration failed")
+
+    # ======================================================
+    # SAVE / LOAD
+    # ======================================================
+
     def save_players(self):
         save_players(self.players_file, self.players)
-    
+
     def save_games(self):
         save_games(self.games_file, self.games)
 
-    def save_edited_game(self, edited_game):
-        games = load_games()
-        # Replace game with same date
-        replaced = False
-        for i, g in enumerate(games):
-            if g.get("id") == edited_game.id:
-                games[i] = edited_game.to_dict()
-                replaced = True
-                break    
-        # Fallback: append if not found
-        if not replaced:
-            games.append(edited_game.to_dict())    
-        self.save_games()
-        self.current_game = None
-        self.root.current = "history"    
-            
+    # ======================================================
+    # GAME FLOW
+    # ======================================================
+
     def start_game(self, names):
         if not names or len(names) < 2:
-            return    
-        players = []
-        for name in names:
-            player = self.players.get(name)
-            if player:
-                players.append(player)    
-        if len(players) < 2:
-            logging.warning("Not enough valid players to start game")
-            return    
-        self.current_game = GameScore(players)        
-        self.root.current = "game"
+            return
 
+        valid_names = [name for name in names if name in self.players]
+    
+        if len(valid_names) < 2:
+            logging.warning("Not enough valid players")
+            return
+        
+        self.current_game = GameScore(valid_names)
+            self.root.current = "game"
+    
     def finish_game(self):
-        if not self.current_game:
+        if not self.game.totals:
+            toast("No scores yet")
             return
     
-        self.games = [g for g in self.games if g.id != self.current_game.id]
-        self.games.append(self.current_game)
+        self.game.finish()
     
+        if self.game.winner:
+            toast(f"{self.game.winner} wins!")
+            self.app.finish_game()
+        else:
+            toast("Tie at the top — another hand!")
+            self.game.finished = False  # unlock for next hand
+            
+    # ======================================================
+    # EDITED GAME SAVE
+    # ======================================================
+
+    def save_edited_game(self, edited_game):
+        replaced = False
+
+        for i, g in enumerate(self.games):
+            if g.id == edited_game.id:
+                self.games[i] = edited_game
+                replaced = True
+                break
+
+        if not replaced:
+            self.games.append(edited_game)
+
         self.save_games()
+        self.sync_players_from_games()
+
         self.current_game = None
-        self.root.current = "menu"
-    
+        self.root.current = "history"
+
+    # ======================================================
+    # STATS
+    # ======================================================
+
     def compute_player_stats(self):
         stats = {}
-        games = load_games(self.games_file)
-        for g in games:
-            if not g.finished:
-                continue    
-            winner = g.winner
-            if not winner:
-                continue  
+
+        for g in self.games:
+            if not g.finished or not g.winner:
+                continue
+
             for name in g.totals:
-                stats.setdefault(name, {"wins": 0, "losses": 0})   
-            stats[winner].wins += 1
+                stats.setdefault(name, {"wins": 0, "losses": 0})
+
+            stats[g.winner]["wins"] += 1
+
             for name in g.totals:
-                if name != winner:
-                    stats[name]["losses"] += 1    
+                if name != g.winner:
+                    stats[name]["losses"] += 1
+
         return stats
 
     def sync_players_from_games(self):
-        computed = self.compute_player_stats()
-        for p in self.players:
-            if p.name in computed:
-                p.wins = computed[p.name]["wins"]
-                p.losses = computed[p.name]["losses"]
+        stats = self.compute_player_stats()
+
+        for p in self.players.values():
+            if p.name in stats:
+                p.wins = stats[p.name]["wins"]
+                p.losses = stats[p.name]["losses"]
             else:
                 p.wins = 0
                 p.losses = 0
 
-    def refresh_players(self):
-        self.players = load_players()
-        return self.players
+        self.save_players()
 
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    def refresh_players(self):
+        self.players = load_players(self.players_file)
+        self.sync_players_from_games()
+        return self.players
 
 
 ===== ./combine.py =====
@@ -301,8 +341,131 @@ THEME_BLK_RED = ["Black", "Red", "Gray"]
                 text: "Exit"
                 size_hint_x: 1
                 on_release: app.stop()
+            
+
+<PlayerSelectScreen>:
+    name: "select"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: players_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(8)
+
+        MDRaisedButton:
+            text: "Start Game"
+            on_release: root.start_game()
+
+        MDFlatButton:
+            text: "Cancel"
+            on_release: root.cancel()
 
 
+<GameScreen>:
+    name: "game"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: score_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDRaisedButton:
+            text: "Finish Hand"
+            on_release: root.finish_game()
+
+        MDFlatButton:
+            text: "Cancel Game"
+            on_release: root.cancel_game()
+
+
+<HistoryScreen>:
+    name: "history"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDList:
+                id: history_list
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+
+
+<EditGameScreen>:
+    name: "edit"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: totals_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDRaisedButton:
+            text: "Save"
+            on_release: root.save()
+
+        MDFlatButton:
+            text: "Cancel"
+            on_release: root.cancel()
+
+
+<StatsScreen>:
+    name: "stats"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        MDRaisedButton:
+            id: player_button
+            text: "Select Player"
+            on_release: root.open_menu()
+
+        MDLabel:
+            id: wins
+            text: "Wins: —"
+
+        MDLabel:
+            id: losses
+            text: "Losses: —"
+
+        MDLabel:
+            id: games
+            text: "Games Played: —"
+
+        MDLabel:
+            id: winrate
+            text: "Win Rate: —"
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+         
 <CreatePlayerScreen>:
     name: "create"
 
@@ -329,154 +492,6 @@ THEME_BLK_RED = ["Black", "Red", "Gray"]
             on_release: app.root.current = "menu"
         
         MDWidget:
-
-
-<EditGameScreen>:
-    name: "edit"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-
-        # ---------- TITLE ----------
-        MDLabel:
-            text: "ADD / EDIT GAMES"
-            halign: "center"
-            font_style: "H4"
-            bold: True
-            size_hint_y: None
-            height: self.texture_size[1] + dp(20)
-
-        # ---------- DATE / TIME ----------
-        MDTextField:
-            id: date_field
-            hint_text: "YYYY-MM-DDTHH:MM:SS"
-            helper_text: "ISO 8601 datetime"
-            helper_text_mode: "on_focus"
-            mode: "rectangle"
-        
-        MDSeparator:
-        
-        ScrollView:
-            MDBoxLayout:
-                id: score_table
-                orientation: "vertical"
-                adaptive_height: True
-                spacing: dp(10)
-        
-        # ---------- BUTTONS ----------
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(60)
-            spacing: dp(20)
-            padding: (dp(10), 0)
-
-            MDRaisedButton:
-                text: "Save"
-                md_bg_color: app.theme_cls.primary_color
-                on_release: root.save_game()
-            
-            MDTextButton:
-                text: "+ Add Player"
-                pos_hint: {"center_x": 0.5}
-                on_release: root.add_row()
-
-            MDRaisedButton:
-                text: "Cancel"
-                on_release: root.cancel()
-
-
-<PlayerSelectScreen>:
-    name: "select"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-
-        ScrollView:
-            MDBoxLayout:
-                id: player_list
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDRaisedButton:
-            text: "Start"
-            size_hint_y: None
-            height: dp(48)
-            on_release: root.start()
-
-        MDRaisedButton:
-            text: "Back"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "menu"
-
-
-<GameScreen>:
-    name: "game"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-
-        ScrollView:
-            MDBoxLayout:
-                id: player_container
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDRaisedButton:
-            text: "End Game"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.finish_game()
-
-
-<HistoryScreen>:
-    name: "history"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-
-        ScrollView:
-            MDBoxLayout:
-                id: history_list
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDBoxLayout:
-            orientation:"horizontal"
-            padding: dp(10)
-            spacing: dp(10)
-        
-            MDRaisedButton:
-                text: "Delete Selected"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.delete_selected()
-            
-            MDRaisedButton:
-                text: "Edit Selected"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.edit_selected()
-
-        MDRaisedButton:
-            text: "Back"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "menu"
 
 
 <OptionsScreen>:
@@ -512,60 +527,7 @@ THEME_BLK_RED = ["Black", "Red", "Gray"]
             size_hint:(1.0, 0.5)
 
 
-<StatsScreen>:
-    name: "stats"
 
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-        
-        MDLabel:
-            text:"Statistics"
-            halign: "center"
-            font_style: "H4"
-            size_hint_y: None
-            height: self.texture_size[1] + dp(20)
-
-        MDRaisedButton:
-            id: player_button
-            text: "Select Player"
-            size_hint_x: 1
-            on_release: root.open_menu()
-
-        MDCard:
-            orientation: "vertical"
-            padding: dp(16)
-            spacing: dp(10)
-            radius: [16]
-            elevation: 4
-
-            MDLabel:
-                text: "Wins: " + str(root.wins)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Losses: " + str(root.losses)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Games Played: " + str(root.games_played)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Win Rate: " + str(root.win_rate) + "%"
-                font_style: "H6"
-        
-        MDBoxLayout:
-            orientation:"horizontal"
-            padding:dp(10)
-            spacing:dp(10)
-            
-            MDRaisedButton:
-                text: "Back"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.on_back()
 
 
 ===== ./kivy_config.py =====
@@ -589,17 +551,20 @@ if __name__ == "__main__":
 ===== ./models.py =====
 
 from datetime import datetime
-import json
 from uuid import uuid4
 
 from constants import MAX_POINTS
 
 
+# ==========================================================
+# PLAYER
+# ==========================================================
+
 class Player:
     def __init__(self, name, wins=0, losses=0):
         self.name = name
-        self.wins = wins
-        self.losses = losses
+        self.wins = int(wins)
+        self.losses = int(losses)
 
     def reset_stats(self):
         self.wins = 0
@@ -621,77 +586,212 @@ class Player:
         )
 
 
+# ==========================================================
+# GAME SCORE
+# ==========================================================
+
 class GameScore:
-    def __init__(self, players, id = None):
+    def __init__(self, player_names, id=None):
         self.id = id or str(uuid4())
         self.date = datetime.now().isoformat()
-        self.players = players
-        self.totals = {p.name: 0 for p in players}
+    
+        self.player_names = list(player_names)
+        self.totals = {name: 0 for name in self.player_names}
+    
         self.rounds = []
         self.finished = False
 
-    def add_points(self, name, pts):
-        self.totals[name] += pts
-        self.rounds.append({"player": name, "points": pts})
-        self.finished = any(total >= MAX_POINTS for total in self.totals.values())
+    # ------------------------------------------------------
+    # SCORING
+    # ------------------------------------------------------
 
-    def winner(self):
+    def add_points(self, name, pts):
+        if self.finished:
+            return
+
+        if name not in self.totals:
+            return
+
+        pts = int(pts)
+        self.totals[name] += pts
+
+        self.rounds.append({
+            "player": name,
+            "points": pts,
+        })
+
+    # ------------------------------------------------------
+    # PROVISIONAL STATE
+    # ------------------------------------------------------
+
+    @property
+    def provisional_leader(self):
+        """
+        Player currently leading (may or may not have reached MAX_POINTS)
+        """
         if not self.totals:
             return None
-        if not self.finished:
-            return None
+
         return max(self.totals.items(), key=lambda x: x[1])[0]
-        
-    def check_finished(self):
-        """Return True if any player has reached MAX_POINTS"""
+
+    @property
+    def max_reached(self):
+        """
+        True if someone has reached or exceeded MAX_POINTS
+        (does NOT end the game)
+        """
         return any(score >= MAX_POINTS for score in self.totals.values())
-    
-    def get_results(self):
+
+    # ------------------------------------------------------
+    # FINAL GAME STATE
+    # ------------------------------------------------------
+
+    def finish(self):
         """
-        Returns:
-            {"finished": bool,
-             "winner": [names],
-             "losers": [names],
-             "high_score": int}
+        Called at the end of the hand.
+        Locks the game and finalizes the winner.
         """
-        if not self.totals:
+        self.finished = True
+
+    @property
+    def winner(self):
+        if not self.finished or not self.totals:
             return None
-        finished = self.check_finished()
-        if not finished:
-            return {
-                "finished": False,
-                "winner": None,
-                "losers": [],
-                "high_score": None,}    
-        high_score = max(self.totals.values())
-        winner = max(self.totals.items(), key=lambda x: x[1])[0]
-        losers = [name for name in self.totals if name != winner]        
-        return {
-            "finished": True,
-            "winner": winner,
-            "losers": losers,
-            "high_score": high_score,}
     
+        high = max(self.totals.values())
+        leaders = [name for name, score in self.totals.items() if score == high]
+    
+        # Tie → no winner yet
+        if len(leaders) != 1:
+            return None
+    
+        return leaders[0]
+    # ------------------------------------------------------
+
     def to_dict(self):
-        results = self.get_results()
         return {
             "id": self.id,
             "date": self.date,
-            "players": list(self.totals.keys()),
             "totals": self.totals,
             "rounds": self.rounds,
-            "finished": results["finished"] if results else False,
+            "finished": self.finished,
         }
+
+    # ------------------------------------------------------
 
     @classmethod
     def from_dict(cls, data):
-        game = cls(players=[], id=data["id"])
-        game.date = data.get("date")
+        game = cls(
+            player_names=list(data.get("totals", {}).keys()),
+            id=data.get("id"),
+        )
+    
+        game.date = data.get("date", datetime.now().isoformat())
         game.totals = data.get("totals", {})
         game.rounds = data.get("rounds", [])
         game.finished = data.get("finished", False)
+    
         return game
 
+
+===== ./players.py =====
+
+from kivy.uix.screenmanager import Screen
+from kivymd.toast import toast
+
+from models import Player
+
+
+class PlayersScreen(Screen):
+
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
+
+    def on_pre_enter(self):
+        self.refresh()
+
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh(self):
+        self.ids.players_list.clear_widgets()
+
+        if not self.app.players:
+            from kivymd.uix.list import OneLineListItem
+            self.ids.players_list.add_widget(
+                OneLineListItem(text="No players yet")
+            )
+            return
+
+        from kivymd.uix.list import OneLineListItem
+
+        for name in sorted(self.app.players.keys()):
+            self.ids.players_list.add_widget(
+                OneLineListItem(
+                    text=name,
+                    on_release=lambda x, n=name: self.select_player(n),
+                )
+            )
+
+    # ------------------------------------------------------
+
+    def select_player(self, name):
+        self.ids.name_input.text = name
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def add_or_update_player(self):
+        name = self.ids.name_input.text.strip()
+
+        if not name:
+            toast("Name required")
+            return
+
+        players = self.app.players
+
+        # Update existing
+        if name in players:
+            toast("Player already exists")
+            return
+
+        players[name] = Player(name=name)
+        self.app.save_players()
+        self.refresh()
+        self.ids.name_input.text = ""
+        toast("Player added")
+
+    # ------------------------------------------------------
+
+    def delete_player(self):
+        name = self.ids.name_input.text.strip()
+
+        if name not in self.app.players:
+            toast("Select a valid player")
+            return
+
+        # Prevent deletion if player exists in games
+        for g in self.app.games:
+            if name in g.totals:
+                toast("Player used in games")
+                return
+
+        del self.app.players[name]
+        self.app.save_players()
+        self.refresh()
+        self.ids.name_input.text = ""
+        toast("Player deleted")
+
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return self.manager.app
 
 
 ===== ./ui_helpers.py =====
@@ -727,15 +827,17 @@ class MDSeparator(MDBoxLayout):
 import json
 import logging
 import os
-import random
 from datetime import datetime
 from uuid import uuid4
-from models import Player, GameScore
 
 from kivy.utils import platform
 
+from models import Player, GameScore
 
 
+# ==========================================================
+# LOGGING
+# ==========================================================
 
 def setup_logger():
     try:
@@ -744,31 +846,80 @@ def setup_logger():
             base = app_storage_path()
         else:
             base = os.getcwd()
+
         log_dir = os.path.join(base, "logs")
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, "domino.log")
     except Exception:
         log_file = "domino.log"
+
     logging.basicConfig(
         filename=log_file,
         filemode="a",
         level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(message)s",)
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+
     logging.info("=== App starting ===")
 
 
+# ==========================================================
+# GENERAL HELPERS
+# ==========================================================
+
 def ids_ready(screen, *names):
+    """Return True if all ids exist on the screen"""
     return all(name in screen.ids for name in names)
 
+
+# ==========================================================
+# FILE SYSTEM
+# ==========================================================
+
+def get_data_dir():
+    if platform == "android":
+        from android.storage import app_storage_path
+        return app_storage_path()
+    return os.getcwd()
+
+
+def get_export_dir():
+    """
+    Shared export folder (Android Downloads / Desktop exports)
+    """
+    if platform == "android":
+        try:
+            from android.storage import primary_external_storage_path
+            base = primary_external_storage_path()
+            path = os.path.join(base, "Download", "DominoScorebook")
+        except Exception:
+            from android.storage import app_storage_path
+            path = app_storage_path()
+    else:
+        path = os.path.join(os.getcwd(), "exports")
+
+    try:
+        os.makedirs(path, exist_ok=True)
+    except Exception:
+        path = os.getcwd()
+
+    return path
+
+
+# ==========================================================
+# JSON SAFE IO
+# ==========================================================
 
 def safe_load_json(path, default):
     if not path or not os.path.exists(path):
         return default
+
     try:
         if os.path.getsize(path) == 0:
             return default
     except Exception:
         return default
+
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -779,63 +930,30 @@ def safe_load_json(path, default):
 
 
 def atomic_write_json(path, data):
-    tmp_path = f"{path}.tmp"
+    tmp = f"{path}.tmp"
     try:
-        with open(tmp_path, "w", encoding="utf-8") as f:
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp_path, path)  # atomic on Android/Linux
+        os.replace(tmp, path)
     except Exception:
-        logging.exception(f"Failed atomic write: {path}")
+        logging.exception(f"Atomic write failed: {path}")
         try:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+            if os.path.exists(tmp):
+                os.remove(tmp)
         except Exception:
             pass
 
 
-def request_storage_permissions():
-    if platform != "android":
-        return
-    try:
-        from android.permissions import request_permissions, Permission
-        request_permissions([
-            Permission.READ_EXTERNAL_STORAGE,
-            Permission.WRITE_EXTERNAL_STORAGE,])
-    except Exception as e:
-        logging.warning(f"Permission request skipped: {e}")
-
-
-def get_data_dir():
-    if platform == "android":
-        from android.storage import app_storage_path
-        return app_storage_path()
-    return os.getcwd()
-
-
-def get_export_dir():
-    if platform == "android":
-        try:
-            from android.storage import primary_external_storage_path, app_storage_path
-            base = primary_external_storage_path()
-        except Exception:
-            # Fallback to internal app storage (always safe)
-            from android.storage import app_storage_path
-            base = app_storage_path()
-        path = os.path.join(base, "Download", "DominoScorebook")
-    else:
-        path = os.path.join(os.getcwd(), "exports")
-    try:
-        os.makedirs(path, exist_ok=True)
-    except Exception:
-        path = os.getcwd()
-    return path
-
-
-###############----------------
+# ==========================================================
+# PLAYERS
+# ==========================================================
 
 def save_players(path, players: dict):
+    """
+    players: dict[str, Player]
+    """
     data = [p.to_dict() for p in players.values()]
     atomic_write_json(path, data)
 
@@ -843,24 +961,41 @@ def save_players(path, players: dict):
 def load_players(path):
     raw = safe_load_json(path, [])
     players = {}
+
     for item in raw:
-        p = Player.from_dict(item)
-        players[p.name] = p
+        try:
+            p = Player.from_dict(item)
+            if p.name:
+                players[p.name] = p
+        except Exception:
+            logging.exception("Failed to load player")
+
     return players
 
 
+# ==========================================================
+# GAMES
+# ==========================================================
+
 def save_games(path, games):
-    atomic_write_json(path, [g.to_dict() for g in games])
+    """
+    games: list[GameScore]
+    """
+    data = [g.to_dict() for g in games]
+    atomic_write_json(path, data)
 
 
 def load_games(path):
     raw = safe_load_json(path, [])
-    return [GameScore.from_dict(d) for d in raw]
-        
+    games = []
 
-SAVE_FILE = os.path.join(get_export_dir(), "players.dom")
-GAMES_FILE = os.path.join(get_export_dir(), "games.dom")
+    for item in raw:
+        try:
+            games.append(GameScore.from_dict(item))
+        except Exception:
+            logging.exception("Failed to load game")
 
+    return games
 
 
 ===== ./ignore/combine.py =====
@@ -4846,264 +4981,261 @@ class CreatePlayerScreen(MDScreen):
 
 ===== ./screens/edit_game.py =====
 
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
-
-
+from models import GameScore
 
 
 class EditGameScreen(MDScreen):
+
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
+
     def on_pre_enter(self):
-        app = MDApp.get_running_app()
-        if not app.current_game:
+        self.game = self.app.current_game
+
+        if not self.game:
             self.manager.current = "history"
-            return  
-        self.populate()
-    
-    def populate(self):
-        app = MDApp.get_running_app()
-        if not ids_ready(self, "score_table", "date_field"):
             return
-        table = self.ids.score_table
-        table.clear_widgets()
-        game = app.current_game
-        if not game:
-            return
-        self.ids.date_field.text = game.date
-        for name, score in game.totals.items():
-            self.add_row(name, score)
 
-    def add_row(self, name="", score=0):
-        row = MDBoxLayout(size_hint_y=None, height=dp(52), spacing=dp(10))
-        name_field = MDTextField(text=name, hint_text="Player", mode="rectangle")
-        score_field = MDTextField(
-            text=str(score),
-            hint_text="Score",
-            mode="rectangle",
-            input_filter="int",)
-        row.name_field = name_field
-        row.score_field = score_field
-        row.add_widget(name_field)
-        row.add_widget(score_field)
-        self.ids.score_table.add_widget(row)
+        self.refresh_totals()
 
-    def save_game(self):
-        app = MDApp.get_running_app()
-        game = app.current_game
-        if not game:
-            return
-        new_totals = {}
-        for row in self.ids.score_table.children:
-            name = row.name_field.text.strip()
-            score = row.score_field.text.strip()
-            if not name:
-                continue
-            try:
-                new_totals[name] = int(score)
-            except ValueError:
-                new_totals[name] = 0
-        if not new_totals:
-            return
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh_totals(self):
+        self.ids.totals_box.clear_widgets()
+
+        for name, score in self.game.totals.items():
+            self.ids.totals_box.add_widget(
+                self._score_label(name, score)
+            )
+
+    def _score_label(self, name, score):
+        from kivymd.uix.label import MDLabel
+        return MDLabel(
+            text=f"{name}: {score}",
+            halign="center",
+        )
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def add_points(self, name, pts):
         try:
-            game.date = datetime.fromisoformat(self.ids.date_field.text).isoformat()
-        except ValueError:
-            game.date = "Corrupted Date"
-        game.totals = new_totals
-        game.players = [Player(n) for n in new_totals.keys()]
-        game.get_results()
-        app.save_edited_game(game)
+            pts = int(pts)
+        except Exception:
+            toast("Invalid points")
+            return
+
+        self.game.add_points(name, pts)
+        self.refresh_totals()
+
+    # ------------------------------------------------------
+
+    def save(self):
+        self.app.save_edited_game(self.game)
+        toast("Game saved")
+
+    # ------------------------------------------------------
 
     def cancel(self):
+        self.app.current_game = None
         self.manager.current = "history"
 
+    # ======================================================
+    # UTIL
+    # ======================================================
 
+    @property
+    def app(self):
+        return MDApp.get_running_app()
 
 
 ===== ./screens/game.py =====
 
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-import logging
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
-from kivymd.toast import toast
-
 from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
-
-
+from kivymd.toast import toast
 
 
 class GameScreen(MDScreen):
-    def on_enter(self):
-        self.refresh()
 
-    def refresh(self):
-        app = MDApp.get_running_app()
-        game = app.current_game
-        if not game:
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
+
+    def on_pre_enter(self):
+        self.game = self.app.current_game
+
+        if not self.game:
+            self.manager.current = "menu"
             return
-        if not ids_ready(self, "player_container"):
+
+        self.refresh_totals()
+
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh_totals(self):
+        self.ids.score_box.clear_widgets()
+
+        from kivymd.uix.label import MDLabel
+
+        for name, score in self.game.totals.items():
+            self.ids.score_box.add_widget(
+                MDLabel(
+                    text=f"{name}: {score}",
+                    halign="center",
+                )
+            )
+
+        # Provisional winner notice
+        if self.game.max_reached:
+            leader = self.game.provisional_leader
+            toast(f"Possible winner: {leader}")
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def add_points(self, name, pts):
+        if self.game.finished:
+            toast("Game already finished")
             return
-        box = self.ids.player_container
-        box.clear_widgets()
-        for name, score in app.current_game.totals.items():
-            top = MDBoxLayout(orientation="horizontal", size_hint=(0.9, None), height=dp(40))
-            top.add_widget(MDLabel(text=f"{name} — {score}", font_style="H6"))
-            btns = MDBoxLayout(spacing=dp(15), size_hint=(0.9, None), height=dp(50))
-            for pts in (5, 10, 20, -5):
-                btns.add_widget(
-                    MDRaisedButton(
-                        text=f"{pts:+}",
-                        on_release=lambda x, n=name, p=pts: self.add(n, p),))
-            box.add_widget(top)
-            box.add_widget(btns)
-            box.add_widget(MDSeparator(thickness=dp(5)))
 
-    def add(self, name, pts):
-        app = MDApp.get_running_app()
-        if not app.current_game:
-            logging.warning("Attempted to score with no active game")
-            return    
-        app.current_game.add_points(name, pts)
-        self.refresh()
+        try:
+            pts = int(pts)
+        except Exception:
+            toast("Invalid points")
+            return
 
+        self.game.add_points(name, pts)
+        self.refresh_totals()
+
+    # ------------------------------------------------------
+
+    def finish_game(self):
+        if not self.game.totals:
+            toast("No scores yet")
+            return
+
+        self.game.finish()
+        winner = self.game.winner or "Unknown"
+        toast(f"{winner} wins!")
+
+        self.app.finish_game()
+
+    # ------------------------------------------------------
+
+    def cancel_game(self):
+        self.app.current_game = None
+        self.manager.current = "menu"
+
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return MDApp.get_running_app()
 
 
 ===== ./screens/history.py =====
 
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.list import OneLineListItem
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
-
+from models import GameScore
 
 
 class HistoryScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.selected = set()
 
-    def on_enter(self):
-        app = MDApp.get_running_app() 
-        if not ids_ready(self, "history_list"):
-            return        
-        box = self.ids.history_list
-        box.clear_widgets()
-        self.selected.clear()
-        if not os.path.exists(app.games_file):
-            box.add_widget(MDLabel(text="No games yet"))
-            return
-        try:
-            games = load_games()
-            changed = False
-            for g in games:
-                if "id" not in g:
-                    g["id"] = str(uuid4())
-                    changed = True
-            if changed:
-                save_games(games)
-        except Exception:
-            box.add_widget(MDLabel(text="Corrupted game history"))
-            return
-        for g in reversed(games):
-            row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
-            cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
-            cb.game_id = g.get("id")
-            cb.bind(active=self.on_checkbox)
-            row.add_widget(cb)
-            col = MDBoxLayout(orientation="vertical")
-            col.add_widget(MDLabel(text=f"{g.date[:16]} — {g.winner}"))
-            col.add_widget(MDLabel(text=str(g.get('totals')), font_style="Caption"))
-            row.add_widget(col)
-            box.add_widget(row)
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
 
-    def on_checkbox(self, checkbox, value):
-        game_id = checkbox.game_id
-        if not game_id:
-            return    
-        if value:
-            self.selected.add(game_id)
+    def on_pre_enter(self):
+        self.refresh()
+
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh(self):
+        self.ids.history_list.clear_widgets()
+
+        app = self.app
+        games = sorted(
+            app.games,
+            key=lambda g: g.date,
+            reverse=True
+        )
+
+        if not games:
+            self.ids.history_list.add_widget(
+                OneLineListItem(text="No games yet")
+            )
+            return
+
+        for game in games:
+            label = self._build_label(game)
+            item = OneLineListItem(
+                text=label,
+                on_release=lambda x, g=game: self.open_game(g),
+            )
+            self.ids.history_list.add_widget(item)
+
+    # ------------------------------------------------------
+
+    def _build_label(self, game: GameScore):
+        if not game.finished:
+            return f"Unfinished game • {game.date[:10]}"
+
+        winner = game.winner or "?"
+        high = max(game.totals.values()) if game.totals else 0
+        return f"{winner} won ({high}) • {game.date[:10]}"
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def open_game(self, game: GameScore):
+        self.app.current_game = game
+        self.manager.current = "edit_game"
+
+    # ------------------------------------------------------
+
+    def delete_game(self, game_id):
+        before = len(self.app.games)
+
+        self.app.games = [
+            g for g in self.app.games if g.id != game_id
+        ]
+
+        if len(self.app.games) < before:
+            self.app.save_games()
+            self.app.sync_players_from_games()
+            self.refresh()
+            toast("Game deleted")
         else:
-            self.selected.discard(game_id)
-        
-    def delete_selected(self):
-        app = MDApp.get_running_app()
-        self.selected.discard(None)
-        if not self.selected:
-            return
-        games = load_games()
-        games = [g for g in games if g.id not in self.selected]
-        save_games(games)
-        self.on_enter()
+            toast("Game not found")
 
-    def edit_selected(self):
-        app = MDApp.get_running_app()
-        self.selected.discard(None)
-        if len(self.selected) != 1:
-            return
-        game_id = next(iter(self.selected))
-        games = app.load_games()
-        for g in games:
-            if g.id == game_id:
-                
-                game = GameScore([])
-                game.id=g["id"]
-                game.date = g["date"]
-                game.totals = g["totals"]
-                game.finished = g.get("finished", False)
-                game.players = [Player(n) for n in g["totals"].keys()]
-                app.current_game = game
-                self.manager.current = "edit"
-                return
+    # ======================================================
+    # UTIL
+    # ======================================================
 
-
+    @property
+    def app(self):
+        return MDApp.get_running_app()
 
 
 ===== ./screens/menu.py =====
@@ -5200,137 +5332,201 @@ class OptionsScreen(MDScreen):
 
 ===== ./screens/player_select.py =====
 
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivymd.app import MDApp
+from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
 
+class PlayerSelectScreen(Screen):
 
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
 
-
-
-class PlayerSelectScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def on_pre_enter(self):
         self.selected = set()
+        self.refresh()
 
-    def on_enter(self):
-        self.selected.clear()
-        if not ids_ready(self, "player_list"):
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh(self):
+        self.ids.players_box.clear_widgets()
+
+        players = self.app.players
+
+        if not players:
+            from kivymd.uix.label import MDLabel
+            self.ids.players_box.add_widget(
+                MDLabel(
+                    text="No players available",
+                    halign="center",
+                )
+            )
             return
-        box = self.ids.player_list
-        box.clear_widgets()
-        for name in MDApp.get_running_app().players:
-            btn = MDRaisedButton(
+
+        from kivymd.uix.selectioncontrol import MDCheckbox
+        from kivymd.uix.label import MDLabel
+        from kivymd.uix.boxlayout import MDBoxLayout
+
+        for name in sorted(players.keys()):
+            row = MDBoxLayout(
+                orientation="horizontal",
+                spacing="12dp",
+                size_hint_y=None,
+                height="48dp",
+            )
+
+            checkbox = MDCheckbox(
+                on_active=lambda cb, val, n=name: self.toggle(n, val)
+            )
+
+            label = MDLabel(
                 text=name,
-                on_release=lambda x, n=name: self.toggle(n, x),)
-            box.add_widget(btn)
+                valign="middle",
+            )
 
-    def toggle(self, name, button):
-        if name in self.selected:
-            self.selected.remove(name)
-            button.md_bg_color = DEFAULT_COLOR
-        else:
+            row.add_widget(checkbox)
+            row.add_widget(label)
+            self.ids.players_box.add_widget(row)
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def toggle(self, name, active):
+        if active:
             self.selected.add(name)
-            button.md_bg_color = SELECTED_COLOR
+        else:
+            self.selected.discard(name)
 
-    def start(self):
-        MDApp.get_running_app().start_game(list(self.selected))
+    # ------------------------------------------------------
 
+    def start_game(self):
+        if len(self.selected) < 2:
+            toast("Select at least 2 players")
+            return
+
+        self.app.start_game(list(self.selected))
+
+    # ------------------------------------------------------
+
+    def cancel(self):
+        self.selected.clear()
+        self.manager.current = "menu"
+
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return MDApp.get_running_app()
 
 
 ===== ./screens/stats.py =====
 
+from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.menu import MDDropdownMenu
-from kivy.properties import StringProperty, NumericProperty
-from kivymd.app import MDApp
+from kivymd.toast import toast
 
 
 class StatsScreen(MDScreen):
-    selected_player = StringProperty("")
-    wins = NumericProperty(0)
-    losses = NumericProperty(0)
-    games_played = NumericProperty(0)
-    win_rate = NumericProperty(0)
-    
+
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
+
     def on_pre_enter(self):
-        self.refresh_stats()
+        self.menu = None
+        self.selected_player = None
+        self.refresh_players()
+        self.clear_stats()
 
-    def refresh_stats(self):
-        app = MDApp.get_running_app()   
-        # Always rebuild menu (players may have changed)
-        self.build_menu()    
-        # Keep current player if still valid
-        if self.selected_player in app.players:
-            self.select_player(self.selected_player)
-        elif app.players:
-            first = next(iter(app.players))
-            self.select_player(first)
-        else:
-            self.clear_stats()
-    
-    def open_menu(self):
-        self.menu.open()
+    # ======================================================
+    # UI
+    # ======================================================
 
-    def select_player(self, name):
-        app = MDApp.get_running_app()
-        for p in app.players:
-            if p.name == name:
-                player = app.players.get(name)
-        if not player:
+    def refresh_players(self):
+        players = list(self.app.players.keys())
+
+        if not players:
+            self.ids.player_button.text = "No players"
+            self.ids.player_button.disabled = True
             return
-        self.selected_player = name
-        self.wins = player.wins
-        self.losses = player.losses
-        self.games_played = self.wins + self.losses
-        self.win_rate = (
-            round((self.wins / self.games_played) * 100)
-            if self.games_played > 0 else 0)
 
-        self.ids.player_button.text = name
-        self.menu.dismiss()
-        
-    def build_menu(self):
-        app = MDApp.get_running_app()  
-        if hasattr(self, "menu"):
-            self.menu.dismiss()
+        self.ids.player_button.disabled = False
+        self.ids.player_button.text = "Select Player"
+
         items = [
             {
                 "text": name,
-                "viewclass": "OneLineListItem",
                 "on_release": lambda x=name: self.select_player(x),
             }
-            for name in app.players.keys()]    
+            for name in sorted(players)
+        ]
+
+        if self.menu:
+            self.menu.dismiss()
+
         self.menu = MDDropdownMenu(
             caller=self.ids.player_button,
             items=items,
-            width_mult=4,)
+            width_mult=4,
+        )
+
+    # ------------------------------------------------------
+
+    def open_menu(self):
+        if self.menu:
+            self.menu.open()
+
+    # ------------------------------------------------------
+
+    def select_player(self, name):
+        self.selected_player = name
+        self.ids.player_button.text = name
+        self.menu.dismiss()
+        self.refresh_stats()
+
+    # ------------------------------------------------------
 
     def clear_stats(self):
-        self.selected_player = ""
-        self.wins = 0
-        self.losses = 0
-        self.games_played = 0
-        self.win_rate = 0
-        self.ids.player_button.text = "Select Player"
-        
-    def on_back(self):
-        self.manager.current = "menu"
-        
+        self.ids.wins.text = "Wins: —"
+        self.ids.losses.text = "Losses: —"
+        self.ids.games.text = "Games Played: —"
+        self.ids.winrate.text = "Win Rate: —"
+
+    # ------------------------------------------------------
+
+    def refresh_stats(self):
+        name = self.selected_player
+        if not name:
+            return
+
+        player = self.app.players.get(name)
+        if not player:
+            toast("Player not found")
+            self.clear_stats()
+            return
+
+        wins = player.wins
+        losses = player.losses
+        games = wins + losses
+
+        rate = f"{(wins / games * 100):.1f}%" if games else "0%"
+
+        self.ids.wins.text = f"Wins: {wins}"
+        self.ids.losses.text = f"Losses: {losses}"
+        self.ids.games.text = f"Games Played: {games}"
+        self.ids.winrate.text = f"Win Rate: {rate}"
+
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return MDApp.get_running_app()

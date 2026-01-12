@@ -1,9 +1,10 @@
-from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
 
 
-class StatsScreen(Screen):
+class StatsScreen(MDScreen):
 
     # ======================================================
     # LIFECYCLE
@@ -99,4 +100,4 @@ class StatsScreen(Screen):
 
     @property
     def app(self):
-        return self.manager.app
+        return MDApp.get_running_app()

@@ -39,15 +39,15 @@ class Player:
 # ==========================================================
 
 class GameScore:
-    def __init__(self, players, id=None):
+    def __init__(self, player_names, id=None):
         self.id = id or str(uuid4())
         self.date = datetime.now().isoformat()
-
-        self.players = players
-        self.totals = {p.name: 0 for p in players}
-
+    
+        self.player_names = list(player_names)
+        self.totals = {name: 0 for name in self.player_names}
+    
         self.rounds = []
-        self.finished = False   # explicit only
+        self.finished = False
 
     # ------------------------------------------------------
     # SCORING
@@ -103,14 +103,17 @@ class GameScore:
 
     @property
     def winner(self):
-        """
-        Final winner — ONLY valid after finish()
-        """
         if not self.finished or not self.totals:
             return None
-
-        return max(self.totals.items(), key=lambda x: x[1])[0]
-
+    
+        high = max(self.totals.values())
+        leaders = [name for name, score in self.totals.items() if score == high]
+    
+        # Tie → no winner yet
+        if len(leaders) != 1:
+            return None
+    
+        return leaders[0]
     # ------------------------------------------------------
 
     def to_dict(self):
@@ -126,13 +129,14 @@ class GameScore:
 
     @classmethod
     def from_dict(cls, data):
-        game = cls(players=[], id=data.get("id"))
-
+        game = cls(
+            player_names=list(data.get("totals", {}).keys()),
+            id=data.get("id"),
+        )
+    
         game.date = data.get("date", datetime.now().isoformat())
         game.totals = data.get("totals", {})
         game.rounds = data.get("rounds", [])
         game.finished = data.get("finished", False)
-
-        game.players = [Player(name) for name in game.totals.keys()]
-
+    
         return game

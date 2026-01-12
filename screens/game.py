@@ -1,8 +1,9 @@
-from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 from kivymd.toast import toast
 
 
-class GameScreen(Screen):
+class GameScreen(MDScreen):
 
     # ======================================================
     # LIFECYCLE
@@ -58,18 +59,25 @@ class GameScreen(Screen):
         self.refresh_totals()
 
     # ------------------------------------------------------
-
+    
     def finish_game(self):
         if not self.game.totals:
             toast("No scores yet")
             return
-
-        self.game.finish()
-        winner = self.game.winner or "Unknown"
-        toast(f"{winner} wins!")
-
-        self.app.finish_game()
-
+    
+        result = self.game.end_hand()
+    
+        if result == "win":
+            toast(f"{self.game.winner} wins!")
+            self.app.archive_game(self.game)
+            self.manager.current = "menu"
+    
+        elif result == "tie":
+            toast("Tie at the top — another hand!")
+    
+        else:
+            toast("Hand completed.")
+    
     # ------------------------------------------------------
 
     def cancel_game(self):
@@ -82,4 +90,4 @@ class GameScreen(Screen):
 
     @property
     def app(self):
-        return self.manager.app
+        return MDApp.get_running_app()

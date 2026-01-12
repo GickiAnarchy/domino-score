@@ -1,11 +1,12 @@
-from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
 from kivymd.uix.list import OneLineListItem
 from kivymd.toast import toast
 
 from models import GameScore
 
 
-class HistoryScreen(Screen):
+class HistoryScreen(MDScreen):
 
     # ======================================================
     # LIFECYCLE
@@ -58,7 +59,7 @@ class HistoryScreen(Screen):
 
     def open_game(self, game: GameScore):
         self.app.current_game = game
-        self.manager.current = "edit_game"
+        self.manager.current = "edit"
 
     # ------------------------------------------------------
 
@@ -66,8 +67,7 @@ class HistoryScreen(Screen):
         before = len(self.app.games)
 
         self.app.games = [
-            g for g in self.app.games if g.id != game_id
-        ]
+            g for g in self.app.games if g.id != game_id]
 
         if len(self.app.games) < before:
             self.app.save_games()
@@ -83,4 +83,4 @@ class HistoryScreen(Screen):
 
     @property
     def app(self):
-        return self.manager.app
+        return MDApp.get_running_app()

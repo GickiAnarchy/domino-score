@@ -87,36 +87,25 @@ class DominoApp(MDApp):
     def start_game(self, names):
         if not names or len(names) < 2:
             return
-
-        players = []
-        for name in names:
-            p = self.players.get(name)
-            if p:
-                players.append(p)
-
-        if len(players) < 2:
+        valid_names = [name for name in names if name in self.players]
+        if len(valid_names) < 2:
             logging.warning("Not enough valid players")
             return
-
-        self.current_game = GameScore(players)
+        self.current_game = GameScore(valid_names)
         self.root.current = "game"
-
-    def finish_game(self):
-        if not self.current_game:
+    
+    def archive_game(self, game):
+        if not game.totals:
+            toast("No scores yet")
             return
-
-        # Replace if exists
-        self.games = [
-            g for g in self.games if g.id != self.current_game.id
-        ]
-        self.games.append(self.current_game)
-
-        self.save_games()
-        self.sync_players_from_games()
-
-        self.current_game = None
-        self.root.current = "menu"
-
+        game.finish()
+        if game.winner:
+            toast(f"{game.winner} wins!")
+            game.finish_game()
+        else:
+            toast("Tie at the top — another hand!")
+            game.finished = False  # unlock for next hand
+            
     # ======================================================
     # EDITED GAME SAVE
     # ======================================================

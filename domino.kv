@@ -83,8 +83,132 @@
                 text: "Exit"
                 size_hint_x: 1
                 on_release: app.stop()
+            
+
+<PlayerSelectScreen>:
+    name: "select"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: players_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(8)
+
+        MDRaisedButton:
+            text: "Start Game"
+            on_release: root.start_game()
+
+        MDFlatButton:
+            text: "Cancel"
+            on_release: root.cancel()
 
 
+<GameScreen>:
+    name: "game"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: score_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDRaisedButton:
+            text: "Finish Hand"
+            on_release: root.finish_game()
+
+        MDFlatButton:
+            text: "Cancel Game"
+            on_release: root.cancel_game()
+
+
+<HistoryScreen>:
+    name: "history"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDList:
+                id: history_list
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+
+
+<EditGameScreen>:
+    name: "edit"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDBoxLayout:
+                id: totals_box
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing:dp(10)
+
+        MDRaisedButton:
+            text: "Save"
+            on_release: root.save()
+
+        MDFlatButton:
+            text: "Cancel"
+            on_release: root.cancel()
+
+
+<StatsScreen>:
+    name: "stats"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        MDRaisedButton:
+            id: player_button
+            text: "Select Player"
+            on_release: root.open_menu()
+
+        MDLabel:
+            id: wins
+            text: "Wins: —"
+
+        MDLabel:
+            id: losses
+            text: "Losses: —"
+
+        MDLabel:
+            id: games
+            text: "Games Played: —"
+
+        MDLabel:
+            id: winrate
+            text: "Win Rate: —"
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+         
 <CreatePlayerScreen>:
     name: "create"
 
@@ -111,154 +235,6 @@
             on_release: app.root.current = "menu"
         
         MDWidget:
-
-
-<EditGameScreen>:
-    name: "edit"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-
-        # ---------- TITLE ----------
-        MDLabel:
-            text: "ADD / EDIT GAMES"
-            halign: "center"
-            font_style: "H4"
-            bold: True
-            size_hint_y: None
-            height: self.texture_size[1] + dp(20)
-
-        # ---------- DATE / TIME ----------
-        MDTextField:
-            id: date_field
-            hint_text: "YYYY-MM-DDTHH:MM:SS"
-            helper_text: "ISO 8601 datetime"
-            helper_text_mode: "on_focus"
-            mode: "rectangle"
-        
-        MDSeparator:
-        
-        ScrollView:
-            MDBoxLayout:
-                id: score_table
-                orientation: "vertical"
-                adaptive_height: True
-                spacing: dp(10)
-        
-        # ---------- BUTTONS ----------
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(60)
-            spacing: dp(20)
-            padding: (dp(10), 0)
-
-            MDRaisedButton:
-                text: "Save"
-                md_bg_color: app.theme_cls.primary_color
-                on_release: root.save_game()
-            
-            MDTextButton:
-                text: "+ Add Player"
-                pos_hint: {"center_x": 0.5}
-                on_release: root.add_row()
-
-            MDRaisedButton:
-                text: "Cancel"
-                on_release: root.cancel()
-
-
-<PlayerSelectScreen>:
-    name: "select"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-
-        ScrollView:
-            MDBoxLayout:
-                id: player_list
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDRaisedButton:
-            text: "Start"
-            size_hint_y: None
-            height: dp(48)
-            on_release: root.start()
-
-        MDRaisedButton:
-            text: "Back"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "menu"
-
-
-<GameScreen>:
-    name: "game"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-
-        ScrollView:
-            MDBoxLayout:
-                id: player_container
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDRaisedButton:
-            text: "End Game"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.finish_game()
-
-
-<HistoryScreen>:
-    name: "history"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-
-        ScrollView:
-            MDBoxLayout:
-                id: history_list
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
-
-        MDBoxLayout:
-            orientation:"horizontal"
-            padding: dp(10)
-            spacing: dp(10)
-        
-            MDRaisedButton:
-                text: "Delete Selected"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.delete_selected()
-            
-            MDRaisedButton:
-                text: "Edit Selected"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.edit_selected()
-
-        MDRaisedButton:
-            text: "Back"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "menu"
 
 
 <OptionsScreen>:
@@ -294,57 +270,3 @@
             size_hint:(1.0, 0.5)
 
 
-<StatsScreen>:
-    name: "stats"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(20)
-        
-        MDLabel:
-            text:"Statistics"
-            halign: "center"
-            font_style: "H4"
-            size_hint_y: None
-            height: self.texture_size[1] + dp(20)
-
-        MDRaisedButton:
-            id: player_button
-            text: "Select Player"
-            size_hint_x: 1
-            on_release: root.open_menu()
-
-        MDCard:
-            orientation: "vertical"
-            padding: dp(16)
-            spacing: dp(10)
-            radius: [16]
-            elevation: 4
-
-            MDLabel:
-                text: "Wins: " + str(root.wins)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Losses: " + str(root.losses)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Games Played: " + str(root.games_played)
-                font_style: "H6"
-
-            MDLabel:
-                text: "Win Rate: " + str(root.win_rate) + "%"
-                font_style: "H6"
-        
-        MDBoxLayout:
-            orientation:"horizontal"
-            padding:dp(10)
-            spacing:dp(10)
-            
-            MDRaisedButton:
-                text: "Back"
-                size_hint_y: None
-                height: dp(48)
-                on_release: root.on_back()

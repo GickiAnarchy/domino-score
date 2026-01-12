@@ -1,52 +1,91 @@
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivymd.app import MDApp
+from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
 
+class PlayerSelectScreen(Screen):
 
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
 
-
-
-class PlayerSelectScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def on_pre_enter(self):
         self.selected = set()
+        self.refresh()
 
-    def on_enter(self):
-        self.selected.clear()
-        if not ids_ready(self, "player_list"):
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh(self):
+        self.ids.players_box.clear_widgets()
+
+        players = self.app.players
+
+        if not players:
+            from kivymd.uix.label import MDLabel
+            self.ids.players_box.add_widget(
+                MDLabel(
+                    text="No players available",
+                    halign="center",
+                )
+            )
             return
-        box = self.ids.player_list
-        box.clear_widgets()
-        for name in MDApp.get_running_app().players:
-            btn = MDRaisedButton(
+
+        from kivymd.uix.selectioncontrol import MDCheckbox
+        from kivymd.uix.label import MDLabel
+        from kivymd.uix.boxlayout import MDBoxLayout
+
+        for name in sorted(players.keys()):
+            row = MDBoxLayout(
+                orientation="horizontal",
+                spacing="12dp",
+                size_hint_y=None,
+                height="48dp",
+            )
+
+            checkbox = MDCheckbox(
+                on_active=lambda cb, val, n=name: self.toggle(n, val)
+            )
+
+            label = MDLabel(
                 text=name,
-                on_release=lambda x, n=name: self.toggle(n, x),)
-            box.add_widget(btn)
+                valign="middle",
+            )
 
-    def toggle(self, name, button):
-        if name in self.selected:
-            self.selected.remove(name)
-            button.md_bg_color = DEFAULT_COLOR
-        else:
+            row.add_widget(checkbox)
+            row.add_widget(label)
+            self.ids.players_box.add_widget(row)
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def toggle(self, name, active):
+        if active:
             self.selected.add(name)
-            button.md_bg_color = SELECTED_COLOR
+        else:
+            self.selected.discard(name)
 
-    def start(self):
-        MDApp.get_running_app().start_game(list(self.selected))
+    # ------------------------------------------------------
+
+    def start_game(self):
+        if len(self.selected) < 2:
+            toast("Select at least 2 players")
+            return
+
+        self.app.start_game(list(self.selected))
+
+    # ------------------------------------------------------
+
+    def cancel(self):
+        self.selected.clear()
+        self.manager.current = "menu"
+
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return MDApp.get_running_app()
