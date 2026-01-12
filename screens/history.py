@@ -1,99 +1,86 @@
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import Screen
+from kivymd.uix.list import OneLineListItem
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
+from models import GameScore
 
 
+class HistoryScreen(Screen):
 
-class HistoryScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.selected = set()
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
 
-    def on_enter(self):
-        self.GAMES_FILE = MDApp.get_running_app().games_file 
-        if not ids_ready(self, "history_list"):
-            return        
-        box = self.ids.history_list
-        box.clear_widgets()
-        self.selected.clear()
-        if not os.path.exists(self.GAMES_FILE):
-            box.add_widget(MDLabel(text="No games yet"))
+    def on_pre_enter(self):
+        self.refresh()
+
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh(self):
+        self.ids.history_list.clear_widgets()
+
+        app = self.app
+        games = sorted(
+            app.games,
+            key=lambda g: g.date,
+            reverse=True
+        )
+
+        if not games:
+            self.ids.history_list.add_widget(
+                OneLineListItem(text="No games yet")
+            )
             return
-        try:
-            games = safe_load_json(self.GAMES_FILE, [])
-            changed = False
-            for g in games:
-                if "id" not in g:
-                    g["id"] = str(uuid4())
-                    changed = True
-            if changed:
-                atomic_write_json(self.GAMES_FILE, games)
-        except Exception:
-            box.add_widget(MDLabel(text="Corrupted game history"))
-            return
-        for g in reversed(games):
-            row = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56))
-            cb = HistoryCheckbox(size_hint=(None, None), size=(dp(48), dp(48)))
-            cb.game_id = g.get("id")
-            cb.bind(active=self.on_checkbox)
-            row.add_widget(cb)
-            col = MDBoxLayout(orientation="vertical")
-            col.add_widget(MDLabel(text=f"{g.get('date')[:16]} — {g.get('winner')}"))
-            col.add_widget(MDLabel(text=str(g.get('totals')), font_style="Caption"))
-            row.add_widget(col)
-            box.add_widget(row)
 
-    def on_checkbox(self, checkbox, value):
-        game_id = checkbox.game_id
-        if not game_id:
-            return    
-        if value:
-            self.selected.add(game_id)
+        for game in games:
+            label = self._build_label(game)
+            item = OneLineListItem(
+                text=label,
+                on_release=lambda x, g=game: self.open_game(g),
+            )
+            self.ids.history_list.add_widget(item)
+
+    # ------------------------------------------------------
+
+    def _build_label(self, game: GameScore):
+        if not game.finished:
+            return f"Unfinished game • {game.date[:10]}"
+
+        winner = game.winner or "?"
+        high = max(game.totals.values()) if game.totals else 0
+        return f"{winner} won ({high}) • {game.date[:10]}"
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def open_game(self, game: GameScore):
+        self.app.current_game = game
+        self.manager.current = "edit_game"
+
+    # ------------------------------------------------------
+
+    def delete_game(self, game_id):
+        before = len(self.app.games)
+
+        self.app.games = [
+            g for g in self.app.games if g.id != game_id
+        ]
+
+        if len(self.app.games) < before:
+            self.app.save_games()
+            self.app.sync_players_from_games()
+            self.refresh()
+            toast("Game deleted")
         else:
-            self.selected.discard(game_id)
-        
-    def delete_selected(self):
-        self.selected.discard(None)
-        if not self.selected:
-            return
-        games = safe_load_json(self.GAMES_FILE, [])
-        games = [g for g in games if g.get("id") not in self.selected]
-        atomic_write_json(self.GAMES_FILE, games)
-        self.on_enter()
+            toast("Game not found")
 
-    def edit_selected(self):
-        self.selected.discard(None)
-        if len(self.selected) != 1:
-            return
-        game_id = next(iter(self.selected))
-        games = safe_load_json(self.GAMES_FILE, []) 
-        for g in games:
-            if g.get("id") == game_id:
-                app = MDApp.get_running_app()
-                game = GameScore([])
-                game.id=g["id"]
-                game.date = g["date"]
-                game.totals = g["totals"]
-                game.finished = g.get("finished", False)
-                game.players = [Player(n) for n in g["totals"].keys()]
-                app.current_game = game
-                self.manager.current = "edit"
-                return
+    # ======================================================
+    # UTIL
+    # ======================================================
 
+    @property
+    def app(self):
+        return self.manager.app

@@ -29,44 +29,20 @@ class OptionsScreen(MDScreen):
         d.open()
 
     def export_saves(self):
-        request_storage_permissions()
-    
         app = MDApp.get_running_app()
-        export_dir = get_export_dir()
+        save_players(app.players_file, app.players)
+        save_games(app.games_file, app.games)
+        toast("Saves exported")
     
-        atomic_write_json(
-            os.path.join(export_dir, "players.dom"),
-            safe_load_json(SAVE_FILE, {})
-        )
-        atomic_write_json(
-            os.path.join(export_dir, "games.dom"),
-            safe_load_json(GAMES_FILE, [])
-        )
-    
-        self.manager.current = "menu"
-
     def import_saves(self):
-        app = MDApp.get_running_app()
-        export_dir = get_export_dir()
-    
-        players_src = os.path.join(export_dir, "players.dom")
-        games_src = os.path.join(export_dir, "games.dom")
-        try:
-            safe_load_json(players_src, "Player")
-            toast("Imported players")      
-            safe_load_json(games_src, "GameScore")
-            toast("Imported Games")
-        except Exception as e:
-            print(e)
-            return
-        
-        #if os.path.exists(players_src):
-#            atomic_write_json(SAVE_FILE, safe_load_json(players_src, {}))
-#    
-#        if os.path.exists(games_src):
-#            atomic_write_json(GAMES_FILE, safe_load_json(games_src, []))
-    
-        app.players = app.load_players()
+        app = MDApp.get_running_app()    
+        players = load_players(app.players_file)
+        games = load_games(app.games_file)    
+        if not players and not games:
+            toast("No saves found")
+            return  
+        app.players = players
+        app.games = games
         app.sync_players_from_games()
+        toast("Saves imported")
         self.manager.current = "menu"
-

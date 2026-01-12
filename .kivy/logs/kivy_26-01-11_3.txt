@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-01_23.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-11_3.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -29,7 +29,7 @@
 [INFO   ] Loader: using a thread pool of 2 workers
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 523, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 6, in <module>
 [WARNING] stderr:     DominoApp().run()
 [WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
@@ -66,10 +66,28 @@
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 60, in custom_callback
 [WARNING] stderr:     exec(__kvlang__.co_value, idmap)
 [WARNING] stderr:     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 205, in <module>
-[WARNING] stderr:     on_release: root.start()
-[WARNING] stderr:     
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 256, in start
-[WARNING] stderr:     app.start_game(list(self.selected))
-[WARNING] stderr:     ^^^^^^^^^^^^^^
-[WARNING] stderr: AttributeError: 'DominoApp' object has no attribute 'start_game'
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 65, in <module>
+[WARNING] stderr:     on_release: app.root.current = "stats"
+[WARNING] stderr:     ^^^^
+[WARNING] stderr:   File "kivy/properties.pyx", line 520, in kivy.properties.Property.__set__
+[WARNING] stderr:   File "kivy/properties.pyx", line 567, in kivy.properties.Property.set
+[WARNING] stderr:   File "kivy/properties.pyx", line 606, in kivy.properties.Property._dispatch
+[WARNING] stderr:   File "kivy/_event.pyx", line 1307, in kivy._event.EventObservers.dispatch
+[WARNING] stderr:   File "kivy/_event.pyx", line 1213, in kivy._event.EventObservers._dispatch
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/screenmanager.py", line 1063, in on_current
+[WARNING] stderr:     self.transition.start(self)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/screenmanager.py", line 377, in start
+[WARNING] stderr:     self.screen_in.dispatch('on_pre_enter')
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "kivy/_event.pyx", line 731, in kivy._event.EventDispatcher.dispatch
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/stats.py", line 15, in on_pre_enter
+[WARNING] stderr:     self.refresh_stats()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/stats.py", line 20, in refresh_stats
+[WARNING] stderr:     self.build_menu()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/stats.py", line 72, in build_menu
+[WARNING] stderr:     for name in app.players.keys()]
+[WARNING] stderr:                 ^^^^^^^^^^^^^^^^
+[WARNING] stderr: AttributeError: 'list' object has no attribute 'keys'

@@ -1,88 +1,73 @@
-from utils import *
-from constants import *
-from ui_helpers import *
-from models import *
-
-from kivy.core.text import LabelBase
-from kivy.metrics import dp
-from kivy.properties import ListProperty, NumericProperty
-from kivy.utils import platform
-from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
 
-from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.textfield import MDTextField
+from models import GameScore
 
 
+class EditGameScreen(Screen):
 
+    # ======================================================
+    # LIFECYCLE
+    # ======================================================
 
-class EditGameScreen(MDScreen):
     def on_pre_enter(self):
-        app = MDApp.get_running_app()
-        if not app.current_game:
+        self.game = self.app.current_game
+
+        if not self.game:
             self.manager.current = "history"
-            return  
-        self.populate()
-    
-    def populate(self):
-        app = MDApp.get_running_app()
-        if not ids_ready(self, "score_table", "date_field"):
             return
-        table = self.ids.score_table
-        table.clear_widgets()
-        game = app.current_game
-        if not game:
-            return
-        self.ids.date_field.text = game.date
-        for name, score in game.totals.items():
-            self.add_row(name, score)
 
-    def add_row(self, name="", score=0):
-        row = MDBoxLayout(size_hint_y=None, height=dp(52), spacing=dp(10))
-        name_field = MDTextField(text=name, hint_text="Player", mode="rectangle")
-        score_field = MDTextField(
-            text=str(score),
-            hint_text="Score",
-            mode="rectangle",
-            input_filter="int",)
-        row.name_field = name_field
-        row.score_field = score_field
-        row.add_widget(name_field)
-        row.add_widget(score_field)
-        self.ids.score_table.add_widget(row)
+        self.refresh_totals()
 
-    def save_game(self):
-        app = MDApp.get_running_app()
-        game = app.current_game
-        if not game:
-            return
-        new_totals = {}
-        for row in self.ids.score_table.children:
-            name = row.name_field.text.strip()
-            score = row.score_field.text.strip()
-            if not name:
-                continue
-            try:
-                new_totals[name] = int(score)
-            except ValueError:
-                new_totals[name] = 0
-        if not new_totals:
-            return
+    # ======================================================
+    # UI
+    # ======================================================
+
+    def refresh_totals(self):
+        self.ids.totals_box.clear_widgets()
+
+        for name, score in self.game.totals.items():
+            self.ids.totals_box.add_widget(
+                self._score_label(name, score)
+            )
+
+    def _score_label(self, name, score):
+        from kivymd.uix.label import MDLabel
+        return MDLabel(
+            text=f"{name}: {score}",
+            halign="center",
+        )
+
+    # ======================================================
+    # ACTIONS
+    # ======================================================
+
+    def add_points(self, name, pts):
         try:
-            game.date = datetime.fromisoformat(self.ids.date_field.text).isoformat()
-        except ValueError:
-            game.date = "Corrupted Date"
-        game.totals = new_totals
-        game.players = [Player(n) for n in new_totals.keys()]
-        game.get_results()
-        app.save_edited_game(game)
+            pts = int(pts)
+        except Exception:
+            toast("Invalid points")
+            return
+
+        self.game.add_points(name, pts)
+        self.refresh_totals()
+
+    # ------------------------------------------------------
+
+    def save(self):
+        self.app.save_edited_game(self.game)
+        toast("Game saved")
+
+    # ------------------------------------------------------
 
     def cancel(self):
+        self.app.current_game = None
         self.manager.current = "history"
 
+    # ======================================================
+    # UTIL
+    # ======================================================
+
+    @property
+    def app(self):
+        return self.manager.app

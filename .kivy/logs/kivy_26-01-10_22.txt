@@ -1,4 +1,4 @@
-[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-08_2.txt
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-10_22.txt
 [INFO   ] Kivy: v2.3.1
 [INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
 [INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
@@ -23,14 +23,17 @@
 [INFO   ] Window: virtual keyboard not allowed, single mode, not docked
 [INFO   ] Clipboard: Provider: android
 [INFO   ] === App starting ===
-[ERROR  ] Players save file has invalid schema
 [INFO   ] GL: NPOT texture support is available
 [WARNING] Base: Unknown <android> provider
 [INFO   ] Base: Start application main loop
 [INFO   ] Loader: using a thread pool of 2 workers
+[WARNING] Deprecated property "<NumericProperty name=width_mult>" of object "<kivymd.uix.menu.menu.MDDropdownMenu object at 0x6dc1d208a0>" has been set, it will be removed in a future version
+[WARNING] Permission request skipped: JVM exception occurred: interface org.kivy.android.PythonActivity$PermissionsCallback is not visible from class loader java.lang.IllegalArgumentException
 [INFO   ] Base: Leaving application in progress...
 [WARNING] stderr: Traceback (most recent call last):
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 675, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 6, in <module>
+[WARNING] stderr:     DominoApp().run()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
 [WARNING] stderr:     runTouchApp()
 [WARNING] stderr:     ~~~~~~~~~~~^^
@@ -65,28 +68,10 @@
 [WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 60, in custom_callback
 [WARNING] stderr:     exec(__kvlang__.co_value, idmap)
 [WARNING] stderr:     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 270, in <module>
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/domino.kv", line 276, in <module>
 [WARNING] stderr:     on_release: root.export_saves()
 [WARNING] stderr:     ^^^^^^^
-[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 273, in export_saves
-[WARNING] stderr:     app.save_players()
-[WARNING] stderr:         ~~~~~~~~~~~~^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/android/permissions.py", line 598, in request_permissions
-[WARNING] stderr:     _RequestPermissionsManager.request_permissions(permissions, callback)
-[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/android/permissions.py", line 538, in request_permissions
-[WARNING] stderr:     cls.register_callback()
-[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/android/permissions.py", line 514, in register_callback
-[WARNING] stderr:     cls._java_callback = _onRequestPermissionsCallback(cls.python_callback)
-[WARNING] stderr:                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/android/permissions.py", line 467, in __init__
-[WARNING] stderr:     super().__init__()
-[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^
-[WARNING] stderr:   File "jnius/jnius_proxy.pxi", line 28, in jnius.jnius.PythonJavaClass.__init__
-[WARNING] stderr:   File "jnius/jnius_proxy.pxi", line 34, in jnius.jnius.PythonJavaClass._init_j_self_ptr
-[WARNING] stderr:   File "jnius/jnius_proxy.pxi", line 180, in jnius.jnius.create_proxy_instance
-[WARNING] stderr:   File "jnius/jnius_export_class.pxi", line 876, in jnius.jnius.JavaMethod.__call__
-[WARNING] stderr:   File "jnius/jnius_export_class.pxi", line 1042, in jnius.jnius.JavaMethod.call_staticmethod
-[WARNING] stderr:   File "jnius/jnius_utils.pxi", line 79, in jnius.jnius.check_exception
-[WARNING] stderr: jnius.jnius.JavaException: JVM exception occurred: interface org.kivy.android.PythonActivity$PermissionsCallback is not visible from class loader java.lang.IllegalArgumentException
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/options.py", line 39, in export_saves
+[WARNING] stderr:     safe_load_json(SAVE_FILE, {})
+[WARNING] stderr:                    ^^^^^^^^^
+[WARNING] stderr: NameError: name 'SAVE_FILE' is not defined

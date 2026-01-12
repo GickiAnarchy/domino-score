@@ -1,6 +1,7 @@
 from utils import *
 from constants import *
 import os
+import random
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
@@ -32,8 +33,3 @@ class MenuScreen(MDScreen):
         self.ids.start_btn.disabled = not bool(app.players)
         self.ids.history_btn.disabled = not (
             GAMES_FILE and os.path.exists(GAMES_FILE))
-        app = MDApp.get_running_app()
-        self.ids.start_btn.disabled = not bool(app.players)
-        self.ids.history_btn.disabled = not (
-        GAMES_FILE is not None and os.path.exists(GAMES_FILE))
-        

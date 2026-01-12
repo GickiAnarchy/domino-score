@@ -1,0 +1,23 @@
+[INFO   ] Logger: Record log in /storage/emulated/0/Documents/domino-score/.kivy/logs/kivy_26-01-11_0.txt
+[INFO   ] Kivy: v2.3.1
+[INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
+[INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
+[INFO   ] Python: Interpreter at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/bin/python3"
+[INFO   ] Logger: Purge log fired. Processing...
+[INFO   ] Logger: Purge finished!
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/main.py", line 2, in <module>
+[WARNING] stderr:     from app import DominoApp
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/app.py", line 6, in <module>
+[WARNING] stderr:     from screens import ALL_SCREENS
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/__init__.py", line 1, in <module>
+[WARNING] stderr:     from .menu import MenuScreen
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/screens/menu.py", line 1, in <module>
+[WARNING] stderr:     from utils import *
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/utils.py", line 7, in <module>
+[WARNING] stderr:     from models import *
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/models.py", line 5, in <module>
+[WARNING] stderr:     from constants import MAX_POINTS
+[WARNING] stderr:   File "/storage/emulated/0/Documents/domino-score/constants.py", line 2, in <module>
+[WARNING] stderr:     from .utils import *
+[WARNING] stderr: ImportError: attempted relative import with no known parent package
