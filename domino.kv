@@ -165,11 +165,20 @@
                 orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
-                spacing:dp(10)
+                spacing:dp(15)
+    
+    MDBoxLayout:
+        orientation:"horizontal"
+        spacing:dp(10)
+        padding:dp(10)
 
         MDRaisedButton:
             text: "Save"
             on_release: root.save()
+            
+        MDRaisedButton:
+            text: "Delete"
+            on_release: root.delete()
 
         MDFlatButton:
             text: "Cancel"

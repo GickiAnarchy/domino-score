@@ -1,5 +1,7 @@
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.toast import toast
 
 from models import GameScore
@@ -32,9 +34,8 @@ class EditGameScreen(MDScreen):
                 self._score_label(name, score)
             )
 
-    def _score_label(self, name, score):
-        from kivymd.uix.label import MDLabel
-        return MDLabel(
+    def _score_label(self, name, score):     
+        return MDTextField(
             text=f"{name}: {score}",
             halign="center",
         )
@@ -63,6 +64,12 @@ class EditGameScreen(MDScreen):
 
     def cancel(self):
         self.app.current_game = None
+        self.manager.current = "history"
+    
+    # ------------------------------------------------------
+    
+    def delete(self):
+        self.app.delete_game(self.game)
         self.manager.current = "history"
 
     # ======================================================

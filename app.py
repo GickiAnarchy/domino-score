@@ -131,6 +131,18 @@ class DominoApp(MDApp):
         self.sync_players_from_games()
         self.current_game = None
         self.root.current = "history"
+        
+    def delete_game(self, x_game):
+        index = None
+        for i, g in enumerate(self.games):
+            if g.id == x_game.id:
+                self.games.remove(g)
+                toast("Game Deleted")
+                break
+        self.save_games()
+        self.sync_players_from_games()
+        self.current_game = None
+        self.root.current = "history"
 
     # ======================================================
     # STATS
