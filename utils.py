@@ -63,21 +63,26 @@ def get_export_dir():
     """
     if platform == "android":
         try:
+            # This is the modern way to get the Downloads folder on Android
             from android.storage import primary_external_storage_path
-            base = primary_external_storage_path()
-            path = os.path.join(base, "Download", "DominoScorebook")
-        except Exception:
+            primary_storage = primary_external_storage_path()
+            path = os.path.join(primary_storage, "Download", "DominoScorebook")
+        except Exception as e:
+            logging.error(f"Failed to get primary storage: {e}")
             from android.storage import app_storage_path
             path = app_storage_path()
     else:
         path = os.path.join(os.getcwd(), "exports")
 
-    try:
-        os.makedirs(path, exist_ok=True)
-    except Exception:
-        path = os.getcwd()
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path, exist_ok=True)
+        except Exception as e:
+            logging.error(f"Failed to create directory {path}: {e}")
+            return os.getcwd()
 
     return path
+
 
 
 # ==========================================================

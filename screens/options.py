@@ -30,14 +30,14 @@ class OptionsScreen(MDScreen):
 
     def export_saves(self):
         app = MDApp.get_running_app()
-        save_players(app.players_file, app.players)
-        save_games(app.games_file, app.games)
+        app.save_players()
+        app.save_games()
         toast("Saves exported")
     
     def import_saves(self):
         app = MDApp.get_running_app()    
         players = load_players(app.players_file)
-        games = load_games(app.games_file)    
+        games = load_games(app.games_file)
         if not players and not games:
             toast("No saves found")
             return  

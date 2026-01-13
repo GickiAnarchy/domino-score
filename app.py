@@ -14,7 +14,7 @@ from utils import (
 )
 
 from constants import COLORS
-
+from android.permissions import request_permissions, Permission
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
@@ -29,6 +29,12 @@ class DominoApp(MDApp):
 
     def build(self):
         setup_logger()
+        
+        if platform == "android":
+            request_permissions([
+                Permission.WRITE_EXTERNAL_STORAGE,
+                Permission.READ_EXTERNAL_STORAGE
+            ])
 
         self.data_dir = get_export_dir()
         self.players_file = os.path.join(self.data_dir, "players.dom")
