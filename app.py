@@ -15,6 +15,7 @@ from utils import (
 
 from constants import COLORS
 from android.permissions import request_permissions, Permission
+from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
@@ -56,7 +57,7 @@ class DominoApp(MDApp):
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
 
-        toast("version 0.9.4")
+        toast("version 0.9.5")
         return sm
 
     # ======================================================
