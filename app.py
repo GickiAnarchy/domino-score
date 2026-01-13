@@ -94,37 +94,41 @@ class DominoApp(MDApp):
         self.current_game = GameScore(valid_names)
         self.root.current = "game"
     
-    def archive_game(self, game):
+    def end_current_game(self):
+        game = self.current_game
+        if not game:
+            return
         if not game.totals:
             toast("No scores yet")
             return
         game.finish()
         if game.winner:
             toast(f"{game.winner} wins!")
-            game.finish_game()
+            self.games.append(game)
+            self.save_games()
+            self.sync_players_from_games()
         else:
             toast("Tie at the top — another hand!")
-            game.finished = False  # unlock for next hand
-            
+            game.finished = False
+            return  # stay in game screen
+        self.current_game = None
+        self.root.current = "menu"
+        
     # ======================================================
     # EDITED GAME SAVE
     # ======================================================
 
     def save_edited_game(self, edited_game):
         replaced = False
-
         for i, g in enumerate(self.games):
             if g.id == edited_game.id:
                 self.games[i] = edited_game
                 replaced = True
                 break
-
         if not replaced:
             self.games.append(edited_game)
-
         self.save_games()
         self.sync_players_from_games()
-
         self.current_game = None
         self.root.current = "history"
 

@@ -93,12 +93,10 @@ class GameScore:
     # ------------------------------------------------------
     # FINAL GAME STATE
     # ------------------------------------------------------
-
+    
     def finish(self):
-        """
-        Called at the end of the hand.
-        Locks the game and finalizes the winner.
-        """
+        if not self.totals:
+            return
         self.finished = True
 
     @property

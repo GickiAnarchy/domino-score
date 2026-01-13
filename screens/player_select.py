@@ -1,9 +1,13 @@
 from kivymd.app import MDApp
-from kivy.uix.screenmanager import Screen
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.selectioncontrol import MDCheckbox
+from kivymd.uix.label import MDLabel
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.label import MDLabel
 from kivymd.toast import toast
 
 
-class PlayerSelectScreen(Screen):
+class PlayerSelectScreen(MDScreen):
 
     # ======================================================
     # LIFECYCLE
@@ -23,7 +27,6 @@ class PlayerSelectScreen(Screen):
         players = self.app.players
 
         if not players:
-            from kivymd.uix.label import MDLabel
             self.ids.players_box.add_widget(
                 MDLabel(
                     text="No players available",
@@ -31,10 +34,6 @@ class PlayerSelectScreen(Screen):
                 )
             )
             return
-
-        from kivymd.uix.selectioncontrol import MDCheckbox
-        from kivymd.uix.label import MDLabel
-        from kivymd.uix.boxlayout import MDBoxLayout
 
         for name in sorted(players.keys()):
             row = MDBoxLayout(
@@ -44,14 +43,10 @@ class PlayerSelectScreen(Screen):
                 height="48dp",
             )
 
-            checkbox = MDCheckbox(
-                on_active=lambda cb, val, n=name: self.toggle(n, val)
-            )
+            checkbox = MDCheckbox()
+            checkbox.bind(active=lambda cb, val, n=name: self.toggle(n, val))
 
-            label = MDLabel(
-                text=name,
-                valign="middle",
-            )
+            label = MDLabel(text=f"{name}",valign="middle")
 
             row.add_widget(checkbox)
             row.add_widget(label)
@@ -68,14 +63,14 @@ class PlayerSelectScreen(Screen):
             self.selected.discard(name)
 
     # ------------------------------------------------------
-
+    
     def start_game(self):
-        if len(self.selected) < 2:
+        selected = list(self.selected)
+        if len(selected) < 2:
             toast("Select at least 2 players")
             return
-
-        self.app.start_game(list(self.selected))
-
+        self.app.start_game(selected)
+         
     # ------------------------------------------------------
 
     def cancel(self):
