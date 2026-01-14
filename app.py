@@ -11,6 +11,7 @@ from utils import (
     save_players,
     load_games,
     save_games,
+    request_android_permissions,
 )
 
 from constants import COLORS
@@ -32,10 +33,7 @@ class DominoApp(MDApp):
         setup_logger()
         
         if platform == "android":
-            request_permissions([
-                Permission.WRITE_EXTERNAL_STORAGE,
-                Permission.READ_EXTERNAL_STORAGE
-            ])
+            request_android_permissions()
 
         self.data_dir = get_export_dir()
         self.players_file = os.path.join(self.data_dir, "players.dom")

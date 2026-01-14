@@ -153,36 +153,40 @@
 
 <EditGameScreen>:
     name: "edit"
-
+    
     MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
+        orientation: 'vertical'
+        
+        MDTopAppBar:
+            title: "Edit Game"
+            left_action_items: [["arrow-left", lambda x: root.go_back()]]
 
         ScrollView:
             MDBoxLayout:
-                id: totals_box
-                orientation: "vertical"
-                size_hint_y: None
-                height: self.minimum_height
-                spacing:dp(15)
-    
-    MDBoxLayout:
-        orientation:"horizontal"
-        spacing:dp(10)
-        padding:dp(10)
+                id: players_container  # <--- We will add textfields here
+                orientation: 'vertical'
+                adaptive_height: True
+                padding: dp(20)
+                spacing: dp(15)
 
-        MDRaisedButton:
-            text: "Save"
-            on_release: root.save()
+        # Date Field and Save Button at the bottom
+        MDBoxLayout:
+            adaptive_height: True
+            padding: dp(20)
             
+            MDTextField:
+                id: date_field
+                hint_text: "Game Date"
+                readonly: True
+                
+            MDIconButton:
+                icon: "calendar"
+                on_release: root.show_date_picker()
+        
         MDRaisedButton:
-            text: "Delete"
-            on_release: root.delete()
-
-        MDFlatButton:
-            text: "Cancel"
-            on_release: root.cancel()
+            text: "Save Changes"
+            pos_hint: {"center_x": .5}
+            on_release: root.save_changes()
 
 
 <StatsScreen>:
@@ -279,3 +283,20 @@
             size_hint:(1.0, 0.5)
 
 
+<EditablePlayerScore>:
+    MDBoxLayout:
+        id:editbox
+        orientation:"horizontal"
+        padding:dp(20)
+        spacing:dp(20)
+        
+        MDTextField:
+            id: name_field
+            hint_text:"name"
+            multiline: False
+        
+        MDTextField:
+            id: score_field
+            hint_text:"score"
+            multiline:False
+            input_filter:"int"

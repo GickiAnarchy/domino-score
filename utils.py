@@ -175,3 +175,31 @@ def load_games(path):
             logging.exception("Failed to load game")
 
     return games
+
+
+
+def request_android_permissions():
+    try:
+        from android.permissions import request_permissions, Permission
+        from jnius import autoclass
+        
+        # This is the "Magic" fix:
+        # We manually get the PythonActivity class loader to avoid the Visibility error
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        activity = PythonActivity.mActivity
+        
+        def callback(permissions, results):
+            if all(results):
+                print("Permissions granted!")
+            else:
+                from kivymd.toast import toast
+                toast("Storage permission denied. Exports may fail.")
+
+        # Pass the permissions list and the callback
+        request_permissions([
+            Permission.WRITE_EXTERNAL_STORAGE,
+            Permission.READ_EXTERNAL_STORAGE
+        ], callback)
+        
+    except Exception as e:
+        logging.error(f"Permission Request Error: {e}")
