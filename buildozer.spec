@@ -28,6 +28,8 @@ presplash.filename = %(source.dir)s/data/splash.png
 # Android configuration (CLEAN)
 # --------------------------------------------------
 android.permissions = WRITE_MEDIA_FILES, READ_MEDIA_FILES, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
+android.manifest.application_arguments = --requestLegacyExternalStorage="true"
+
 
 # Target Android SDK
 android.api = 33

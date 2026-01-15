@@ -16,7 +16,6 @@ class EditGameScreen(MDScreen):
     # ======================================================
 
     def on_pre_enter(self):
-        self.app = MDApp.get_running_app()
         self.game = self.app.current_game
         container = self.ids.players_container
         
@@ -31,11 +30,11 @@ class EditGameScreen(MDScreen):
         self.ids.date_field.text = str(self.game.date)
 
         # 3. Create a TextField for every player in this game
-        for player_name, score in self.game.scores.items():
+        for player_name, score in self.game.totals.items():
             field = MDTextField(
                 text=str(score),
                 hint_text=f"{player_name}'s Score",
-                mode="outline",
+                mode="line",
                 input_filter="int"
             )
             container.add_widget(field)

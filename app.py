@@ -32,9 +32,6 @@ class DominoApp(MDApp):
     def build(self):
         setup_logger()
         
-        if platform == "android":
-            request_android_permissions()
-
         self.data_dir = get_export_dir()
         self.players_file = os.path.join(self.data_dir, "players.dom")
         self.games_file = os.path.join(self.data_dir, "games.dom")
@@ -57,6 +54,11 @@ class DominoApp(MDApp):
 
         toast("version 0.9.5")
         return sm
+    
+    def on_start(self):
+        if platform == "android":
+            request_android_permissions()
+
 
     # ======================================================
     # FONTS
