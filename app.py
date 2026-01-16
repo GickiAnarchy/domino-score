@@ -15,7 +15,7 @@ from utils import (
 )
 
 from constants import COLORS
-from android.permissions import request_permissions, Permission
+#from android.permissions import request_permissions, Permission
 from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
@@ -58,6 +58,7 @@ class DominoApp(MDApp):
     
     def req(self):
         if platform == "android":
+            from android.permissions import request_permissions, Permission
             request_android_permissions()
 
 
