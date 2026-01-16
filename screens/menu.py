@@ -24,7 +24,7 @@ from kivymd.uix.textfield import MDTextField
 
 
 class MenuScreen(MDScreen):
-    def on_enter(self):
+    def on_enter(self, *args):
         GAMES_FILE = MDApp.get_running_app().games_file
         if not ids_ready(self, "fact_label", "start_btn", "history_btn"):
             return

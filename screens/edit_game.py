@@ -15,7 +15,7 @@ class EditGameScreen(MDScreen):
     # LIFECYCLE
     # ======================================================
 
-    def on_pre_enter(self):
+    def on_pre_enter(self, *args):
         self.game = self.app.current_game
         container = self.ids.players_container
         

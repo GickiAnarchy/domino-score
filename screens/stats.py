@@ -10,7 +10,7 @@ class StatsScreen(MDScreen):
     # LIFECYCLE
     # ======================================================
 
-    def on_pre_enter(self):
+    def on_pre_enter(self, *args):
         self.menu = None
         self.selected_player = None
         self.refresh_players()
