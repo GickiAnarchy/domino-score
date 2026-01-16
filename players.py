@@ -1,3 +1,4 @@
+from kivymd.app import MDApp
 from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
 
@@ -93,4 +94,4 @@ class PlayersScreen(Screen):
 
     @property
     def app(self):
-        return self.manager.app
+        return MDApp.get_running_app()

@@ -2,6 +2,7 @@ from kivy.core.text import LabelBase
 from kivy.metrics import dp
 from kivy.properties import ListProperty, NumericProperty
 
+from kivymd.uix.widget import MDWidget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
 
@@ -21,3 +22,7 @@ class MDSeparator(MDBoxLayout):
         self.size_hint_y = None
         self.height = self.thickness
         self.md_bg_color = [1, 1, 1, 0.2]
+
+
+class EditablePlayerScore(MDWidget):
+    pass
