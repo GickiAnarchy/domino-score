@@ -15,7 +15,7 @@ version = 0.9.5
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,kivymd,pyjnius, android
+requirements = kivy,kivymd,pyjnius,android
 
 orientation = portrait
 fullscreen = 1

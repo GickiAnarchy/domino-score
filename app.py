@@ -30,6 +30,7 @@ class DominoApp(MDApp):
     # ======================================================
 
     def build(self):
+        self.req()
         setup_logger()
         
         self.data_dir = get_export_dir()
@@ -55,7 +56,7 @@ class DominoApp(MDApp):
         toast("version 0.9.5")
         return sm
     
-    def on_start(self):
+    def req(self):
         if platform == "android":
             request_android_permissions()
 
