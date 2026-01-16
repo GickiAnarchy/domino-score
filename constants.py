@@ -4,8 +4,6 @@ import os
 
 
 
-
-MAX_POINTS = 300
 SELECTED_COLOR = get_color_from_hex("#4CAF50")
 DEFAULT_COLOR = get_color_from_hex("#1E88E5")
 

@@ -9,46 +9,10 @@ from kivy.utils import platform
 from models import Player, GameScore
 
 
-# ==========================================================
-# LOGGING
-# ==========================================================
 
-def setup_logger():
-    try:
-        if platform == "android":
-            from android.storage import app_storage_path
-            base = app_storage_path()
-        else:
-            base = os.getcwd()
-
-        log_dir = os.path.join(base, "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, "domino.log")
-    except Exception:
-        log_file = "domino.log"
-
-    logging.basicConfig(
-        filename=log_file,
-        filemode="a",
-        level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-    )
-
-    logging.info("=== App starting ===")
-
-
-# ==========================================================
-# GENERAL HELPERS
-# ==========================================================
-
-def ids_ready(screen, *names):
-    """Return True if all ids exist on the screen"""
-    return all(name in screen.ids for name in names)
-
-
-# ==========================================================
+#=================================================
 # FILE SYSTEM
-# ==========================================================
+# ================================================
 
 def get_data_dir():
     if platform == "android":
@@ -84,50 +48,11 @@ def get_export_dir():
     return path
 
 
-
-# ==========================================================
-# JSON SAFE IO
-# ==========================================================
-
-def safe_load_json(path, default):
-    if not path or not os.path.exists(path):
-        return default
-
-    try:
-        if os.path.getsize(path) == 0:
-            return default
-    except Exception:
-        return default
-
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, type(default)) else default
-    except Exception:
-        logging.exception(f"Failed to load JSON: {path}")
-        return default
+##
+#    FILE I/O
+##
 
 
-def atomic_write_json(path, data):
-    tmp = f"{path}.tmp"
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-    except Exception:
-        logging.exception(f"Atomic write failed: {path}")
-        try:
-            if os.path.exists(tmp):
-                os.remove(tmp)
-        except Exception:
-            pass
-
-
-# ==========================================================
-# PLAYERS
-# ==========================================================
 
 def save_players(path, players: dict):
     """
@@ -150,12 +75,8 @@ def load_players(path):
             logging.exception("Failed to load player")
 
     return players
-
-
-# ==========================================================
-# GAMES
-# ==========================================================
-
+    
+    
 def save_games(path, games):
     """
     games: list[GameScore]
@@ -177,29 +98,3 @@ def load_games(path):
     return games
 
 
-
-def request_android_permissions():
-    try:
-        from android.permissions import request_permissions, Permission
-        from jnius import autoclass
-        
-        # This is the "Magic" fix:
-        # We manually get the PythonActivity class loader to avoid the Visibility error
-        PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        activity = PythonActivity.mActivity
-        
-        def callback(permissions, results):
-            if all(results):
-                print("Permissions granted!")
-            else:
-                from kivymd.toast import toast
-                toast("Storage permission denied. Exports may fail.")
-
-        # Pass the permissions list and the callback
-        request_permissions([
-            Permission.WRITE_EXTERNAL_STORAGE,
-            Permission.READ_EXTERNAL_STORAGE
-        ], callback)
-        
-    except Exception as e:
-        logging.error(f"Permission Request Error: {e}")

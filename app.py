@@ -4,18 +4,8 @@ import random
 
 from screens import ALL_SCREENS
 from models import Player, GameScore
-from utils import (
-    setup_logger,
-    get_export_dir,
-    load_players,
-    save_players,
-    load_games,
-    save_games,
-    request_android_permissions,
-)
 
 from constants import COLORS
-#from android.permissions import request_permissions, Permission
 from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
