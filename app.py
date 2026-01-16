@@ -53,12 +53,12 @@ class DominoApp(MDApp):
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
 
-        toast("version 0.9.5")
+        #toast("version 0.9.5")
         return sm
     
     def req(self):
         if platform == "android":
-            from android.permissions import request_permissions, Permission
+            #from android.permissions import request_permissions, Permission
             request_android_permissions()
 
 

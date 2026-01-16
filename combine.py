@@ -8,7 +8,7 @@ def combine_files(source_dir, output_file):
     with open(output_file, "w", encoding="utf-8") as out:
         for root, _, files in os.walk(source_dir):
             for filename in sorted(files):
-                if filename.endswith(EXTENSIONS):
+                if filename.endswith(EXTENSIONS) and filename != "combine.py":
                     filepath = os.path.join(root, filename)
 
                     out.write("\n\n\n")
