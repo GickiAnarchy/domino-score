@@ -185,10 +185,20 @@
                 icon: "calendar"
                 on_release: root.show_date_picker()
         
-        MDRaisedButton:
-            text: "Save Changes"
-            pos_hint: {"center_x": .5}
-            on_release: root.save_changes()
+        MDBoxLayout:
+            orientation:"horizontal"
+            padding:dp(15)
+            spacing:dp(10)
+        
+            MDRaisedButton:
+                text: "Save Changes"
+                pos_hint: {"center_x": .5}
+                on_release: root.save_changes()
+            
+            MDRaisedButton:
+                text: "Delete Game"
+                pos_hint: {"center_x": .5}
+                on_release: root.delete()
 
 
 <StatsScreen>:
@@ -285,20 +295,20 @@
             size_hint:(1.0, 0.5)
 
 
-<EditablePlayerScore>:
-    MDBoxLayout:
-        id:editbox
-        orientation:"horizontal"
-        padding:dp(20)
-        spacing:dp(20)
-        
-        MDTextField:
-            id: name_field
-            hint_text:"name"
-            multiline: False
-        
-        MDTextField:
-            id: score_field
-            hint_text:"score"
-            multiline:False
-            input_filter:"int"
+#<EditablePlayerScore>:
+#    MDBoxLayout:
+#        id:editbox
+#        orientation:"horizontal"
+#        padding:dp(20)
+#        spacing:dp(20)
+#        
+#        MDTextField:
+#            id: name_field
+#            hint_text:"name"
+#            multiline: False
+#        
+#        MDTextField:
+#            id: score_field
+#            hint_text:"score"
+#            multiline:False
+#            input_filter:"int"

@@ -46,9 +46,9 @@ class EditGameScreen(MDScreen):
         # Update scores from the text fields
         for name, field in self.player_fields.items():
             try:
-                game.scores[name] = int(field.text)
+                game.totals[name] = int(field.text)
             except ValueError:
-                game.scores[name] = 0        
+                game.totals[name] = 0        
         game.date = self.ids.date_field.text
         # Save to disk
         self.app.save_edited_game(game)

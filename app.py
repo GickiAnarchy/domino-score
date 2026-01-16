@@ -21,6 +21,7 @@ from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
 from kivymd.toast import toast
+from kivy.clock import Clock
 
 
 class DominoApp(MDApp):
@@ -30,7 +31,6 @@ class DominoApp(MDApp):
     # ======================================================
 
     def build(self):
-        self.req()
         setup_logger()
         
         self.data_dir = get_export_dir()
@@ -56,12 +56,26 @@ class DominoApp(MDApp):
         #toast("version 0.9.5")
         return sm
     
-    def req(self):
+    def on_start(self):
         if platform == "android":
-            #from android.permissions import request_permissions, Permission
-            request_android_permissions()
+            Clock.schedule_once(lambda *_: self.init_storage(), 0.5)
 
-
+    def init_storage(self):
+        from android.permissions import request_permissions, Permission
+    
+        def callback(permissions, results):
+            if all(results):
+                self.data_dir = get_export_dir()
+                ensure_dirs(self.data_dir)
+            else:
+                toast("Storage permission denied")
+    
+        request_permissions(
+            [Permission.READ_EXTERNAL_STORAGE],
+            callback
+        )
+        
+        
     # ======================================================
     # FONTS
     # ======================================================
@@ -196,3 +210,13 @@ class DominoApp(MDApp):
         self.players = load_players(self.players_file)
         self.sync_players_from_games()
         return self.players
+        
+
+
+def ensure_dirs(path):
+    try:
+        os.makedirs(path, exist_ok=True)
+        return True
+    except Exception as e:
+        print("Directory creation failed:", e)
+        return False
