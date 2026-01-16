@@ -56,9 +56,9 @@ class DominoApp(MDApp):
         #toast("version 0.9.5")
         return sm
     
-    def on_start(self):
-        if platform == "android":
-            Clock.schedule_once(lambda *_: self.init_storage(), 0.5)
+    #def on_start(self):
+#        if platform == "android":
+#            Clock.schedule_once(lambda *_: self.init_storage(), 0.5)
 
     def init_storage(self):
         from android.permissions import request_permissions, Permission
@@ -213,10 +213,10 @@ class DominoApp(MDApp):
         
 
 
-def ensure_dirs(path):
-    try:
-        os.makedirs(path, exist_ok=True)
-        return True
-    except Exception as e:
-        print("Directory creation failed:", e)
-        return False
+#def ensure_dirs(path):
+#    try:
+#        os.makedirs(path, exist_ok=True)
+#        return True
+#    except Exception as e:
+#        print("Directory creation failed:", e)
+#        return False
