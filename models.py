@@ -22,16 +22,14 @@ class Player:
         return {
             "name": self.name,
             "wins": self.wins,
-            "losses": self.losses,
-        }
+            "losses": self.losses,}
 
     @classmethod
     def from_dict(cls, data):
         return cls(
             name=data.get("name", ""),
             wins=data.get("wins", 0),
-            losses=data.get("losses", 0),
-        )
+            losses=data.get("losses", 0),)
 
 
 # ==========================================================
@@ -39,12 +37,12 @@ class Player:
 # ==========================================================
 
 class GameScore:
-    def __init__(self, player_names, id=None):
+    def __init__(self, players, id, **):
         self.id = id or str(uuid4())
         self.date = datetime.now().isoformat()
     
-        self.player_names = list(player_names)
-        self.totals = {name: 0 for name in self.player_names}
+        self.players = list(players)
+        self.totals = {p.name: 0 for p in self.players}
     
         self.rounds = []
         self.finished = False
@@ -53,67 +51,7 @@ class GameScore:
     # SCORING
     # ------------------------------------------------------
 
-    def add_points(self, name, pts):
-        if self.finished:
-            return
-
-        if name not in self.totals:
-            return
-
-        pts = int(pts)
-        self.totals[name] += pts
-
-        self.rounds.append({
-            "player": name,
-            "points": pts,
-        })
-
-    # ------------------------------------------------------
-    # PROVISIONAL STATE
-    # ------------------------------------------------------
-
-    @property
-    def provisional_leader(self):
-        """
-        Player currently leading (may or may not have reached MAX_POINTS)
-        """
-        if not self.totals:
-            return None
-
-        return max(self.totals.items(), key=lambda x: x[1])[0]
-
-    @property
-    def max_reached(self):
-        """
-        True if someone has reached or exceeded MAX_POINTS
-        (does NOT end the game)
-        """
-        return any(score >= MAX_POINTS for score in self.totals.values())
-
-    # ------------------------------------------------------
-    # FINAL GAME STATE
-    # ------------------------------------------------------
     
-    def finish(self):
-        if not self.totals:
-            return
-        self.finished = True
-
-    @property
-    def winner(self):
-        if not self.finished or not self.totals:
-            return None
-    
-        high = max(self.totals.values())
-        leaders = [name for name, score in self.totals.items() if score == high]
-    
-        # Tie → no winner yet
-        if len(leaders) != 1:
-            return None
-    
-        return leaders[0]
-    # ------------------------------------------------------
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -128,7 +66,7 @@ class GameScore:
     @classmethod
     def from_dict(cls, data):
         game = cls(
-            player_names=list(data.get("totals", {}).keys()),
+            players=list(data.get("totals", {}).keys()),
             id=data.get("id"),
         )
     
