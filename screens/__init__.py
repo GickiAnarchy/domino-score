@@ -9,13 +9,13 @@ from .stats import StatsScreen
 
 ALL_SCREENS = [
     (MenuScreen, "menu"),
-    (CreatePlayerScreen, "create"),
-    (PlayerSelectScreen, "select"),
-    (GameScreen, "game"),
-    (OptionsScreen, "options"),
-    (HistoryScreen, "history"),
-    (EditGameScreen, "edit"),
-    (StatsScreen, "stats"),
+   # (CreatePlayerScreen, "create"),
+#    (PlayerSelectScreen, "select"),
+#    (GameScreen, "game"),
+#    (OptionsScreen, "options"),
+#    (HistoryScreen, "history"),
+#    (EditGameScreen, "edit"),
+#    (StatsScreen, "stats"),
 ]
 
 __all__ = [

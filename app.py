@@ -4,6 +4,7 @@ import random
 
 from screens import ALL_SCREENS
 from models import Player, GameScore
+from utils import save_games, load_games, save_players, load_players
 
 from constants import COLORS
 from kivy.utils import platform
@@ -20,52 +21,22 @@ class DominoApp(MDApp):
     # APP BOOT
     # ======================================================
 
-    def build(self):
-        setup_logger()
-        
-        self.data_dir = get_export_dir()
-        self.players_file = os.path.join(self.data_dir, "players.dom")
-        self.games_file = os.path.join(self.data_dir, "games.dom")
-
-        self.players = load_players(self.players_file)
-        self.games = load_games(self.games_file)
-
+    def build(self):        
         self.current_game = None
-
-        self.sync_players_from_games()
-
         self.theme_cls.primary_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
-
         self._register_fonts()
-
+        
+        self.players = load_players()
+        self.games = load_games()
+        
+        self.current_game = None
+        
         sm = ScreenManager()
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
-
-        #toast("version 0.9.5")
         return sm
     
-    #def on_start(self):
-#        if platform == "android":
-#            Clock.schedule_once(lambda *_: self.init_storage(), 0.5)
-
-    def init_storage(self):
-        from android.permissions import request_permissions, Permission
-    
-        def callback(permissions, results):
-            if all(results):
-                self.data_dir = get_export_dir()
-                ensure_dirs(self.data_dir)
-            else:
-                toast("Storage permission denied")
-    
-        request_permissions(
-            [Permission.READ_EXTERNAL_STORAGE],
-            callback
-        )
-        
-        
     # ======================================================
     # FONTS
     # ======================================================
@@ -87,101 +58,77 @@ class DominoApp(MDApp):
     # SAVE / LOAD
     # ======================================================
 
-    def save_players(self):
-        save_players(self.players_file, self.players)
+    def save_players(self, player = None):
+        if player != None and isinstance(player, Player):
+            newplayer = True
+            for i,p in enumerate(self.players):
+                if player.name == p.name:
+                    self.players[i] = player
+                    newplayer = False
+                    break
+            if newplayer:
+                self.players.append(player)
+                print("New player added")
+        save_players(self.players)
+        print("Players saved")
 
-    def save_games(self):
-        save_games(self.games_file, self.games)
+    def save_games(self, game = None):
+        if game != None and isinstance(game, GameScore):
+            newgame = True
+            for i,g in enumerate(self.games):
+                if g.id == game.id:
+                    self.games[i] = g
+                    newgame = False
+                    break
+            if newgame:
+                self.games.append(game)
+                print("New game added")
+        save_games(self.games)
+        print("Games saved")
 
     # ======================================================
     # GAME FLOW
     # ======================================================
 
+
     def start_game(self, names):
         if not names or len(names) < 2:
+            print("Need at least two players to start game.")
             return
-        valid_names = [name for name in names if name in self.players]
-        if len(valid_names) < 2:
-            logging.warning("Not enough valid players")
-            return
-        self.current_game = GameScore(valid_names)
-        self.root.current = "game"
+        self.current_game = GameScore(names)
+        #go to game screen
+        #self.root.current = "game"
     
-    def end_current_game(self):
+    def end_game(self):
         game = self.current_game
-        if not game:
+        if not game.finished:
+            print("Game isn't finished, cannot end current game.")
             return
-        if not game.totals:
-            toast("No scores yet")
-            return
-        game.finish()
-        if game.winner:
-            toast(f"{game.winner} wins!")
-            self.games.append(game)
-            self.save_games()
-            self.sync_players_from_games()
-        else:
-            toast("Tie at the top — another hand!")
-            game.finished = False
-            return  # stay in game screen
+        self.save_games(game)
         self.current_game = None
-        self.root.current = "menu"
-        
-    # ======================================================
-    # EDITED GAME SAVE
-    # ======================================================
-
-    def save_edited_game(self, edited_game):
-        replaced = False
-        for i, g in enumerate(self.games):
-            if g.id == edited_game.id:
-                self.games[i] = edited_game
-                replaced = True
-                break
-        if not replaced:
-            self.games.append(edited_game)
-        self.save_games()
         self.sync_players_from_games()
-        self.current_game = None
-        self.root.current = "history"
-        
-    def delete_game(self, x_game):
-        index = None
-        for i, g in enumerate(self.games):
-            if g.id == x_game.id:
-                self.games.remove(g)
-                toast("Game Deleted")
-                break
-        self.save_games()
-        self.sync_players_from_games()
-        self.current_game = None
-        self.root.current = "history"
+        self.save_players()
 
-    # ======================================================
-    # STATS
-    # ======================================================
 
+#
+#
+#
     def compute_player_stats(self):
         stats = {}
-
         for g in self.games:
             if not g.finished or not g.winner:
                 continue
-
             for name in g.totals:
                 stats.setdefault(name, {"wins": 0, "losses": 0})
-
             stats[g.winner]["wins"] += 1
-
             for name in g.totals:
                 if name != g.winner:
                     stats[name]["losses"] += 1
-
         return stats
+
 
     def sync_players_from_games(self):
         stats = self.compute_player_stats()
-
         for p in self.players.values():
             if p.name in stats:
                 p.wins = stats[p.name]["wins"]
@@ -189,24 +136,11 @@ class DominoApp(MDApp):
             else:
                 p.wins = 0
                 p.losses = 0
-
         self.save_players()
+        print("Players synced")
 
-    # ======================================================
-    # UTIL
-    # ======================================================
 
     def refresh_players(self):
-        self.players = load_players(self.players_file)
+        self.players = load_players()
         self.sync_players_from_games()
         return self.players
-        
-
-
-#def ensure_dirs(path):
-#    try:
-#        os.makedirs(path, exist_ok=True)
-#        return True
-#    except Exception as e:
-#        print("Directory creation failed:", e)
-#        return False
