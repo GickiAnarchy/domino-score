@@ -72,6 +72,7 @@ class DominoApp(MDApp):
         save_players(self.players)
         print("Players saved")
 
+
     def save_games(self, game = None):
         if game != None and isinstance(game, GameScore):
             newgame = True
