@@ -72,14 +72,22 @@ def save_players(players):
 
 def load_players():    
     players = []
+    raw = []
     path = os.path.join(get_export_dir(), "players.dom")
     if os.path.exists(path):
         try:
             with open(path,"r") as f:
-                players = json.load(f)
+                raw = json.load(f)
         except Exception as e:
             print(e)
             return
+        try:
+            for item in raw:
+                players.append(Player.from_dict(item))
+        except Exception as e:
+            print(e)
+            return
+    print("APP:Players loaded")
     return players
     
     
@@ -119,8 +127,9 @@ def load_games():
                 print(e)
                 return
     else:
-        print("No saved games file")p
+        print("No saved games file")
         return
+    print("APP:Games loaded")
     return games
 
 

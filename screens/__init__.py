@@ -1,16 +1,16 @@
 from .menu import MenuScreen
 from .create_player import CreatePlayerScreen
 from .player_select import PlayerSelectScreen
-from .game import GameScreen
-from .options import OptionsScreen
-from .history import HistoryScreen
-from .edit_game import EditGameScreen
-from .stats import StatsScreen
+#from .game import GameScreen
+#from .options import OptionsScreen
+#from .history import HistoryScreen
+#from .edit_game import EditGameScreen
+#from .stats import StatsScreen
 
 ALL_SCREENS = [
     (MenuScreen, "menu"),
-   # (CreatePlayerScreen, "create"),
-#    (PlayerSelectScreen, "select"),
+    (CreatePlayerScreen, "create"),
+    (PlayerSelectScreen, "select"),
 #    (GameScreen, "game"),
 #    (OptionsScreen, "options"),
 #    (HistoryScreen, "history"),
@@ -20,12 +20,12 @@ ALL_SCREENS = [
 
 __all__ = [
     "MenuScreen",
-    "CreatePlayerScreen",
+    "#CreatePlayerScreen",
     "PlayerSelectScreen",
-    "GameScreen",
-    "OptionsScreen",
-    "HistoryScreen",
-    "EditGameScreen",
-    "StatsScreen",
+#    "GameScreen",
+#    "OptionsScreen",
+#    "HistoryScreen",
+#    "EditGameScreen",
+#    "StatsScreen",
     "ALL_SCREENS",
 ]

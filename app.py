@@ -6,7 +6,7 @@ from screens import ALL_SCREENS
 from models import Player, GameScore
 from utils import save_games, load_games, save_players, load_players
 
-from constants import COLORS
+#from constants import COLORS
 from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
@@ -23,7 +23,7 @@ class DominoApp(MDApp):
 
     def build(self):        
         self.current_game = None
-        self.theme_cls.primary_palette = random.choice(COLORS)
+        #self.theme_cls.primary_palette = random.choice(COLORS)
         self.theme_cls.theme_style = "Dark"
         self._register_fonts()
         
@@ -110,10 +110,11 @@ class DominoApp(MDApp):
         self.sync_players_from_games()
         self.save_players()
 
+    
+    # ======================================================
+    # PLAYER FUNCTIONS
+    # ======================================================
 
-#
-#
-#
     def compute_player_stats(self):
         stats = {}
         for g in self.games:
@@ -130,7 +131,7 @@ class DominoApp(MDApp):
 
     def sync_players_from_games(self):
         stats = self.compute_player_stats()
-        for p in self.players.values():
+        for p in self.players:
             if p.name in stats:
                 p.wins = stats[p.name]["wins"]
                 p.losses = stats[p.name]["losses"]
@@ -145,3 +146,19 @@ class DominoApp(MDApp):
         self.players = load_players()
         self.sync_players_from_games()
         return self.players
+    
+    
+    def delete_player(self, player):
+        # Ensure we have the name string to compare
+        target_name = player.name if isinstance(player, Player) else player     
+        # Find the player object in the list that matches the name
+        player_to_remove = None
+        for p in self.players:
+            if p.name == target_name:
+                player_to_remove = p
+                break       
+        # Remove the object from the list
+        if player_to_remove:
+            self.players.remove(player_to_remove)
+            print(f"Player {player_to_remove.name} deleted.")
+            

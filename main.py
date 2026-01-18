@@ -3,5 +3,6 @@ from app import DominoApp
 
 
 if __name__ == "__main__":
-    DominoApp().run()
+    DominoApp().run(
+   )
 
