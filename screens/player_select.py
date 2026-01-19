@@ -36,6 +36,7 @@ class PlayerSelectScreen(MDScreen):
             return
     
         for p in players:
+            print(type(p))
             name = p.name
     
             row = MDBoxLayout(
@@ -94,6 +95,7 @@ class PlayerSelectScreen(MDScreen):
         for s in selected:
             self.app.delete_player(s)
         self.app.save_players()
+        self.refresh()
 
     # ======================================================
     # UTIL

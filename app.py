@@ -6,7 +6,7 @@ from screens import ALL_SCREENS
 from models import Player, GameScore
 from utils import save_games, load_games, save_players, load_players
 
-#from constants import COLORS
+from constants import COLORS
 from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
@@ -58,20 +58,16 @@ class DominoApp(MDApp):
     # SAVE / LOAD
     # ======================================================
 
-    def save_players(self, player = None):
-        if player != None and isinstance(player, Player):
-            newplayer = True
-            for i,p in enumerate(self.players):
-                if player.name == p.name:
-                    self.players[i] = player
-                    newplayer = False
-                    break
-            if newplayer:
-                self.players.append(player)
-                print("New player added")
+    def save_players(self, name=None):
+        if not self.players:
+            self.players = []
+    
+        if name and isinstance(name, str):
+            if not any(p.name == name for p in self.players):
+                self.players.append(Player(name))
         save_players(self.players)
         print("Players saved")
-
+    
 
     def save_games(self, game = None):
         if game != None and isinstance(game, GameScore):

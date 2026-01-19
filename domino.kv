@@ -96,6 +96,7 @@
         MDRaisedButton:
             id: delete_btn
             text: "Delete Players"
+            disabled: len(root.selected) != 1
             on_release: root.delete()
 
         MDFlatButton:
