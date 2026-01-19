@@ -6,7 +6,6 @@ from kivymd.uix.widget import MDWidget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
 
-import random
 
 
 
@@ -16,21 +15,10 @@ class HistoryCheckbox(MDCheckbox):
         
 class MDSeparator(MDBoxLayout):
     thickness = NumericProperty(dp(1))
-    #color = ListProperty([1, 1, 1, 0.2])
-    color = ListProperty([1,1,1,0.2])
+    color = ListProperty([1, 1, 1, 0.2])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
         self.height = self.thickness
-        #self.md_bg_color = [1, 1, 1, 0.2]
-        self.random_color()
-        self.md_bg_color = self.color
-        
-    def random_color(self):
-        colors = []
-        for c in range(3):
-            val = round(random.random(), 1)
-            colors.append(val)
-        colors.append(0.5)
-        self.color = colors
+        self.md_bg_color = [1, 1, 1, 0.2]

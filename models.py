@@ -57,7 +57,10 @@ class GameScore:
         if name not in self.totals:
             print(f"Player {name} is not in the game, it seems.")
         points = int(points)
-        self.totals[name] += points
+        if points % 5 == 0:
+            self.totals[name] += points
+        else:
+            print("Tried to add invalid value of points")
 
 
     @property

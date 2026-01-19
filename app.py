@@ -28,7 +28,9 @@ class DominoApp(MDApp):
         self._register_fonts()
         
         self.players = load_players()
+        print(f"{str(len(self.players))} players loaded")
         self.games = load_games()
+        print(f"{str(len(self.games))} games loaded")
         
         self.current_game = None
         
