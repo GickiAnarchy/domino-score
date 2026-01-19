@@ -53,8 +53,17 @@
             size_hint_y: None
             height: dp(48)
             on_release: app.root.current = "create"
+        
+        MDRaisedButton:
+            id: history_btn
+            text: "Game History"
+            size_hint_y: None
+            height: dp(48)
+            on_release: app.root.current = "history"
                 
         Widget:
+                
+        MDSeparator:
         
         MDBoxLayout:
             size_hint_y: None
@@ -197,3 +206,68 @@
         MDBoxLayout:
             orientation:"vertical"
             size_hint:(1.0, 0.5)
+
+
+<HistoryScreen>:
+    name: "history"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        ScrollView:
+            MDList:
+                id: history_list
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
+
+
+<EditGameScreen>:
+    name: "edit"
+    
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+        MDTopAppBar:
+            title: "Edit Game"
+            left_action_items: [["arrow-left", lambda x: root.cancel()]]
+
+        ScrollView:
+            MDBoxLayout:
+                id: players_container  # <--- We will add textfields here
+                orientation: 'vertical'
+                adaptive_height: True
+                padding: dp(20)
+                spacing: dp(15)
+
+        # Date Field and Save Button at the bottom
+        MDBoxLayout:
+            adaptive_height: True
+            padding: dp(20)
+            
+            MDTextField:
+                id: date_field
+                hint_text: "Game Date"
+                readonly: True
+                
+            MDIconButton:
+                icon: "calendar"
+                on_release: root.show_date_picker()
+        
+        MDBoxLayout:
+            orientation:"horizontal"
+            padding:dp(15)
+            spacing:dp(10)
+        
+            MDRaisedButton:
+                text: "Save Changes"
+                pos_hint: {"center_x": .5}
+                on_release: root.save_changes()
+            
+            MDRaisedButton:
+                text: "Delete Game"
+                pos_hint: {"center_x": .5}
+                on_release: root.delete()

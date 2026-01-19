@@ -25,8 +25,7 @@ class MDSeparator(MDBoxLayout):
         self.size_hint_y = None
         self.height = self.thickness
         #self.md_bg_color = [1, 1, 1, 0.2]
-        self.random_color()
-        self.md_bg_color = self.color
+        self.md_bg_color = self.random_color()
         
     def random_color(self):
         colors = []
@@ -34,7 +33,9 @@ class MDSeparator(MDBoxLayout):
             val = round(random.random(), 1)
             colors.append(val)
         colors.append(0.5)
+        print(colors)
         self.color = colors
+        return self.color
 
 
 class ConfirmDialog:
