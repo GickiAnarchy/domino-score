@@ -1,7 +1,8 @@
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
 from kivy.properties import ListProperty, NumericProperty
-
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDFlatButton
 from kivymd.uix.widget import MDWidget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
@@ -34,3 +35,37 @@ class MDSeparator(MDBoxLayout):
             colors.append(val)
         colors.append(0.5)
         self.color = colors
+
+
+class ConfirmDialog:
+    def __init__(
+        self,
+        title="Are you sure?",
+        text="This action cannot be undone.",
+        on_confirm=None,
+        on_cancel=None,):
+        self.on_confirm = on_confirm
+        self.on_cancel = on_cancel
+
+        self.dialog = MDDialog(
+            title=title,
+            text=text,
+            buttons=[
+                MDFlatButton(text="Cancel", on_release=self._cancel,),
+                MDFlatButton(text="Yes", on_release=self._confirm,),],auto_dismiss=False,)
+
+    def open(self):
+        self.dialog.open()
+
+    def dismiss(self):
+        self.dialog.dismiss()
+
+    def _confirm(self, *args):
+        self.dismiss()
+        if self.on_confirm:
+            self.on_confirm()
+
+    def _cancel(self, *args):
+        self.dismiss()
+        if self.on_cancel:
+            self.on_cancel()

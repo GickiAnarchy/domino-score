@@ -148,6 +148,16 @@ class DominoApp(MDApp):
         self.sync_players_from_games()
         return self.players
     
+    def reset_players(self, player = None):
+        if isinstance(player, Player) and any(p.name == player.name for p in self.players):
+            player.reset_stats()
+            print(f"{player.name} has been reset")
+        if player is None:
+            for p in self.players:
+                p.reset_stats()
+                print(f"{p.name} has been reset")
+        self.save_players()
+    
     
     def delete_player(self, player):
         # Ensure we have the name string to compare
