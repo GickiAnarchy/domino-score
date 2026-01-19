@@ -172,4 +172,19 @@ class DominoApp(MDApp):
         if player_to_remove:
             self.players.remove(player_to_remove)
             print(f"Player {player_to_remove.name} deleted.")
-            
+
+
+    # ======================================================
+    # GAME HISTORY FUNCTIONS
+    # ======================================================
+
+    def delete_game(self, x_game):
+        if not x_game or not isinstance(x_game, GameScore):
+            print("APP: Invalid game to delete.")
+            return
+        try:
+            self.games.remove(x_game)
+            self.save_games()
+        except Exception as e:
+            print(f"ERROR IN DominoApp.delete_game:\n{str(e)}")
+            return

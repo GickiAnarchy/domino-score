@@ -76,6 +76,25 @@ class GameScreen(MDScreen):
         self.game.add_points(name, pts)
         self.refresh_totals()
 
+
+    def add_field_points(self, name):
+        field = self.score_inputs.get(name)
+        if not field or not field.text:
+            print("Text fields is empty or invalid")
+            return
+        try:
+            new_points = int(field.text)
+            if new_points % 5 != 0:
+                toast("Invalid point value.")
+            else:
+                self.add_points(name, new_points)
+                toast(f"Added {new_points} to {name}'s total")
+            field.text = ""
+            self.refresh_totals()
+        except ValueError as e:
+            print(e)
+            toast("Please enter a valid number")
+
     # ------------------------------------------------------
     
     def finish_game(self):
@@ -88,22 +107,6 @@ class GameScreen(MDScreen):
     def cancel_game(self):
         self.app.current_game = None
         self.manager.current = "menu"
-
-
-    def add_field_points(self, name):
-        field = self.score_inputs.get(name)
-        if not field or not field.text:
-            print("Text fields is empty or invalid")
-            return
-        try:
-            new_points = int(field.text)
-            self.add_points(name, new_points)
-            toast(f"Added {new_points} to {name}'s total")
-            field.text = ""
-            self.refresh_totals()
-        except ValueError as e:
-            print(e)
-            toast("Please enter a valid number")
 
     # ======================================================
     # UTIL
