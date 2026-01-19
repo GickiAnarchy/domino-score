@@ -70,6 +70,8 @@ class DominoApp(MDApp):
     
 
     def save_games(self, game = None):
+        if self.games is None:
+            self.games = []
         if game != None and isinstance(game, GameScore):
             newgame = True
             for i,g in enumerate(self.games):
@@ -79,6 +81,7 @@ class DominoApp(MDApp):
                     break
             if newgame:
                 self.games.append(game)
+                print(f"{game.to_dict()}\n")
                 print("New game added")
         save_games(self.games)
         print("Games saved")
@@ -94,7 +97,7 @@ class DominoApp(MDApp):
             return
         self.current_game = GameScore(names)
         #go to game screen
-        #self.root.current = "game"
+        self.root.current = "game"
     
     def end_game(self):
         game = self.current_game
@@ -103,7 +106,7 @@ class DominoApp(MDApp):
             return
         self.save_games(game)
         self.current_game = None
-        self.sync_players_from_games()
+        self.refresh_players()
         self.save_players()
 
     
