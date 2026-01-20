@@ -22,9 +22,12 @@ class DominoApp(MDApp):
     # ======================================================
 
     def build(self):
+        self.load_kv("domino.kv")  # 👈 REQUIRED ON ANDROID
+
         self.players = []
         self.games = []
         self.current_game = None
+
 
         self.theme_cls.theme_style = "Dark"
         self._register_fonts()

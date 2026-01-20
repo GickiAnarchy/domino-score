@@ -54,7 +54,7 @@ def get_export_dir():
             path = app_storage_path()
         except Exception as e:
             print("Storage fallback:", e)
-            path = "/data/data/org.kivy.yourapp/files"
+            path = "/data/data/com.gicki.dominoscores/files"
     else:
         path = os.path.join(os.getcwd(), "exports")
 
