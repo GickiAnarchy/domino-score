@@ -103,13 +103,17 @@ class DominoApp(MDApp):
     
     def end_game(self):
         game = self.current_game
-        if not game.finished:
-            print("Game isn't finished, cannot end current game.")
+        if not game or not game.finished:
             return
+        for name, score in game.totals.items():
+            for player in self.players:
+                if player.name == name:
+                    player.set_highest_score(score)
+                    break
         self.save_games(game)
+        self.save_players()
         self.current_game = None
         self.refresh_players()
-        self.save_players()
 
     
     # ======================================================
@@ -123,10 +127,10 @@ class DominoApp(MDApp):
                 continue
             for name in g.totals:
                 stats.setdefault(name, {"wins": 0, "losses": 0})
-            stats[g.winner]["wins"] += 1
+            stats[g.winner]["wins"] += 1    #Add to wins
             for name in g.totals:
                 if name != g.winner:
-                    stats[name]["losses"] += 1
+                    stats[name]["losses"] += 1    #Add to losses
         return stats
 
 
@@ -138,10 +142,21 @@ class DominoApp(MDApp):
                 p.losses = stats[p.name]["losses"]
             else:
                 p.wins = 0
-                p.losses = 0
+                p.losses = 0       
         self.save_players()
         print("Players synced")
 
+    def recompute_high_scores(self):
+        for p in self.players:
+            p.highest_score = 0
+    
+        for g in self.games:
+            if not g.finished:
+                continue
+            for name, score in g.totals.items():
+                for p in self.players:
+                    if p.name == name:
+                        p.set_highest_score(score)
 
     def refresh_players(self):
         self.players = load_players()

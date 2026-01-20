@@ -11,6 +11,7 @@ class Player:
         self.name = name
         self.wins = kwargs.get("wins",0)
         self.losses = kwargs.get("losses",0)
+        self.highest_score = kwargs.get("highest_score", 0)
 
     def reset_stats(self):
         self.wins = 0
@@ -21,6 +22,7 @@ class Player:
             "name": self.name,
             "wins": self.wins,
             "losses": self.losses,
+            "highest_score": self.highest_score
         }
 
     @classmethod
@@ -29,7 +31,13 @@ class Player:
             name=data.get("name", ""),
             wins=data.get("wins", 0),
             losses=data.get("losses", 0),
-        )
+            highest_score=data.get("highest_score", 0)
+        )    
+    
+    def set_highest_score(self, newscore):
+        if newscore > self.highest_score:
+            self.highest_score = newscore
+            
 
 
 #. ==========================================================
@@ -50,7 +58,7 @@ class GameScore:
 
 
     def finish_game(self):
-        self.finished = True
+            self.finished = True
     
     
     def add_points(self, name, points):
@@ -65,8 +73,6 @@ class GameScore:
 
     @property
     def winner(self):
-        if not self.finished or not self.totals:
-            return None    
         high = max(self.totals.values())
         leaders = [name for name, score in self.totals.items() if score == high]        
         # Tie → no winner yet

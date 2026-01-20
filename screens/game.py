@@ -8,7 +8,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.toast import toast
 from kivy.metrics import dp
 
-from ui_helpers import MDSeparator
+from ui_helpers import MDSeparator, ConfirmDialog
 
 
 
@@ -98,9 +98,12 @@ class GameScreen(MDScreen):
     # ------------------------------------------------------
     
     def finish_game(self):
-        self.game.finish_game()
-        self.app.end_game()
-        self.manager.current = "menu"
+        def _do_finish_game():
+            self.game.finish_game()
+            self.app.end_game()
+            self.manager.current = "menu"
+        self.finish_comfirm = ConfirmDialog(title="Finish this game?", text=f"Are you sure you want to finalize this game?\n\nWinner: {self.game.winner}",on_confirm=_do_finish_game)
+        self.finish_comfirm.open()
     
     # ------------------------------------------------------
 

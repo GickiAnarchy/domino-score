@@ -55,6 +55,13 @@
             on_release: app.root.current = "create"
         
         MDRaisedButton:
+            id: stats_btn
+            text: "Player Stats"
+            size_hint_y: None
+            height: dp(48)
+            on_release: app.root.current = "stats"
+        
+        MDRaisedButton:
             id: history_btn
             text: "Game History"
             size_hint_y: None
@@ -271,3 +278,41 @@
                 text: "Delete Game"
                 pos_hint: {"center_x": .5}
                 on_release: root.delete()
+
+
+<StatsScreen>:
+    name: "stats"
+
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+
+        MDRaisedButton:
+            id: player_button
+            text: "Select Player"
+            on_release: root.open_menu()
+
+        MDLabel:
+            id: wins
+            text: "Wins: —"
+
+        MDLabel:
+            id: losses
+            text: "Losses: —"
+
+        MDLabel:
+            id: games
+            text: "Games Played: —"
+
+        MDLabel:
+            id: winrate
+            text: "Win Rate: —"
+
+        MDLabel:
+            id: highscore
+            text: "Highest Score: —"
+
+        MDFlatButton:
+            text: "Back"
+            on_release: root.manager.current = "menu"
