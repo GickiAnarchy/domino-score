@@ -9,46 +9,10 @@ from kivy.utils import platform
 from models import Player, GameScore
 
 
-# ==========================================================
-# LOGGING
-# ==========================================================
 
-def setup_logger():
-    try:
-        if platform == "android":
-            from android.storage import app_storage_path
-            base = app_storage_path()
-        else:
-            base = os.getcwd()
-
-        log_dir = os.path.join(base, "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, "domino.log")
-    except Exception:
-        log_file = "domino.log"
-
-    logging.basicConfig(
-        filename=log_file,
-        filemode="a",
-        level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-    )
-
-    logging.info("=== App starting ===")
-
-
-# ==========================================================
-# GENERAL HELPERS
-# ==========================================================
-
-def ids_ready(screen, *names):
-    """Return True if all ids exist on the screen"""
-    return all(name in screen.ids for name in names)
-
-
-# ==========================================================
+#=================================================
 # FILE SYSTEM
-# ==========================================================
+# ================================================
 
 def get_data_dir():
     if platform == "android":
@@ -84,122 +48,99 @@ def get_export_dir():
     return path
 
 
-
-# ==========================================================
-# JSON SAFE IO
-# ==========================================================
-
-def safe_load_json(path, default):
-    if not path or not os.path.exists(path):
-        return default
-
-    try:
-        if os.path.getsize(path) == 0:
-            return default
-    except Exception:
-        return default
-
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, type(default)) else default
-    except Exception:
-        logging.exception(f"Failed to load JSON: {path}")
-        return default
-
-
-def atomic_write_json(path, data):
-    tmp = f"{path}.tmp"
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-    except Exception:
-        logging.exception(f"Atomic write failed: {path}")
-        try:
-            if os.path.exists(tmp):
-                os.remove(tmp)
-        except Exception:
-            pass
-
-
-# ==========================================================
-# PLAYERS
-# ==========================================================
-
-def save_players(path, players: dict):
+##
+#    FILE I/O
+##
+    
+def save_players(players):
     """
-    players: dict[str, Player]
+    players: list[Player]
     """
-    data = [p.to_dict() for p in players.values()]
-    atomic_write_json(path, data)
+    path = os.path.join(get_export_dir(), "players.dom")
+    #if not isinstance(players, list):
+#        print("Players need to be in a list")
+#        return
+    try:
+        data = [p.to_dict() for p in players]
+        with open(path, "w") as f:
+            json.dump(data, f, indent = 2)
+    except Exception as e:
+        print("sp")
+        print(e)
+        return
+    print("Players saved")
+    
 
-
-def load_players(path):
-    raw = safe_load_json(path, [])
-    players = {}
-
-    for item in raw:
+def load_players():    
+    players = []
+    raw = []
+    path = os.path.join(get_export_dir(), "players.dom")
+    if os.path.exists(path):
         try:
-            p = Player.from_dict(item)
-            if p.name:
-                players[p.name] = p
-        except Exception:
-            logging.exception("Failed to load player")
-
+            with open(path,"r") as f:
+                raw = json.load(f)
+        except Exception as e:
+            print("lp1")
+            print(e)
+            return
+        print(raw)
+        try:
+            for item in raw:
+                np = Player.from_dict(item)
+                players.append(np)
+                print(f"{np.name} loaded")
+        except Exception as e:
+            print("lp2")
+            print(e)
+            return
+    else:
+        print("No players file found")
+    print("APP:Players loaded")
     return players
-
-
-# ==========================================================
-# GAMES
-# ==========================================================
-
-def save_games(path, games):
+    
+    
+def save_games(games):
     """
     games: list[GameScore]
     """
+    path = os.path.join(get_export_dir(), "games.dom")
+    if not isinstance(games, list):
+        print("Games need to be a list.")
+        return
     data = [g.to_dict() for g in games]
-    atomic_write_json(path, data)
+    try:
+        with open(path, "w") as f:
+            json.dump(data, f, indent = 2)
+    except Exception as e:
+        print("sg")
+        print(e)
+        return
+    print("Games saved")       
 
 
-def load_games(path):
-    raw = safe_load_json(path, [])
+def load_games():
+    raw = None
     games = []
-
-    for item in raw:
+    path = os.path.join(get_export_dir(), "games.dom")
+    if os.path.exists(path):
         try:
-            games.append(GameScore.from_dict(item))
-        except Exception:
-            logging.exception("Failed to load game")
-
+            with open(path, "r") as f:
+                raw = json.load(f)
+        except Exception as e:
+            print("lg")
+            print(e)
+            return
+        for g in raw:
+            try:
+                games.append(GameScore.from_dict(g))
+            except Exception as e:
+                print("lg")
+                print(e)
+                return
+    else:
+        print("No saved games file")
+        return
+    print("APP:Games loaded")
     return games
 
 
-
-def request_android_permissions():
-    try:
-        from android.permissions import request_permissions, Permission
-        from jnius import autoclass
-        
-        # This is the "Magic" fix:
-        # We manually get the PythonActivity class loader to avoid the Visibility error
-        PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        activity = PythonActivity.mActivity
-        
-        def callback(permissions, results):
-            if all(results):
-                print("Permissions granted!")
-            else:
-                from kivymd.toast import toast
-                toast("Storage permission denied. Exports may fail.")
-
-        # Pass the permissions list and the callback
-        request_permissions([
-            Permission.WRITE_EXTERNAL_STORAGE,
-            Permission.READ_EXTERNAL_STORAGE
-        ], callback)
-        
-    except Exception as e:
-        logging.error(f"Permission Request Error: {e}")

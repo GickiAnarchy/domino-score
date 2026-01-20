@@ -1,5 +1,6 @@
 from utils import *
 from constants import *
+from ui_helpers import ConfirmDialog
 
 from kivy.core.text import LabelBase
 from kivy.metrics import dp
@@ -21,28 +22,16 @@ from kivymd.uix.textfield import MDTextField
 
 
 class OptionsScreen(MDScreen):
-    def show_dialog(self, title, text):
-        d = MDDialog(
-            title=title,
-            text=text,
-            buttons=[MDFlatButton(text="OK", on_release=lambda x: d.dismiss())])
-        d.open()
-
-    def export_saves(self):
-        app = MDApp.get_running_app()
-        app.save_players()
-        app.save_games()
-        toast("Saves exported")
     
-    def import_saves(self):
-        app = MDApp.get_running_app()    
-        players = load_players(app.players_file)
-        games = load_games(app.games_file)
-        if not players and not games:
-            toast("No saves found")
-            return  
-        app.players = players
-        app.games = games
-        app.sync_players_from_games()
-        toast("Saves imported")
-        self.manager.current = "menu"
+    def reset_players(self):
+        
+        def do_reset():
+            self.app.reset_players()
+        
+        self.reset_confirm = ConfirmDialog(title="Reset Confirmation", text="This will reset ALL players!\nAre you sure?", on_confirm=do_reset,)
+        self.reset_confirm.open()
+
+    
+    @property
+    def app(self):
+        return MDApp.get_running_app()

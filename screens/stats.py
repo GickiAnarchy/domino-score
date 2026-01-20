@@ -21,27 +21,27 @@ class StatsScreen(MDScreen):
     # ======================================================
 
     def refresh_players(self):
-        players = list(self.app.players.keys())
-
+        players = self.app.players  # list[Player]
+    
         if not players:
             self.ids.player_button.text = "No players"
             self.ids.player_button.disabled = True
             return
-
+    
         self.ids.player_button.disabled = False
         self.ids.player_button.text = "Select Player"
-
+    
         items = [
             {
-                "text": name,
-                "on_release": lambda x=name: self.select_player(x),
+                "text": p.name,
+                "on_release": lambda x=p.name: self.select_player(x),
             }
-            for name in sorted(players)
+            for p in sorted(players, key=lambda p: p.name.lower())
         ]
-
+    
         if self.menu:
             self.menu.dismiss()
-
+    
         self.menu = MDDropdownMenu(
             caller=self.ids.player_button,
             items=items,
@@ -69,6 +69,7 @@ class StatsScreen(MDScreen):
         self.ids.losses.text = "Losses: —"
         self.ids.games.text = "Games Played: —"
         self.ids.winrate.text = "Win Rate: —"
+        self.ids.highscore.text = "Highest Score: —"
 
     # ------------------------------------------------------
 
@@ -77,7 +78,7 @@ class StatsScreen(MDScreen):
         if not name:
             return
 
-        player = self.app.players.get(name)
+        player = next((p for p in self.app.players if p.name == name), None)
         if not player:
             toast("Player not found")
             self.clear_stats()
@@ -86,6 +87,7 @@ class StatsScreen(MDScreen):
         wins = player.wins
         losses = player.losses
         games = wins + losses
+        h_score = player.highest_score
 
         rate = f"{(wins / games * 100):.1f}%" if games else "0%"
 
@@ -93,6 +95,7 @@ class StatsScreen(MDScreen):
         self.ids.losses.text = f"Losses: {losses}"
         self.ids.games.text = f"Games Played: {games}"
         self.ids.winrate.text = f"Win Rate: {rate}"
+        self.ids.highscore.text = f"Highest Score: {h_score}"
 
     # ======================================================
     # UTIL

@@ -7,6 +7,7 @@ from kivymd.uix.pickers import MDDatePicker
 from datetime import datetime
 
 from models import GameScore
+from ui_helpers import ConfirmDialog
 
 
 class EditGameScreen(MDScreen):
@@ -27,7 +28,9 @@ class EditGameScreen(MDScreen):
             return
 
         # 2. Set the date field
-        self.ids.date_field.text = str(self.game.date)
+        dt_date = datetime.fromisoformat(self.game.date)
+        p_date = f"{dt_date:%m/%d/%y %I:%M%p}"
+        self.ids.date_field.text = p_date
 
         # 3. Create a TextField for every player in this game
         for player_name, score in self.game.totals.items():
@@ -64,23 +67,6 @@ class EditGameScreen(MDScreen):
     def on_date_save(self, instance, value, date_range):
         self.ids.date_field.text = str(value)
 
-    #def save_changes(self):
-#        if not self.app.current_game:
-#            return
-
-#        try:
-#            # Update the object in memory
-#            self.app.current_game.player_name = self.ids.player_name_field.text
-#            self.app.current_game.score = int(self.ids.score_field.text)
-#            self.app.current_game.date = self.ids.date_field.text
-#            
-#            # Save to file (using your existing util function)
-#            save_games(self.app.games_file, self.app.games)
-#            
-#            toast("Game updated successfully")
-#            self.manager.current = "history"
-#        except ValueError:
-#            toast("Please enter a valid number for score")
 
     # ======================================================
     # UI
@@ -88,7 +74,6 @@ class EditGameScreen(MDScreen):
 
     def refresh_totals(self):
         self.ids.totals_box.clear_widgets()
-
         for name, score in self.game.totals.items():
             self.ids.totals_box.add_widget(
                 self._score_label(name, score)
@@ -129,8 +114,13 @@ class EditGameScreen(MDScreen):
     # ------------------------------------------------------
     
     def delete(self):
-        self.app.delete_game(self.game)
-        self.manager.current = "history"
+        def _do_delete():
+            self.app.delete_game(self.game)
+            self.manager.current = "history"
+        
+        f_date = f"{datetime.fromisoformat(self.game.date):%m-%d-%y}"
+        self.del_confirm = ConfirmDialog(title="Delete Game?", text=f"Delete the game from {f_date}?", on_confirm=_do_delete, on_cancel=self.cancel)
+        self.del_confirm.open()
 
     # ======================================================
     # UTIL

@@ -1,18 +1,17 @@
 from datetime import datetime
 from uuid import uuid4
 
-from constants import MAX_POINTS
-
 
 # ==========================================================
 # PLAYER
 # ==========================================================
 
 class Player:
-    def __init__(self, name, wins=0, losses=0):
+    def __init__(self, name, **kwargs):
         self.name = name
-        self.wins = int(wins)
-        self.losses = int(losses)
+        self.wins = kwargs.get("wins",0)
+        self.losses = kwargs.get("losses",0)
+        self.highest_score = kwargs.get("highest_score", 0)
 
     def reset_stats(self):
         self.wins = 0
@@ -23,6 +22,7 @@ class Player:
             "name": self.name,
             "wins": self.wins,
             "losses": self.losses,
+            "highest_score": self.highest_score
         }
 
     @classmethod
@@ -31,110 +31,73 @@ class Player:
             name=data.get("name", ""),
             wins=data.get("wins", 0),
             losses=data.get("losses", 0),
-        )
+            highest_score=data.get("highest_score", 0)
+        )    
+    
+    def set_highest_score(self, newscore):
+        if newscore > self.highest_score:
+            self.highest_score = newscore
+            
 
 
-# ==========================================================
+#. ==========================================================
 # GAME SCORE
 # ==========================================================
 
 class GameScore:
-    def __init__(self, player_names, id=None):
+    def __init__(self, players, id=None, **kwargs):
         self.id = id or str(uuid4())
-        self.date = datetime.now().isoformat()
+        # Use existing date if passed via kwargs, else now
+        self.date = kwargs.get("date", datetime.now().isoformat())    
+        # 1. Store only the names (Strings)
+        # This allows you to look up the Player object from your app's main list
+        self.players = list(players)         
+        # 2. Initialize totals based on names
+        self.totals = kwargs.get("totals", {name: 0 for name in self.players})
+        self.finished = kwargs.get("finished", False)
+
+
+    def finish_game(self):
+            self.finished = True
     
-        self.player_names = list(player_names)
-        self.totals = {name: 0 for name in self.player_names}
     
-        self.rounds = []
-        self.finished = False
-
-    # ------------------------------------------------------
-    # SCORING
-    # ------------------------------------------------------
-
-    def add_points(self, name, pts):
-        if self.finished:
-            return
-
+    def add_points(self, name, points):
         if name not in self.totals:
-            return
+            print(f"Player {name} is not in the game, it seems.")
+        points = int(points)
+        if points % 5 == 0:
+            self.totals[name] += points
+        else:
+            print("Tried to add invalid value of points")
 
-        pts = int(pts)
-        self.totals[name] += pts
-
-        self.rounds.append({
-            "player": name,
-            "points": pts,
-        })
-
-    # ------------------------------------------------------
-    # PROVISIONAL STATE
-    # ------------------------------------------------------
-
-    @property
-    def provisional_leader(self):
-        """
-        Player currently leading (may or may not have reached MAX_POINTS)
-        """
-        if not self.totals:
-            return None
-
-        return max(self.totals.items(), key=lambda x: x[1])[0]
-
-    @property
-    def max_reached(self):
-        """
-        True if someone has reached or exceeded MAX_POINTS
-        (does NOT end the game)
-        """
-        return any(score >= MAX_POINTS for score in self.totals.values())
-
-    # ------------------------------------------------------
-    # FINAL GAME STATE
-    # ------------------------------------------------------
-    
-    def finish(self):
-        if not self.totals:
-            return
-        self.finished = True
 
     @property
     def winner(self):
-        if not self.finished or not self.totals:
-            return None
-    
         high = max(self.totals.values())
-        leaders = [name for name, score in self.totals.items() if score == high]
-    
+        leaders = [name for name, score in self.totals.items() if score == high]        
         # Tie → no winner yet
         if len(leaders) != 1:
-            return None
-    
+            return None            
         return leaders[0]
-    # ------------------------------------------------------
+
 
     def to_dict(self):
+        """Converts the game object into a dictionary for JSON/Pickle saving"""
         return {
             "id": self.id,
             "date": self.date,
+            "players": self.players,  # This is your list of names: ["Alice", "Bob"]
             "totals": self.totals,
-            "rounds": self.rounds,
-            "finished": self.finished,
-        }
+            "finished": self.finished,}
 
-    # ------------------------------------------------------
 
     @classmethod
     def from_dict(cls, data):
-        game = cls(
-            player_names=list(data.get("totals", {}).keys()),
+        """Creates a GameScore object from a dictionary"""
+        # Pass data through kwargs to the __init__
+        return cls(
+            players=data.get("players", []),
             id=data.get("id"),
-        )
-    
-        game.date = data.get("date", datetime.now().isoformat())
-        game.totals = data.get("totals", {})
-        game.rounds = data.get("rounds", [])
-        game.finished = data.get("finished", False)
-    
-        return game
+            date=data.get("date"),
+            totals=data.get("totals"),
+            finished=data.get("finished", False))

@@ -22,20 +22,20 @@ class HistoryScreen(MDScreen):
     def refresh(self):
         self.ids.history_list.clear_widgets()
 
-        app = self.app
+        
         games = sorted(
-            app.games,
+            self.app.games,
             key=lambda g: g.date,
             reverse=True
         )
 
-        if not games:
+        if not self.app.games:
             self.ids.history_list.add_widget(
                 OneLineListItem(text="No games yet")
             )
             return
 
-        for game in games:
+        for game in self.app.games:
             label = self._build_label(game)
             item = OneLineListItem(
                 text=label,
@@ -58,6 +58,8 @@ class HistoryScreen(MDScreen):
     # ======================================================
 
     def open_game(self, game: GameScore):
+        #print("Would edit game here")
+        #self.manager.current = "menu"
         self.app.current_game = game
         self.manager.current = "edit"
 

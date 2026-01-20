@@ -5,16 +5,17 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
 from kivymd.toast import toast
+from kivy.properties import ListProperty
 
 
 class PlayerSelectScreen(MDScreen):
-
+    selected = ListProperty([])
     # ======================================================
     # LIFECYCLE
     # ======================================================
 
     def on_pre_enter(self):
-        self.selected = set()
+        self.selected = []
         self.refresh()
 
     # ======================================================
@@ -23,9 +24,8 @@ class PlayerSelectScreen(MDScreen):
 
     def refresh(self):
         self.ids.players_box.clear_widgets()
-
         players = self.app.players
-
+    
         if not players:
             self.ids.players_box.add_widget(
                 MDLabel(
@@ -34,23 +34,32 @@ class PlayerSelectScreen(MDScreen):
                 )
             )
             return
-
-        for name in sorted(players.keys()):
+    
+        for p in players:
+            print(type(p))
+            name = p.name
+    
             row = MDBoxLayout(
                 orientation="horizontal",
                 spacing="12dp",
                 size_hint_y=None,
                 height="48dp",
             )
-
+    
             checkbox = MDCheckbox()
-            checkbox.bind(active=lambda cb, val, n=name: self.toggle(n, val))
-
-            label = MDLabel(text=f"{name}",valign="middle")
-
+            checkbox.bind(
+                active=lambda cb, val, n=name: self.toggle(n, val)
+            )
+    
+            label = MDLabel(
+                text=name,
+                valign="middle",
+            )
+    
             row.add_widget(checkbox)
             row.add_widget(label)
             self.ids.players_box.add_widget(row)
+    
 
     # ======================================================
     # ACTIONS
@@ -58,9 +67,11 @@ class PlayerSelectScreen(MDScreen):
 
     def toggle(self, name, active):
         if active:
-            self.selected.add(name)
+            if name not in self.selected:
+                self.selected.append(name) # Use append for lists
         else:
-            self.selected.discard(name)
+            if name in self.selected:
+                self.selected.remove(name) # Use remove for lists
 
     # ------------------------------------------------------
     
@@ -76,6 +87,15 @@ class PlayerSelectScreen(MDScreen):
     def cancel(self):
         self.selected.clear()
         self.manager.current = "menu"
+    
+    # ------------------------------------------------------
+
+    def delete(self):
+        selected = list(self.selected)
+        for s in selected:
+            self.app.delete_player(s)
+        self.app.save_players()
+        self.refresh()
 
     # ======================================================
     # UTIL
