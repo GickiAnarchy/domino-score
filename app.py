@@ -35,14 +35,15 @@ class DominoApp(MDApp):
         return sm
 
     def on_start(self):
-        if platform == "android":
-            from android.permissions import request_permissions, Permission
+        #if platform == "android" and 1 == 2:
+#            from android.permissions import request_permissions, Permission
 
-            request_permissions(
-                [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE],
-                self._on_permissions_result
-            )
-        else:
+#            request_permissions(
+#                [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE],
+#                self._on_permissions_result
+#            )
+#        else:
+        if 1 == 1:
             self._load_data()
 
     def _on_permissions_result(self, permissions, results):
