@@ -10,12 +10,12 @@ package.domain = com.gicki
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 
-version = 0.9.2
+version = 0.9.6
 
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,kivymd,pyjnius
+requirements = kivy,kivymd,pyjnius,android
 
 orientation = portrait
 fullscreen = 1
@@ -28,6 +28,8 @@ presplash.filename = %(source.dir)s/data/splash.png
 # Android configuration (CLEAN)
 # --------------------------------------------------
 android.permissions = READ_MEDIA_FILES, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
+android.manifest.application_arguments = --requestLegacyExternalStorage="true"
+
 
 # Target Android SDK
 android.api = 33
