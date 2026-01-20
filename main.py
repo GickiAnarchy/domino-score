@@ -1,4 +1,4 @@
-import kivy_config
+
 from app import DominoApp
 
 
