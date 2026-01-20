@@ -1,6 +1,4 @@
 from kivy.utils import get_color_from_hex
-from utils import *
-import os
 
 
 

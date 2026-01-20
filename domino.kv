@@ -1,6 +1,8 @@
 #:import dp kivy.metrics.dp
 #:import FitImage kivymd.uix.fitimage.FitImage
 #:import MDSeparator ui_helpers.MDSeparator
+#:import MDTopAppBar kivymd.uix.toolbar.MDTopAppBar
+#:import MDIconButton kivymd.uix.button.MDIconButton
 
 
 <MenuScreen>:
@@ -34,7 +36,7 @@
 
             MDLabel:
                 id: fact_label
-                text: ""
+                text: root.get_fact()
                 halign: "center"
                 theme_text_color: "Secondary"
                 text_size: self.width, None
