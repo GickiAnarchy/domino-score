@@ -21,23 +21,41 @@ class DominoApp(MDApp):
     # APP BOOT
     # ======================================================
 
-    def build(self):        
+    def build(self):
+        self.players = []
+        self.games = []
         self.current_game = None
-        #self.theme_cls.primary_palette = random.choice(COLORS)
+
         self.theme_cls.theme_style = "Dark"
         self._register_fonts()
-        
-        self.players = load_players()
-        print(f"{str(len(self.players))} players loaded")
-        self.games = load_games()
-        print(f"{str(len(self.games))} games loaded")
-        
-        self.current_game = None
-        
+
         sm = ScreenManager()
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
         return sm
+
+    def on_start(self):
+        if platform == "android":
+            from android.permissions import request_permissions, Permission
+
+            request_permissions(
+                [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE],
+                self._on_permissions_result
+            )
+        else:
+            self._load_data()
+
+    def _on_permissions_result(self, permissions, results):
+        if all(results):
+            self._load_data()
+        else:
+            toast("Storage permission denied")
+
+    def _load_data(self):
+        self.players = load_players() or []
+        self.games = load_games() or []
+        print(f"{len(self.players)} players loaded")
+        print(f"{len(self.games)} games loaded")
     
     # ======================================================
     # FONTS

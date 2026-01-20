@@ -9,6 +9,7 @@ package.domain = com.gicki
 
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
+source.include_patterns = screens/*,data/*
 
 version = 0.9.6
 
