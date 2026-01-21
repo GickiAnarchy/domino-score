@@ -22,16 +22,4 @@ from kivymd.uix.textfield import MDTextField
 
 
 class OptionsScreen(MDScreen):
-    
-    def reset_players(self):
-        
-        def do_reset():
-            self.app.reset_players()
-        
-        self.reset_confirm = ConfirmDialog(title="Reset Confirmation", text="This will reset ALL players!\nAre you sure?", on_confirm=do_reset,)
-        self.reset_confirm.open()
-
-    
-    @property
-    def app(self):
-        return MDApp.get_running_app()
+    pass

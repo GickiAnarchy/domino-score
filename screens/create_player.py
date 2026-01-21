@@ -22,17 +22,4 @@ from kivymd.uix.textfield import MDTextField
 
 
 class CreatePlayerScreen(MDScreen):
-    
-    def save(self):
-        app = MDApp.get_running_app()
-        name = self.ids.player_name.text.strip()
-        if not name:
-            print("Invalid name in create_player.")
-            return
-        app.save_players(name)
-        self.ids.player_name.text = ""
-        self.manager.current = "menu"
-
-    @property
-    def app(self):
-        return MDApp.get_running_app()
+    pass

@@ -3,49 +3,10 @@ import logging
 import os
 from datetime import datetime
 from uuid import uuid4
-
 from kivy.utils import platform
-
 from models import Player, GameScore
 
 
-
-#=================================================
-# FILE SYSTEM
-# ================================================
-
-def get_data_dir():
-    if platform == "android":
-        from android.storage import app_storage_path
-        return app_storage_path()
-    return os.getcwd()
-
-
-#def get_export_dir():
-#    """
-#    Shared export folder (Android Downloads / Desktop exports)
-#    """
-#    if platform == "android":
-#        try:
-#            # This is the modern way to get the Downloads folder on Android
-#            from android.storage import primary_external_storage_path
-#            primary_storage = primary_external_storage_path()
-#            path = os.path.join(primary_storage, "Download", "DominoScorebook")
-#        except Exception as e:
-#            logging.error(f"Failed to get primary storage: {e}")
-#            from android.storage import app_storage_path
-#            path = app_storage_path()
-#    else:
-#        path = os.path.join(os.getcwd(), "exports")
-
-#    if not os.path.exists(path):
-#        try:
-#            os.makedirs(path, exist_ok=True)
-#        except Exception as e:
-#            logging.error(f"Failed to create directory {path}: {e}")
-#            return os.getcwd()
-
-#    return path
 
 def get_export_dir():
     if platform == "android":
@@ -57,104 +18,77 @@ def get_export_dir():
             path = "/data/data/com.gicki.dominoscores/files"
     else:
         path = os.path.join(os.getcwd(), "exports")
-
     os.makedirs(path, exist_ok=True)
     return path
 
 
-##
-#    FILE I/O
-##
-    
+PLAYERS_FILE  = os.path.join(get_export_dir(), "players.dom")
+GAMES_FILE  = os.path.join(get_export_dir(), "games.dom")
+
+###
+#   PLAYERS
+###
+
 def save_players(players):
-    """
-    players: list[Player]
-    """
-    path = os.path.join(get_export_dir(), "players.dom")
-    #if not isinstance(players, list):
-#        print("Players need to be in a list")
-#        return
-    try:
-        data = [p.to_dict() for p in players]
-        with open(path, "w") as f:
-            json.dump(data, f, indent = 2)
-    except Exception as e:
-        print("sp")
-        print(e)
+    if not players:
+        print("utils.save_players(players) -> players is not valid")
         return
-    print("Players saved")
+    data = {n: p.to_dict() for n,p in players.items()}
+    with open(PLAYERS_FILE, "w") as f:
+        json.dump(data, f, indent = 2)
+    print("Players have been saved")
+    return
     
 
-def load_players():    
-    players = []
-    raw = []
-    path = os.path.join(get_export_dir(), "players.dom")
-    if os.path.exists(path):
-        try:
-            with open(path,"r") as f:
-                raw = json.load(f)
-        except Exception as e:
-            print("lp1")
-            print(e)
-            return
-        print(raw)
-        try:
-            for item in raw:
-                np = Player.from_dict(item)
-                players.append(np)
-                print(f"{np.name} loaded")
-        except Exception as e:
-            print("lp2")
-            print(e)
-            return
-    else:
-        print("No players file found")
-    print("APP:Players loaded")
-    return players
-    
-    
+def load_players() -> dict:
+    if not os.path.exists(PLAYERS_FILE):
+        return {}
+    try:
+        with open(PLAYERS_FILE, "r") as f:
+            raw = json.load(f)
+    except Exception as e:
+        print(f"utils.load_players -> {e}")
+        return {}
+    try:
+        data = {n: Player.from_dict(p) for n,p in raw.items()}
+    except Exception as e:
+        print(f"utils.load_players -> {e}")
+        return {}
+    print("Players have been loaded")
+    return data
+
+
+
+
+###
+#   GAMES
+###
+
 def save_games(games):
-    """
-    games: list[GameScore]
-    """
-    path = os.path.join(get_export_dir(), "games.dom")
-    if not isinstance(games, list):
-        print("Games need to be a list.")
+    if not games:
+        print("utils.save_games(games) -> games is not valid")
         return
-    data = [g.to_dict() for g in games]
+    data = {n: g.to_dict() for n,g in games.items()}
+    with open(GAMES_FILE, "w") as f:
+        json.dump(data, f, indent = 2)
+    print("Games have been saved")
+    return
+
+
+def load_games() -> dict:
+    if not os.path.exists(GAMES_FILE):
+        return {}
     try:
-        with open(path, "w") as f:
-            json.dump(data, f, indent = 2)
+        with open(GAMES_FILE, "r") as f:
+            raw = json.load(f)
     except Exception as e:
-        print("sg")
-        print(e)
-        return
-    print("Games saved")       
-
-
-def load_games():
-    raw = None
-    games = []
-    path = os.path.join(get_export_dir(), "games.dom")
-    if os.path.exists(path):
-        try:
-            with open(path, "r") as f:
-                raw = json.load(f)
-        except Exception as e:
-            print("lg")
-            print(e)
-            return
-        for g in raw:
-            try:
-                games.append(GameScore.from_dict(g))
-            except Exception as e:
-                print("lg")
-                print(e)
-                return
-    else:
-        print("No saved games file")
-        return
-    print("APP:Games loaded")
-    return games
-
+        print(f"utils.load_games() -> {e}")
+        return {}
+    try:
+        data = {id: GameScore.from_dict(g) for id, g in raw.items()}
+    except Exception as e:
+        print(f"utils.load_games() -> {e}")
+        return {}
+    print("Ganes have been loaded")
+    return data
 

@@ -1,9 +1,8 @@
-ignore/
-.__pycache__/
-__pycache__
-kivy/
-.kivy/
+#directories
+ignore/*
+__pycache__/*
+.kivy/*
+
+
 *.txt
-combined.txt
-main.txt
-screens.txt
+
