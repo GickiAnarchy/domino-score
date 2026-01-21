@@ -1,17 +1,12 @@
 import os
 import logging
-import random
 from ui_helpers import ConfirmDialog
 from screens import ALL_SCREENS
 from models import Player, GameScore
-from utils import save_games, load_games, save_players, load_players
-from constants import COLORS
-from kivy.utils import platform
+from utils import load_games, load_players, save_games, save_players
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
-from kivymd.toast import toast
-from kivy.clock import Clock
 
 
 class DominoApp(MDApp):

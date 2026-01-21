@@ -58,7 +58,7 @@ class PlayerSelectScreen(MDScreen):
         if len(selected) < 2:
             toast("Select at least 2 players")
             return
-        #self.app.start_game(selected)
+        self.app.start_game(selected)
 
 
     def cancel(self):

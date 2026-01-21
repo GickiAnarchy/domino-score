@@ -1,12 +1,8 @@
-from kivy.core.text import LabelBase
 from kivy.metrics import dp
 from kivy.properties import ListProperty, NumericProperty
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
-from kivymd.uix.widget import MDWidget
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.selectioncontrol import MDCheckbox
-import random
 
 
         

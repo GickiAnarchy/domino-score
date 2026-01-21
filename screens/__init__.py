@@ -27,5 +27,5 @@ __all__ = [
     # "HistoryScreen",
     # "EditGameScreen",
     # "StatsScreen",
-    "ALL_SCREENS",
+    "ALL_SCREENS"
 ]
