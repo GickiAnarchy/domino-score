@@ -1,6 +1,7 @@
 import os
 import logging
 import random
+from ui_helpers import ConfirmDialog
 from screens import ALL_SCREENS
 from models import Player, GameScore
 from utils import save_games, load_games, save_players, load_players
@@ -50,3 +51,23 @@ class DominoApp(MDApp):
     
     def end_game(self):
         pass
+
+
+    def add_player(self, name):
+        if not name:
+            return
+        if name in self.players.keys():
+            print(f"{name} already exists")
+            return
+        else:
+            self.players[name] = Player(name)
+            save_players()
+
+
+    def delete_player(self, name):
+        if not name:
+            return
+        def _do_delete():
+            self.players.pop(name, None)
+            save_players()
+        del_confirm = ConfirmDialog(title="Delete Player?", text=f"Do you want to delete {name}?", on_confirm)=_do_delete)
