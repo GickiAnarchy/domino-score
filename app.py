@@ -71,3 +71,4 @@ class DominoApp(MDApp):
             self.players.pop(name, None)
             save_players()
         del_confirm = ConfirmDialog(title="Delete Player?", text=f"Do you want to delete {name}?", on_confirm =_do_delete)
+        del_confirm.open()

@@ -3,7 +3,6 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.label import MDLabel
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.label import MDLabel
 from kivymd.toast import toast
 from kivy.properties import ListProperty
 
@@ -16,6 +15,7 @@ class PlayerSelectScreen(MDScreen):
 
 
     def refresh(self):
+        players = self.app.players
         self.ids.player_box.clear_widgets()
         if not players:
             self.ids.players_box.add_widget(

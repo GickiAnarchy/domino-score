@@ -24,8 +24,8 @@ class Player:
         p_dict = {
             "name": self.name,
             "wins": self.wins,
-            "losses": self.losses,"highest_score": self.highest_score
-        }
+            "losses": self.losses,"highest_score": self.highest_score}
+        return p_dict
 
 
     @classmethod
