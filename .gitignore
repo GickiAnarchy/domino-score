@@ -1,8 +1,13 @@
-#directories
-ignore/*
-__pycache__/*
-.kivy/*
+##
+# directories
 
+ignore/
+__pycache__/*
+
+
+
+##
+# files
 
 *.txt
-
+combine.py

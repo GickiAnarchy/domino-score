@@ -41,15 +41,15 @@ class Player:
 
 class GameScore:
     
-    def __init__(self, players, id=None, **kwarg):
+    def __init__(self, players, id=None, **kwargs):
         self.id = id or str(uuid4())    #Used to identify games.
         
         self.date = kwargs.get("date", datetime.now().isoformat()) #Keep in isoformat in file and in memory, only format to string to display
-        #
+
         self.players = list(players)    #List of [Player.name]'s
-        #
-            self.totals = kwargs.get("totals", {name: 0 for name in self.players)  # dict: {player_name:score}
-        #
+
+        self.totals = kwargs.get("totals", {name: 0 for name in self.players})  # dict: {player_name:score}
+
         self.finished = kwargs.get("finished", False)  # Used to verify the game is closed and complete
 
 
@@ -65,6 +65,11 @@ class GameScore:
             self.totals[name] += points
         else:
             print("Tried to add invalid value of points")
+
+
+    def get_date(self) -> str:
+        data = f"{self.date:%m/%d/%y %I:%M%p}"
+        return data
 
 
     @property
