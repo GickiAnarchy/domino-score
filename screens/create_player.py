@@ -26,7 +26,7 @@ class CreatePlayerScreen(MDScreen):
     def save(self):
         name = self.ids.player_name.text.strip()
         if not name:
-            print("Invalid name in create_player)
+            print("Invalid name in create_player")
             return
         self.app.add_player(name)
         self.ids.player_name.text = ""
