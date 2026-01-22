@@ -2,7 +2,6 @@ from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 
 
-
 class CreatePlayerScreen(MDScreen):
 
     def save(self):
