@@ -4,8 +4,8 @@ from kivy.utils import platform
 from models import Player, GameScore
 
 
-
-def get_export_dir() -> str:
+"""
+def get_export_dir() -> str:    
     if platform == "android":
         try:
             from android.storage import app_storage_path
@@ -17,7 +17,10 @@ def get_export_dir() -> str:
         path = os.path.join(os.getcwd(), "exports")
     os.makedirs(path, exist_ok=True)
     return path
+"""
 
+
+"""
 def get_export_dir_wrapper() -> str:
     export_dir = None
     try:
@@ -26,13 +29,16 @@ def get_export_dir_wrapper() -> str:
         print(f"utils.get_export_dir_wrapper() -> \n{e}")
     finally:
         return export_dir
+"""
 
 
+    
 
 ###
 #   PLAYERS
 ###
 
+"""
 def save_players(players):
     if not players:
         print("utils.save_players(players) -> players is not valid")
@@ -43,7 +49,9 @@ def save_players(players):
         json.dump(data, f, indent = 2)
     print("Players have been saved")
     return
+"""
 
+"""
 def load_players() -> dict:
     PLAYERS_FILE = get_players_file()
     if not os.path.exists(PLAYERS_FILE):
@@ -61,7 +69,9 @@ def load_players() -> dict:
         return {}
     print("Players have been loaded")
     return data
+"""
 
+"""
 def get_players_file() -> str:
     path = None
     ex_dir = get_export_dir_wrapper()
@@ -71,12 +81,14 @@ def get_players_file() -> str:
         print(f"utils.get_players_file() -> Error in creating path\n{e}")
     finally:
         return path
+"""
 
 
 ###
 #   GAMES
 ###
 
+"""
 def save_games(games):
     if not games:
         print("utils.save_games(games) -> games is not valid")
@@ -87,7 +99,9 @@ def save_games(games):
         json.dump(data, f, indent = 2)
     print("Games have been saved")
     return
+"""
 
+"""
 def load_games() -> dict:
     GAMES_FILE = get_games_file()
     if not os.path.exists(GAMES_FILE):
@@ -105,7 +119,10 @@ def load_games() -> dict:
         return {}
     print("Games have been loaded")
     return data
+"""
 
+
+"""
 def get_games_file() -> str:
     path = None
     ex_dir = get_export_dir_wrapper()
@@ -115,5 +132,5 @@ def get_games_file() -> str:
         print(f"utils.get_games_file() -> Error in creating path\n{e}")
     finally:
         return path
-
+"""
 
