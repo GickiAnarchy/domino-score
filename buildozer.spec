@@ -11,7 +11,7 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 exclude_patterns = **/test*, **/tests*, **/Testing*
 
-version = 0.8.1
+version = 0.8.2
 
 # --------------------------------------------------
 # Python / Kivy requirements
@@ -28,7 +28,7 @@ presplash.filename = %(source.dir)s/data/splash.png
 # --------------------------------------------------
 # Android configuration (CLEAN)
 # --------------------------------------------------
-android.permissions = READ_MEDIA_FILES, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
+android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 android.manifest.application_arguments = --requestLegacyExternalStorage="true"
 
 
