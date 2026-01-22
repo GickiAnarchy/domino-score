@@ -36,8 +36,10 @@ def get_export_dir_wrapper() -> str:
 #   PLAYERS
 ###
 
-"""
+
 def save_players(players):
+    pass
+"""
     if not players:
         print("utils.save_players(players) -> players is not valid")
         return
@@ -49,8 +51,10 @@ def save_players(players):
     return
 """
 
-"""
+
 def load_players() -> dict:
+    return {}
+"""
     PLAYERS_FILE = get_players_file()
     if not os.path.exists(PLAYERS_FILE):
         return {}
@@ -86,8 +90,10 @@ def get_players_file() -> str:
 #   GAMES
 ###
 
-"""
+
 def save_games(games):
+    pass
+"""
     if not games:
         print("utils.save_games(games) -> games is not valid")
         return
@@ -99,8 +105,10 @@ def save_games(games):
     return
 """
 
-"""
+
 def load_games() -> dict:
+    return {}
+"""
     GAMES_FILE = get_games_file()
     if not os.path.exists(GAMES_FILE):
         return {}
