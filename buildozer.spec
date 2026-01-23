@@ -11,12 +11,14 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 exclude_patterns = **/test*, **/tests*, **/Testing*
 
-version = 0.8.2
+version = 0.8.3
 
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,kivymd,pyjnius,android
+requirements = kivy,kivymd,android
+#old requirements:
+#requirements = kivy,kivymd,pyjnius,android
 
 orientation = portrait
 fullscreen = 1
