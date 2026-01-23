@@ -55,6 +55,10 @@ def load_players(f_path) -> dict:
         return {}
     try:
         data = {n: models.Player.from_dict(p) for n,p in raw.items()}
+
+    # FOR DEBIGGING:
+        print(data.keys())
+
     except Exception as e:
         print(f"utils.load_players -> {e}")
         return {}

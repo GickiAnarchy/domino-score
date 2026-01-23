@@ -11,7 +11,7 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 exclude_patterns = **/test*, **/tests*, **/Testing*
 
-version = 0.8.3
+version = 0.8.5
 
 # --------------------------------------------------
 # Python / Kivy requirements

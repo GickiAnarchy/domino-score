@@ -12,10 +12,11 @@ class PlayerSelectScreen(MDScreen):
 
     def on_enter(self):
         self.selected = []
+        self.refresh()
 
     def refresh(self):
         players = self.app.players
-        self.ids.player_box.clear_widgets()
+        self.ids.players_box.clear_widgets()
         if not players:
             self.ids.players_box.add_widget(
                 MDLabel(
@@ -42,6 +43,7 @@ class PlayerSelectScreen(MDScreen):
             row.add_widget(label)
             self.ids.players_box.add_widget(row)
 
+
     def toggle(self, name, active):
         if active:
             if name not in self.selected:
@@ -50,6 +52,7 @@ class PlayerSelectScreen(MDScreen):
             if name in self.selected:
                 self.selected.remove(name)  # Use remove for lists
 
+
     def start_game(self):
         selected = list(self.selected)
         if len(selected) < 2:
@@ -57,15 +60,19 @@ class PlayerSelectScreen(MDScreen):
             return
         self.app.start_game(selected)
 
+
     def cancel(self):
         self.selected.clear()
         self.manager.current = "menu"
+
 
     def delete(self):
         selected = list(self.selected)
         for s in selected:
             self.app.delete_player(s)
         self.refresh()
+        self.manager.current = "menu"
+
 
     @property
     def app(self):

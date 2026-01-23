@@ -15,9 +15,11 @@ class Player:
             "highest_score", 0
         )  # Players highest score ever
 
+
     def reset_stats(self):
         self.wins = 0
         self.losses = 0
+
 
     def to_dict(self):
         p_dict = {
@@ -57,8 +59,11 @@ class GameScore:
             "finished", False
         )  # Used to verify the game is closed and complete
 
+
     def finish_game(self):
         self.finished = True
+        
+
 
     def add_points(self, name, points):
         if name not in self.totals:
@@ -69,9 +74,11 @@ class GameScore:
         else:
             print("Tried to add invalid value of points")
 
+
     def get_date(self) -> str:
         data = f"{self.date:%m/%d/%y %I:%M%p}"
         return data
+
 
     @property
     def winner(self):
@@ -82,6 +89,7 @@ class GameScore:
             return None
         return leaders[0]
 
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -90,6 +98,7 @@ class GameScore:
             "totals": self.totals,
             "finished": self.finished,
         }
+
 
     @classmethod
     def from_dict(cls, data):
