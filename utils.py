@@ -1,10 +1,10 @@
 import json
 import os
 from kivy.utils import platform
-from models import Player, GameScore
+import models
 
 
-"""
+
 def get_export_dir() -> str:    
     if platform == "android":
         try:
@@ -12,24 +12,13 @@ def get_export_dir() -> str:
             path = app_storage_path()
         except Exception as e:
             print("Storage fallback:", e)
-            path = "/data/data/com.gicki.dominoscores/files"
+            #path = "/data/data/com.gicki.dominoscores/files"
+            path = "."
     else:
         path = os.path.join(os.getcwd(), "exports")
     os.makedirs(path, exist_ok=True)
     return path
-"""
 
-
-"""
-def get_export_dir_wrapper() -> str:
-    export_dir = None
-    try:
-        export_dir = get_export_dir()
-    except Exception as e:
-        print(f"utils.get_export_dir_wrapper() -> \n{e}")
-    finally:
-        return export_dir
-"""
 
 
 ###
@@ -37,53 +26,40 @@ def get_export_dir_wrapper() -> str:
 ###
 
 
-def save_players(players):
-    pass
-"""
-    if not players:
-        print("utils.save_players(players) -> players is not valid")
+def save_players(players = None, f_path = None):
+    if players == None or not f_path:
         return
-    PLAYERS_FILE = get_players_file()
+    p_file = os.path.join(get_export_dir(), "players.json")
     data = {n: p.to_dict() for n,p in players.items()}
-    with open(PLAYERS_FILE, "w") as f:
-        json.dump(data, f, indent = 2)
+    try:
+        with open(p_file, "w") as f:
+            json.dump(data, f, indent = 2)
+    except Exception as e:
+        print(f"UTILS ERROR: {e}")
+        return
     print("Players have been saved")
     return
-"""
+    
 
-
-def load_players() -> dict:
-    return {}
-"""
-    PLAYERS_FILE = get_players_file()
-    if not os.path.exists(PLAYERS_FILE):
+def load_players(f_path) -> dict:
+    if not f_path:
+        return
+    p_file = os.path.join(f_path,"players.json")
+    if not os.path.exists(p_file):
         return {}
     try:
-        with open(PLAYERS_FILE, "r") as f:
+        with open(p_file, "r") as f:
             raw = json.load(f)
     except Exception as e:
         print(f"utils.load_players -> {e}")
         return {}
     try:
-        data = {n: Player.from_dict(p) for n,p in raw.items()}
+        data = {n: models.Player.from_dict(p) for n,p in raw.items()}
     except Exception as e:
         print(f"utils.load_players -> {e}")
         return {}
     print("Players have been loaded")
     return data
-"""
-
-"""
-def get_players_file() -> str:
-    path = None
-    ex_dir = get_export_dir_wrapper()
-    try:
-        path  = os.path.join(ex_dir, "players.dom")
-    except Exception as e:
-        print(f"utils.get_players_file() -> Error in creating path\n{e}")
-    finally:
-        return path
-"""
 
 
 ###
@@ -91,51 +67,38 @@ def get_players_file() -> str:
 ###
 
 
-def save_games(games):
-    pass
-"""
-    if not games:
+def save_games(games = None, f_path = None):
+    if not games or not f_path:
         print("utils.save_games(games) -> games is not valid")
         return
-    GAMES_FILE = get_games_file()
+    g_file = os.path.join(f_path, "games.json")
     data = {n: g.to_dict() for n,g in games.items()}
-    with open(GAMES_FILE, "w") as f:
-        json.dump(data, f, indent = 2)
+    try:
+        with open(g_file, "w") as f:
+            json.dump(data, f, indent = 2)
+    except Exception as e:
+        print(f"UTILS ERROR: {e}")
+        return
     print("Games have been saved")
     return
-"""
 
 
-def load_games() -> dict:
-    return {}
-"""
-    GAMES_FILE = get_games_file()
-    if not os.path.exists(GAMES_FILE):
+def load_games(f_path) -> dict:
+    if not f_path:
+        return
+    g_file = os.path.join(f_path, "games.json")
+    if not os.path.exists(g_file):
         return {}
     try:
-        with open(GAMES_FILE, "r") as f:
+        with open(g_file, "r") as f:
             raw = json.load(f)
     except Exception as e:
         print(f"utils.load_games() -> {e}")
         return {}
     try:
-        data = {id: GameScore.from_dict(g) for id, g in raw.items()}
+        data = {id: models.GameScore.from_dict(g) for id, g in raw.items()}
     except Exception as e:
         print(f"utils.load_games() -> {e}")
         return {}
     print("Games have been loaded")
     return data
-"""
-
-
-"""
-def get_games_file() -> str:
-    path = None
-    ex_dir = get_export_dir_wrapper()
-    try:
-        path  = os.path.join(ex_dir, "games.dom")
-    except Exception as e:
-        print(f"utils.get_games_file() -> Error in creating path\n{e}")
-    finally:
-        return path
-"""

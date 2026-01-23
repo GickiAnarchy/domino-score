@@ -5,7 +5,7 @@ from screens import ALL_SCREENS
 from models import Player, GameScore
 import utils
 
-from kivy.utils import platform
+#from kivy.utils import platform
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
@@ -19,17 +19,16 @@ class DominoApp(MDApp):
 
         self.current_game = None
 
+        self.f_path = self.user_data_dir
+
         sm = ScreenManager()
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
         return sm
 
     def on_start(self):
-        if platform == "android":
-            from android.permissions import request_permissions, Permission
-            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
-            self.players = utils.load_players()
-            self.games = utils.load_games()
+        self.players = utils.load_players()
+        self.games = utils.load_games()
 
     def _register_fonts(self):
         font_path = os.path.join(os.path.dirname(__file__), "data", "breakaway.ttf")
@@ -55,7 +54,8 @@ class DominoApp(MDApp):
             print(f"{name} already exists")
             return
         else:
-            self.players[name] = utils.save_players()
+            self.players[name] = Player(name)
+            utils.save_players(self.players, self.f_path)
 
     def delete_player(self, name):
         if not name:
@@ -63,7 +63,7 @@ class DominoApp(MDApp):
 
         def _do_delete():
             self.players.pop(name, None)
-            utils.save_players()
+            utils.save_players(self.players, self.f_path)
 
         del_confirm = ConfirmDialog(
             title="Delete Player?",
