@@ -19,16 +19,14 @@ class DominoApp(MDApp):
 
         self.current_game = None
 
-        self.f_path = self.user_data_dir
-
         sm = ScreenManager()
         for cls, name in ALL_SCREENS:
             sm.add_widget(cls(name=name))
         return sm
 
     def on_start(self):
-        self.players = utils.load_players()
-        self.games = utils.load_games()
+        self.players = utils.load_players(self.app_path)
+        self.games = utils.load_games(self.app_path)
 
     def _register_fonts(self):
         font_path = os.path.join(os.path.dirname(__file__), "data", "breakaway.ttf")
@@ -55,7 +53,7 @@ class DominoApp(MDApp):
             return
         else:
             self.players[name] = Player(name)
-            utils.save_players(self.players, self.f_path)
+            utils.save_players(self.players, self.app_path)
 
     def delete_player(self, name):
         if not name:
@@ -63,7 +61,7 @@ class DominoApp(MDApp):
 
         def _do_delete():
             self.players.pop(name, None)
-            utils.save_players(self.players, self.f_path)
+            utils.save_players(self.players, self.app_path)
 
         del_confirm = ConfirmDialog(
             title="Delete Player?",
@@ -71,3 +69,8 @@ class DominoApp(MDApp):
             on_confirm=_do_delete,
         )
         del_confirm.open()
+    
+    
+    @property
+    def app_path(self):
+        return self.user_data_dir
