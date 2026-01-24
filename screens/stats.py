@@ -14,7 +14,7 @@ class StatsScreen(MDScreen):
 
 
     def refresh_players(self):
-        players = self.app.players  # list[Player]
+        players = self.app.players
     
         if not players:
             self.ids.player_button.text = "No players"

@@ -84,6 +84,7 @@ class GameScreen(MDScreen):
 
 
     def finish_game(self):
+        print("GameScreen -> finish_game()")
         def _do_finish_game():
             self.game.finish_game()
             self.app.end_game()

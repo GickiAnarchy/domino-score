@@ -26,22 +26,19 @@ def get_export_dir() -> str:
 ###
 
 
-def save_players(players = None, f_path = None):
-    if players == None or not f_path:
-        return
-    p_file = os.path.join(get_export_dir(), "players.json")
-    data = {n: p.to_dict() for n,p in players.items()}
-    try:
-        with open(p_file, "w") as f:
-            json.dump(data, f, indent = 2)
-    except Exception as e:
-        print(f"UTILS ERROR: {e}")
-        return
-    print("Players have been saved")
-    return
+def save_players(players, f_path):
+    if not isinstance(players, dict) or not f_path:
+        raise ValueError("save_players: invalid arguments")
+
+    p_file = os.path.join(f_path, "players.json")
+    data = {n: p.to_dict() for n, p in players.items()}
+
+    with open(p_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
     
 
 def load_players(f_path) -> dict:
+    print("Loading Players.....")
     if not f_path:
         return
     p_file = os.path.join(f_path,"players.json")
@@ -71,27 +68,24 @@ def load_players(f_path) -> dict:
 ###
 
 
-def save_games(games = None, f_path = None):
-    if not games or not f_path:
-        print("utils.save_games(games) -> games is not valid")
-        return
+def save_games(games, f_path):
+    if not isinstance(games, dict) or not f_path:
+        raise ValueError("save_games: invalid arguments")
+
     g_file = os.path.join(f_path, "games.json")
-    data = {n: g.to_dict() for n,g in games.items()}
-    try:
-        with open(g_file, "w") as f:
-            json.dump(data, f, indent = 2)
-    except Exception as e:
-        print(f"UTILS ERROR: {e}")
-        return
-    print("Games have been saved")
-    return
+    data = {gid: g.to_dict() for gid, g in games.items()}
+
+    with open(g_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 
 def load_games(f_path) -> dict:
+    print("Loading Games.....")
     if not f_path:
         return
     g_file = os.path.join(f_path, "games.json")
     if not os.path.exists(g_file):
+        print("utils: g_file doesn't exist")
         return {}
     try:
         with open(g_file, "r") as f:

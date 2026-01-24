@@ -61,9 +61,9 @@ class GameScore:
 
 
     def finish_game(self):
+        print("GameScore -> finish_game()")
         self.finished = True
         
-
 
     def add_points(self, name, points):
         if name not in self.totals:
@@ -76,7 +76,8 @@ class GameScore:
 
 
     def get_date(self) -> str:
-        data = f"{self.date:%m/%d/%y %I:%M%p}"
+        ddate = datetime.fromisoformat(self.date)
+        data = f"{ddate:%m/%d/%y %I:%M%p}"
         return data
 
 

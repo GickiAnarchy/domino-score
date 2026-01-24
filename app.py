@@ -13,11 +13,16 @@ from kivymd.app import MDApp
 
 class DominoApp(MDApp):
 
-    def build(self):
+    def build(self):        
         self.players = {}  # {player.name : Player}
         self.games = {}  # {game.id : GameScore}
-
         self.current_game = None
+        
+        self.data_dir = self.user_data_dir
+        os.makedirs(self.data_dir, exist_ok=True)
+        
+        self.theme_cls.theme_style = "Dark"
+        self._register_fonts()
 
         sm = ScreenManager()
         for cls, name in screens.ALL_SCREENS:
@@ -26,8 +31,18 @@ class DominoApp(MDApp):
 
 
     def on_start(self):
-        self.players = utils.load_players(self.app_path)
-        self.games = utils.load_games(self.app_path)
+        loaded_players = utils.load_players(self.data_dir)
+        loaded_games = utils.load_games(self.data_dir)
+    
+        if loaded_players:
+            self.players = loaded_players
+        else:
+            self.players = {}
+    
+        if loaded_games:
+            self.games = loaded_games
+        else:
+            self.games = {}
 
 
     def _register_fonts(self):
@@ -40,7 +55,7 @@ class DominoApp(MDApp):
                 )
             except Exception:
                 print("Font registration failed")
-
+    
 
     def start_game(self, names):
         self.current_game = models.GameScore(names)
@@ -48,17 +63,22 @@ class DominoApp(MDApp):
 
 
     def end_game(self):
+        print("DominoApp -> end_game()")
         game = self.current_game
         if not game or not game.finished:
+            print("App: not game or not game.finished")
             return
+        self.games[game.id] = game    # Add game to self.games
         for name, score in game.totals.items():
             p = self.players.get(name)
-            if score > p.highest_score:
-                self.players[name].highestscore = score
+            if score > self.players[name].highest_score:
+                self.players[name].highest_score = score
             if game.winner == name:
                 self.players[name].wins += 1
             else:
                 self.players[name].losses += 1
+        utils.save_players(self.players, self.app_path)
+        utils.save_games(self.games, self.app_path)
             
 
     def add_player(self, name):
@@ -90,31 +110,66 @@ class DominoApp(MDApp):
 
 
     def add_game(self, game):
-        if not game:
+        if not game or not game.id:
             return
-        if game.id in self.games.keya():
-            print("Game already exists in Games History")
-            return
+    
         self.games[game.id] = game
-        utils.save_games(self.games, self.app_path)
-        self.current_game = None
+        self.recompute_player_stats()
+        utils.save_games(self.games, self.data_dir)
+        utils.save_players(self.players, self.data_dir)
     
     
     def delete_game(self, game):
-        if not game:
+        if not game or not game.id:
             return
+    
         def _do_delete():
-            self.players.pop()
-            utils.save_games(self.games, self.app_path)
-        
-        self.del_player_conf = ui_helpers.ConfirmDialog(
-        title="Delete Player?",
-        text="Are you sure you want to permanently delete this game??", 
-        on_confirm=_do_delete)
-        
-        self.del_player_conf.open()
+            if game.id not in self.games:
+                print(f"delete_game: game {game.id} not found")
+                return
+    
+            del self.games[game.id]
+            print(f"Removed game {game.id}")
+   
+            # 👓tats come from games — always recompute
+            self.recompute_player_stats()
+    
+            # 👐ersist BOTH
+            utils.save_games(self.games, self.data_dir)
+            utils.save_players(self.players, self.data_dir)
+    
+        self.del_game_conf = ui_helpers.ConfirmDialog(
+            title="Delete Game?",
+            text="Are you sure you want to permanently delete this game?",
+            on_confirm=_do_delete
+        )
+        self.del_game_conf.open()
     
     
+    def recompute_player_stats(self):
+        for p in self.players.values():
+            p.wins = 0
+            p.losses = 0
+            p.highest_score = 0
+    
+        for game in self.games.values():
+            if not game.finished or not game.winner:
+                continue
+    
+            for name, score in game.totals.items():
+                player = self.players.get(name)
+                if not player:
+                    continue
+    
+                if score > player.highest_score:
+                    player.highest_score = score
+    
+                if name == game.winner:
+                    player.wins += 1
+                else:
+                    player.losses += 1
+
+
     @property
     def app_path(self):
-        return self.user_data_dir
+        return self.data_dir
