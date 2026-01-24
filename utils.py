@@ -2,7 +2,17 @@ import json
 import os
 from kivy.utils import platform
 import models
+from android.storage import primary_external_storage_path
 
+
+
+
+
+def get_shared_folder():
+    base = primary_external_storage_path()
+    path = os.path.join(base, "Download", "DominoScorebook")
+    os.makedirs(path, exist_ok=True)
+    return path
 
 
 def get_export_dir() -> str:    
@@ -100,3 +110,44 @@ def load_games(f_path) -> dict:
         return {}
     print("Games have been loaded")
     return data
+
+
+###
+# IMPORT / EXPORT
+###
+
+
+def import_data(data: dict):
+    players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
+    games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
+    return players, games
+
+
+def export_data(players: dict, games: dict):
+    return {
+        "players": {k: p.to_dict() for k, p in players.items()},
+        "games": {k: g.to_dict() for k, g in games.items()},}
+
+
+def export_to_shared(players: dict, games: dict):
+    folder = get_shared_folder()
+    file_path = os.path.join(folder, "domino_backup.json")
+    data = {
+        "players": {k: p.to_dict() for k, p in players.items()},
+        "games": {k: g.to_dict() for k, g in games.items()},
+    }
+    with open(file_path, "w") as f:
+        json.dump(data, f, indent=2)
+    return file_path
+
+
+def import_from_shared():
+    folder = get_shared_folder()
+    file_path = os.path.join(folder, "domino_backup.json")
+    if not os.path.exists(file_path):
+        raise FileNotFoundError("Backup not found")
+    with open(file_path, "r") as f:
+        data = json.load(f)
+    players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
+    games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
+    return players, games
