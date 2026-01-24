@@ -19,6 +19,8 @@ class DominoApp(MDApp):
         self.games = {}  # {game.id : GameScore}
         self.current_game = None
         
+        self.load_kv("domino.kv")
+        
         self.data_dir = self.user_data_dir
         os.makedirs(self.data_dir, exist_ok=True)
         

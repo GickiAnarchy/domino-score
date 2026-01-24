@@ -42,19 +42,6 @@ class HistoryScreen(MDScreen):
         self.manager.current = "edit"
 
 
-    def delete_game(self, game_id):
-        before = len(self.app.games)
-        self.app.games = [
-            g for g in self.app.games if g.id != game_id]
-        if len(self.app.games) < before:
-            self.app.save_games()
-            self.app.sync_players_from_games()
-            self.refresh()
-            print("Game deleted")
-        else:
-            print("Game not found")
-
-
     @property
     def app(self):
         return MDApp.get_running_app()

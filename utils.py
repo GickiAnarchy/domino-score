@@ -2,13 +2,14 @@ import json
 import os
 from kivy.utils import platform
 import models
-from android.storage import primary_external_storage_path
 
 
 
 
 
 def get_shared_folder():
+    from android.storage import primary_external_storage_path
+
     base = primary_external_storage_path()
     path = os.path.join(base, "Download", "DominoScorebook")
     os.makedirs(path, exist_ok=True)
