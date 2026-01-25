@@ -5,7 +5,7 @@ OUTPUT_FILE = "main.txt"
 EXTENSIONS = (".py", ".kv")
 
 def combine_files(source_dir, output_file):
-    with open(output_file, "w", encoding="utf-8") as out:
+    with open(output_file, "a", encoding="utf-8") as out:
         for root, _, files in os.walk(source_dir):
             for filename in sorted(files):
                 if filename.endswith(EXTENSIONS) and filename != "combine.py":
@@ -24,4 +24,4 @@ def combine_files(source_dir, output_file):
 
 if __name__ == "__main__":
     combine_files(SOURCE_DIR, OUTPUT_FILE)
-    combine_files("./screens", "screens.txt")
+    combine_files("./screens", OUTPUT_FILE)

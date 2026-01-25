@@ -5,7 +5,7 @@ import ui_helpers
 import screens
 import models
 import utils
-
+from kivy.utils import platform
 from kivymd.toast import toast
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
@@ -50,7 +50,7 @@ class DominoApp(MDApp):
 
     def request_permissions(self):
         # 1. Check & Request Storage Permissions (Android 11+)
-        if utils.platform == "android":
+        if platform == "android":
             from jnius import autoclass
             from android.permissions import request_permissions, Permission
             
