@@ -202,7 +202,11 @@ class DominoApp(MDApp):
                     player.wins += 1
                 else:
                     player.losses += 1
-    
+
+
+    def go_back(self):
+        self.root.current = "menu"
+
 
     @property
     def app_path(self):

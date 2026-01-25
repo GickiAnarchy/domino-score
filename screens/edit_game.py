@@ -59,6 +59,13 @@ class EditGameScreen(MDScreen):
         self.manager.current = "history"
 
 
+    def show_datetime_dialog(self):
+        self.edited_dt = self.current_dt
+        self.show_date_picker()
+        self.show_time_picker()
+        self.current_dt = self.edited_dt
+        self.update_date_display()
+
     def show_date_picker(self):
         date_dialog = MDDatePicker()
         date_dialog.bind(on_save=self.on_date_save)
@@ -66,10 +73,7 @@ class EditGameScreen(MDScreen):
 
 
     def on_date_save(self, instance, value, date_range):
-        # 'value' is a datetime.date object
-        # Combine the NEW date with the OLD time
-        self.current_dt = datetime.combine(value, self.current_dt.time())
-        self.update_date_display()
+        self.edited_dt = datetime.combine(value, self.current_dt.time())
 
 
     def show_time_picker(self):
@@ -79,8 +83,7 @@ class EditGameScreen(MDScreen):
     
     
     def on_time_save(self, instance, value, time_range):
-        self.current_dt = datetime.combine(self.current_dt.date(), value)
-        self.update_date_display()
+        self.edited_dt = datetime.combine(self.current_dt.date(), value)
 
 
     def refresh_totals(self):

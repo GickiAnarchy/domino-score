@@ -121,6 +121,10 @@
         orientation: "vertical"
         padding: dp(10)
         spacing: dp(10)
+        
+        MDTopAppBar:
+            title: "Select Players"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
 
         ScrollView:
             spacing: dp(15)
@@ -137,7 +141,7 @@
                         radius: [25, 25, 25, 25] 
 
                 adaptive_height: True
-                orientation: "vertical"
+                orientation: "vertical"               
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(15)
@@ -162,16 +166,16 @@
             disabled: len(root.selected) != 1
             on_release: root.delete()
 
-        MDFlatButton:
-            text: "Cancel"
-            on_release: root.cancel()
-
 
 <CreatePlayerScreen>:
     name: "create"
     
     MDBoxLayout:
         orientation: "vertical"
+        
+        MDTopAppBar:
+            title: "Create Player"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
         
         MDBoxLayout:
             orientation: "vertical"
@@ -200,12 +204,6 @@
                 size_hint_y: None
                 height: dp(48)
                 on_release: root.save()
-    
-            MDRaisedButton:
-                text: "Back"
-                size_hint_y: None
-                height: dp(48)
-                on_release: app.root.current = "menu"
 
 
 <StatsScreen>:
@@ -215,6 +213,10 @@
         orientation: "vertical"
         padding: dp(10)
         spacing: dp(10)
+    
+        MDTopAppBar:
+            title: "Player Stats"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
 
         MDRaisedButton:
             id: player_button
@@ -228,7 +230,7 @@
         MDLabel:
             id: losses
             text: "Losses: —"
-
+    
         MDLabel:
             id: games
             text: "Games Played: —"
@@ -236,14 +238,10 @@
         MDLabel:
             id: winrate
             text: "Win Rate: —"
-
+            
         MDLabel:
             id: highscore
             text: "Highest Score: —"
-
-        MDFlatButton:
-            text: "Back"
-            on_release: root.manager.current = "menu"
 
 
 <GameScreen>:
@@ -277,15 +275,14 @@
         orientation: "vertical"
         padding: dp(10)
         spacing: dp(10)
+        
+        MDTopAppBar:
+            title: "Game History"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
 
         ScrollView:
             MDList:
                 id: history_list
-
-        MDFlatButton:
-            text: "Back"
-            on_release: root.manager.current = "menu"
-
 
 
 <EditGameScreen>:
@@ -343,6 +340,12 @@
         orientation: "vertical"
         padding: dp(20)
         spacing: dp(20)
+    
+        MDTopAppBar:
+            title: "Options"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+
+        Widget:
 
         MDRaisedButton:
             text: "Export Data"
@@ -355,17 +358,5 @@
             size_hint_y: None
             height: dp(48)
             on_release: root.import_data()
-
-        MDSeparator:
-
-        MDRaisedButton:
-            text: "Back"
-            size_hint_y: None
-            height: dp(48)
-            on_release: app.root.current = "menu"
-        
-        MDBoxLayout:
-            orientation:"vertical"
-            size_hint:(1.0, 0.5)
 
 
