@@ -24,3 +24,4 @@ def combine_files(source_dir, output_file):
 
 if __name__ == "__main__":
     combine_files(SOURCE_DIR, OUTPUT_FILE)
+    combine_files("./screens", "screens.txt")
