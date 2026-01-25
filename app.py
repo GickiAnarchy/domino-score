@@ -32,6 +32,8 @@ class DominoApp(MDApp):
 
 
     def on_start(self):
+        self.request_permissions()
+        
         loaded_players = utils.load_players(self.data_dir)
         loaded_games = utils.load_games(self.data_dir)
     
@@ -44,6 +46,43 @@ class DominoApp(MDApp):
             self.games = loaded_games
         else:
             self.games = {}
+
+
+    def request_permissions(self):
+        # 1. Check & Request Storage Permissions (Android 11+)
+        if utils.platform == "android":
+            from jnius import autoclass
+            from android.permissions import request_permissions, Permission
+            
+            # Standard permissions (good to have)
+            request_permissions([
+                Permission.READ_EXTERNAL_STORAGE, 
+                Permission.WRITE_EXTERNAL_STORAGE
+            ])
+
+            # Check for "All Files Access" (Android 11/API 30+)
+            Environment = autoclass("android.os.Environment")
+            if not Environment.isExternalStorageManager():
+                print("Requesting All Files Access...")
+                
+                # Create an Intent to open the specific settings page
+                Intent = autoclass("android.content.Intent")
+                Settings = autoclass("android.provider.Settings")
+                Uri = autoclass("android.net.Uri")
+                PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                
+                # Open: Settings > Apps > Special App Access > All Files Access > [Your App]
+                try:
+                    intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    uri = Uri.parse("package:" + PythonActivity.mActivity.getPackageName())
+                    intent.setData(uri)
+                    PythonActivity.mActivity.startActivity(intent)
+                    toast("Please allow 'All Files Access' to save data.")
+                except Exception as e:
+                    print(f"Error requesting permission: {e}")
+                    toast("Could not open settings for file permission.")
+
+     
 
 
     def _register_fonts(self):

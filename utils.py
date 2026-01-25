@@ -1,18 +1,30 @@
 import json
 import os
-from kivy.utils import platform
 import models
 
 
 
-
-
 def get_shared_folder():
-    from android.storage import primary_external_storage_path
+    from kivy.utils import platform
+    import os
 
-    base = primary_external_storage_path()
-    path = os.path.join(base, "Download", "DominoScorebook")
-    os.makedirs(path, exist_ok=True)
+    if platform == "android":
+        try:
+            from android.storage import primary_external_storage_path
+            # This points to /storage/emulated/0/Download/DominoScorebook
+            # This folder is visible to the user and survives uninstall.
+            path = os.path.join(primary_external_storage_path(), "Download", "DominoScorebook")
+        except Exception as e:
+            print(f"Storage Error: {e}")
+            path = "."
+    else:
+        # Desktop path
+        path = os.path.join(os.getcwd(), "exports")
+
+    # Create the folder if it doesn't exist
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+        
     return path
 
 
