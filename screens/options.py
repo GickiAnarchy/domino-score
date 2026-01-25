@@ -17,10 +17,11 @@ class OptionsScreen(MDScreen):
 
     def import_data(self):
         try:
+            path = self.app.data_dir
             self.app.players, self.app.games = utils.import_from_shared()
-            utils.save_players(self.app.players)
-            utils.save_games(self.app.games)
             self.app.recompute_player_stats()
+            utils.save_players(self.app.players, path)
+            utils.save_games(self.app.games, path)
             toast("Import successful")
         except Exception as e:
             toast(str(e))

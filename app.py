@@ -6,7 +6,7 @@ import screens
 import models
 import utils
 
-#from kivy.utils import platform
+from kivymd.toast import toast
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
@@ -18,8 +18,6 @@ class DominoApp(MDApp):
         self.players = {}  # {player.name : Player}
         self.games = {}  # {game.id : GameScore}
         self.current_game = None
-        
-        self.load_kv("domino.kv")
         
         self.data_dir = self.user_data_dir
         os.makedirs(self.data_dir, exist_ok=True)
@@ -130,17 +128,11 @@ class DominoApp(MDApp):
             if game.id not in self.games:
                 print(f"delete_game: game {game.id} not found")
                 return
-    
             del self.games[game.id]
             print(f"Removed game {game.id}")
-   
-            # 👓tats come from games — always recompute
             self.recompute_player_stats()
-    
-            # 👐ersist BOTH
             utils.save_games(self.games, self.data_dir)
             utils.save_players(self.players, self.data_dir)
-    
         self.del_game_conf = ui_helpers.ConfirmDialog(
             title="Delete Game?",
             text="Are you sure you want to permanently delete this game?",

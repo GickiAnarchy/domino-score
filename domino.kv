@@ -5,6 +5,24 @@
 #:import MDIconButton kivymd.uix.button.MDIconButton
 
 
+
+<MyButton@MDRaisedButton>:
+    size_hint_y: None
+    height: dp(48)
+    md_bg_color: 1,1,1,0
+    
+    canvas.before:
+        Color:
+            rgba: 0.7, 0, 0.1, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            # The radius of the corners [top-left, top-right, bottom-right, bottom-left]
+            radius: [25, 25, 25, 25] 
+
+
+
+
 <MenuScreen>:
     name: "menu"
 
@@ -28,8 +46,21 @@
 
             MDLabel:
                 id: title_label
+                
+                canvas.after:
+                    Color:
+                        rgba: 1, 0, 0, 0.8  # White Border
+                    
+                    # The border line
+                    Line:
+                        width: 2
+                        # (x, y, width, height, radius)
+                        # Note: The radius here (25) should match the radius in canvas.before
+                        rounded_rectangle: (self.x, self.y, self.width, self.height, 25)
+               
                 text: "Domino Scorebook"
                 font_style: "H4"
+                font_size: "42sp"
                 halign: "center"
                 size_hint_y: None
                 height: self.texture_size[1]
@@ -43,25 +74,21 @@
                 size_hint_y: None
                 height: self.texture_size[1]
     
-        MDRaisedButton:
+        MyButton:
             id: start_btn
             text: "Start Game"
-            size_hint_y: None
-            height: dp(48)
             on_release: app.root.current = "select"
 
-        MDRaisedButton:
+        MyButton:
             id: stats_btn
             text: "Player Stats"
             size_hint_y: None
             height: dp(48)
             on_release: app.root.current = "stats"
         
-        MDRaisedButton:
+        MyButton:
             id: history_btn
             text: "Game History"
-            size_hint_y: None
-            height: dp(48)
             on_release: app.root.current = "history"
                 
         Widget:
@@ -76,12 +103,12 @@
             size_hint_x: None
             width: dp(260)  # controls how far apart they are
                     
-            MDRaisedButton:
+            MyButton:
                 text: "Options"
                 size_hint_x: 1
                 on_release: app.root.current = "options"
             
-            MDRaisedButton:
+            MyButton:
                 text: "Exit"
                 size_hint_x: 1
                 on_release: app.stop()
@@ -96,12 +123,25 @@
         spacing: dp(10)
 
         ScrollView:
+            spacing: dp(15)
             MDBoxLayout:
                 id: players_box
+                
+                canvas.before:
+                    Color:
+                        rgba: 0.2, 0.5, 0.2, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        # The radius of the corners [top-left, top-right, bottom-right, bottom-left]
+                        radius: [25, 25, 25, 25] 
+
+                adaptive_height: True
                 orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
-                spacing: dp(8)
+                spacing: dp(15)
+                padding: dp(15)
 
         MDRaisedButton:
             id: start_btn
@@ -327,3 +367,5 @@
         MDBoxLayout:
             orientation:"vertical"
             size_hint:(1.0, 0.5)
+
+
