@@ -14,12 +14,16 @@ class Player:
         self.highest_score = kwargs.get(
             "highest_score", 0
         )  # Players highest score ever
+        
+        self.nickname = kwargs.get("nickname", "")
 
+    @property
+    def win_percentage(self):
+        return (self.wins / (self.wins + self.losses) * 100)
 
     def reset_stats(self):
         self.wins = 0
         self.losses = 0
-
 
     def to_dict(self):
         p_dict = {
@@ -27,6 +31,7 @@ class Player:
             "wins": self.wins,
             "losses": self.losses,
             "highest_score": self.highest_score,
+            "nickname": self.nickname,
         }
         return p_dict
 
@@ -37,6 +42,7 @@ class Player:
             wins=data.get("wins", 0),
             losses=data.get("losses", 0),
             highest_score=data.get("highest_score", 0),
+            nickname = data.get("nickname", ""),
         )
 
 

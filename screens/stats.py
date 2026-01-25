@@ -22,6 +22,8 @@ class StatsScreen(MDScreen):
             return
         self.ids.player_button.disabled = False
         self.ids.player_button.text = "Select Player"
+        top_player = max(players.values(), key = lambda x: x.wins)
+        self.ids.top_player_label.text = top_player.name
         items = [
             {
                 "text": p,

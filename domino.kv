@@ -217,6 +217,20 @@
         MDTopAppBar:
             title: "Player Stats"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            
+        MDLabel:
+            id: top_player_label
+
+            canvas.before:
+                Color:
+                    rgba: 0, 0.8, 0, 0.8
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25, 25, 25, 25]
+
+            pos_hint:{"center_x":0.5}
+            halign:"center"
 
         MDRaisedButton:
             id: player_button
@@ -360,3 +374,23 @@
             on_release: root.import_data()
 
 
+<EditPlayerScreen>:
+    name: "editplayer"
+    
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+        MDTopAppBar:
+            title: "Edit Game"
+            left_action_items: [["arrow-left", lambda x: root.cancel()]]
+        
+        MDLabel:
+            id: player_name
+
+        MDTextField:
+            id: player_nickname
+            hint_text: "nickname"
+            
+            
+    
+    
