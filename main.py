@@ -1,4 +1,4 @@
-#import kivy_pydroid
+
 from app import DominoApp
 
 

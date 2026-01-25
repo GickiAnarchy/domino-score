@@ -28,21 +28,6 @@ def get_shared_folder():
     return path
 
 
-def get_export_dir() -> str:    
-    if platform == "android":
-        try:
-            from android.storage import app_storage_path
-            path = app_storage_path()
-        except Exception as e:
-            print("Storage fallback:", e)
-            #path = "/data/data/com.gicki.dominoscores/files"
-            path = "."
-    else:
-        path = os.path.join(os.getcwd(), "exports")
-    os.makedirs(path, exist_ok=True)
-    return path
-
-
 
 ###
 #   PLAYERS
@@ -58,7 +43,7 @@ def save_players(players, f_path):
 
     with open(p_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
-    
+
 
 def load_players(f_path) -> dict:
     print("Loading Players.....")
@@ -76,7 +61,7 @@ def load_players(f_path) -> dict:
     try:
         data = {n: models.Player.from_dict(p) for n,p in raw.items()}
 
-    # FOR DEBIGGING:
+    # FOR DEBUGGING:
         print(data.keys())
 
     except Exception as e:

@@ -16,7 +16,7 @@ version = 0.9.0
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,kivymd,android,pillow
+requirements = kivy,kivymd,android,pillow,pyjnius
 #old requirements:
 #requirements = kivy,kivymd,pyjnius,android
 
