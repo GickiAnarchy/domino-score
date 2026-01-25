@@ -3,7 +3,7 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 from kivymd.toast import toast
-from kivymd.uix.pickers import MDDatePicker
+from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 from datetime import datetime
 
 import models
@@ -24,7 +24,8 @@ class EditGameScreen(MDScreen):
             return
 
         # 2. Set the date field
-        self.ids.date_field.text = self.game.get_date()
+        self.current_dt = datetime.fromisoformat(self.game.date)
+        self.update_date_display()
 
         # 3. Create a TextField for every player in this game
         for player_name, score in self.game.totals.items():
@@ -39,6 +40,11 @@ class EditGameScreen(MDScreen):
             self.player_fields[player_name] = field
 
 
+    def update_date_display(self):
+        # Update the text field with a pretty format (e.g., "01/25/26 09:30AM")
+        self.ids.date_field.text = self.current_dt.strftime("%m/%d/%y %I:%M%p")
+
+
     def save_changes(self):
         game = self.game        
         # Update scores from the text fields
@@ -47,7 +53,7 @@ class EditGameScreen(MDScreen):
                 game.totals[name] = int(field.text)
             except ValueError:
                 game.totals[name] = 0        
-        #game.date = self.ids.date_field.text
+        game.date = self.current_dt.isoformat()
         # Save to disk
         self.app.add_game(game)
         self.manager.current = "history"
@@ -60,7 +66,21 @@ class EditGameScreen(MDScreen):
 
 
     def on_date_save(self, instance, value, date_range):
-        self.ids.date_field.text = str(value)
+        # 'value' is a datetime.date object
+        # Combine the NEW date with the OLD time
+        self.current_dt = datetime.combine(value, self.current_dt.time())
+        self.update_date_display()
+
+
+    def show_time_picker(self):
+        time_dialog = MDTimePicker(year=self.current_dt.year,month=self.current_dt.month,day=self.current_dt.day)
+        time_dialog.bind(on_save=self.on_time_save)
+        time_dialog.open()
+    
+    
+    def on_time_save(self, instance, value, time_range):
+        self.current_dt = datetime.combine(self.current_dt.date(), value)
+        self.update_date_display()
 
 
     def refresh_totals(self):
