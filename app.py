@@ -23,6 +23,7 @@ class DominoApp(MDApp):
         os.makedirs(self.data_dir, exist_ok=True)
         
         self.theme_cls.theme_style = "Dark"
+
         self._register_fonts()
 
         sm = ScreenManager()

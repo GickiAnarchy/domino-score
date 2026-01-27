@@ -14,37 +14,30 @@ class GameScreen(MDScreen):
 
     def on_pre_enter(self):
         self.game = self.app.current_game
-
         if not self.game:
             self.manager.current = "menu"
             return
-
         self.refresh_totals()
 
 
     def refresh_totals(self):
         box = self.ids.score_box
         box.clear_widgets()
-        
         self.score_inputs = {}
-
         for name, score in self.app.current_game.totals.items():
             top = MDBoxLayout(orientation="horizontal", size_hint=(0.9, None), height=dp(76), pos_hint = {"center_y":0.5})
             score_field = MDTextField(pos_hint = {"center_y":0.5}, multiline = False, input_filter = "int", hint_text = "Enter Score", on_text_validate = lambda x, n = name: self.add_field_points(n))
             self.score_inputs[name] = score_field
             top.add_widget(MDLabel(text=f"{name} — {score}", font_style="H6"))
             top.add_widget(score_field)
-            
-            btns = MDBoxLayout(spacing=dp(15), size_hint=(0.9, None), height=dp(70))
-            for pts in (5, 10, 20, -5):
+            btns = MDBoxLayout(spacing=dp(10), size_hint=(1, None), height=dp(75))
+            for pts in (5, 10, 15, 20, -5):
                 btns.add_widget(
                     MDRaisedButton(
-                        text=f"{pts:+}", size_hint_y = None, height = dp(45),
+                        text=f"{pts:+}", size_hint = (0.2,None), height = dp(60),
                         on_release=lambda x, n=name, p=pts: self.add_points(n, p),))
-            
             btm = MDBoxLayout(size_hint_y=None, height=dp(20))
             btm.add_widget(ui_helpers.MDSeparator())
-            
             box.add_widget(top)
             box.add_widget(btns)
             box.add_widget(btm)
