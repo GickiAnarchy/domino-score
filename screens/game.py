@@ -54,26 +54,24 @@ class GameScreen(MDScreen):
             return
         # TODO: IF POINTS AREN'T BY 5 = INVALID
         self.game.add_points(name, pts)
-        self.refresh_totals()
+        #self.refresh_totals()
 
 
     def add_field_points(self, name):
-        field = self.score_inputs.get(name)
-        if not field or not field.text:
-            print("Text fields is empty or invalid")
-            return
-        try:
-            new_points = int(field.text)
+        for n,tf in self.score_inputs.items():
+            try:
+                new_points = int(self.score_inputs.get(n).text)
+            except Exception as e:
+                print(e)
+                print("skipping player")
+                continue
             if new_points % 5 != 0:
                 toast("Invalid point value.")
             else:
-                self.add_points(name, new_points)
-                toast(f"Added {new_points} to {name}'s total")
-            field.text = ""
-            self.refresh_totals()
-        except ValueError as e:
-            print(e)
-            toast("Please enter a valid number")
+                self.add_points(n, new_points)
+                toast(f"Added {new_points} to {n}'s total")
+            self.score_inputs.get(n).text = "0"
+        self.refresh_totals()
 
 
     def finish_game(self):

@@ -33,7 +33,7 @@ class DominoApp(MDApp):
 
 
     def on_start(self):
-        self.request_permissions()
+        #self.request_permissions()
         
         loaded_players = utils.load_players(self.data_dir)
         loaded_games = utils.load_games(self.data_dir)
