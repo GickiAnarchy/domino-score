@@ -13,3 +13,4 @@ __pycache__/*
 *.txt
 combine.py
 kivy_pydroid.py
+_buildozer.spec
