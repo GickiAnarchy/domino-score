@@ -2,7 +2,7 @@
 
 git add .
 
-git commit -am "Auto push triggered"
+git commit -am "Auto push triggered [apk]"
 
 git push
 

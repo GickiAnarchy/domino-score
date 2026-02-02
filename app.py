@@ -10,7 +10,11 @@ from kivymd.toast import toast
 from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
+from kivy.clock import Clock
 
+
+
+APP_VER = "v1.4.0"
 
 class DominoApp(MDApp):
 
@@ -47,6 +51,8 @@ class DominoApp(MDApp):
             self.games = loaded_games
         else:
             self.games = {}
+        
+        Clock.schedule_once(self.toast_version,4)
 
 
     def request_permissions(self):
@@ -61,32 +67,10 @@ class DominoApp(MDApp):
                 Permission.WRITE_EXTERNAL_STORAGE
             ])
 
-            # Check for "All Files Access" (Android 11/API 30+)
-            """
-            Environment = autoclass("android.os.Environment")
-            if not Environment.isExternalStorageManager():
-                print("Requesting All Files Access...")
-                
-                # Create an Intent to open the specific settings page
-                Intent = autoclass("android.content.Intent")
-                Settings = autoclass("android.provider.Settings")
-                Uri = autoclass("android.net.Uri")
-                PythonActivity = autoclass('org.kivy.android.PythonActivity')
-                
-                # Open: Settings > Apps > Special App Access > All Files Access > [Your App]
-                try:
-                    intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    uri = Uri.parse("package:" + PythonActivity.mActivity.getPackageName())
-                    intent.setData(uri)
-                    PythonActivity.mActivity.startActivity(intent)
-                    toast("Please allow 'All Files Access' to save data.")
-                except Exception as e:
-                    print(f"Error requesting permission: {e}")
-                    toast("Could not open settings for file permission.")
-                    """
 
-     
-
+    def toast_version(self, dt):
+        toast(APP_VER)
+    
 
     def _register_fonts(self):
         font_path = os.path.join(os.path.dirname(__file__), "data", "breakaway.ttf")
@@ -212,15 +196,26 @@ class DominoApp(MDApp):
     
     
     def import_data(self, data):
-        self.players, self.games = utils.load_data(data)
-       # players = {k:models.Player.from_dict(p) for k,p in data['players'].items()}
-#        games = {id:models.GameScore.from_dict(g) for id,g in data['games'].items()}
-#        self.players = players
-#        self.games = games
+        datas = json.loads(f"{data}")
+        self.players, self.games = utils.load_data(datas)
         print("Data imported!")
         utils.save_games(self.games, self.data_dir)
         utils.save_players(self.players, self.data_dir)
         self.root.current = "menu"
+
+
+    def format_data_for_export(self):
+        appdata = {
+            "players": {k: p.to_dict() for k, p in self.players.items()},
+            "games": {k: g.to_dict() for k, g in self.games.items()},
+            }
+        try:
+           data = json.dumps(appdata, indent=4)
+        except Exception as e:
+            print(e)
+            return None
+        return data
+
 
 
     @property

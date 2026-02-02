@@ -365,7 +365,7 @@
             text: "Export Data"
             size_hint_y: None
             height: dp(48)
-            on_release: root.export_data()
+            on_release: app.root.current = "export"
 
         MDRaisedButton:
             text: "Import Data"
@@ -407,4 +407,31 @@
         MDTextField:
             id: import_field
             multiline: True
-            on_text_validate:root.import_data(self.text)
+        
+        MyButton:
+            text:"Import"
+            on_release:root.import_data(import_field.text)
+            halign:"center"
+
+
+<ExportScreen>:
+    name:"export"
+    
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(10)
+        spacing: dp(10)
+        
+        MDTopAppBar:
+            title: "Export Data"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            
+        MDLabel:
+            id:export_label
+        
+        MyButton:
+            id: copy_button
+            text: "Copy Data"
+            on_release: root.copy_data()
+            pos_hint: {"center_x":0.5}
+            disabled: True

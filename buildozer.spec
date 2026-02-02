@@ -11,12 +11,12 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf,dom
 exclude_patterns = **/test*, **/tests*, **/Testing*
 
-version = 1.3
+version = 1.4
 
 # --------------------------------------------------
 # Python / Kivy requirements
 # --------------------------------------------------
-requirements = kivy,kivymd,android,pillow,pyjnius
+requirements = python3,kivy,kivymd,android,pillow,pyjnius
 #old requirements:
 #requirements = kivy,kivymd,pyjnius,android
 
