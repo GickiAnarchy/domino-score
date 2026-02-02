@@ -7,6 +7,7 @@ from .history import HistoryScreen
 from .edit_game import EditGameScreen
 from .stats import StatsScreen
 from .editplayer import EditPlayerScreen
+from .importscreen import ImportScreen
 
 ALL_SCREENS = [
     (MenuScreen, "menu"),
@@ -18,6 +19,7 @@ ALL_SCREENS = [
     (EditGameScreen, "edit"),
     (StatsScreen, "stats"),
     (EditPlayerScreen, "editplayer"),
+    (ImportScreen, "import"),
 ]
 
 __all__ = [
@@ -30,5 +32,6 @@ __all__ = [
     "EditGameScreen",
     "StatsScreen",
     "EditPlayerScreen",
+    "ImportScreen",
     "ALL_SCREENS",
 ]

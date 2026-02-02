@@ -1,7 +1,7 @@
 import json
 import os
 import models
-
+from datetime import datetime
 
 
 def get_shared_folder():
@@ -115,18 +115,6 @@ def load_games(f_path) -> dict:
 ###
 
 
-def import_data(data: dict):
-    players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
-    games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
-    return players, games
-
-
-def export_data(players: dict, games: dict):
-    return {
-        "players": {k: p.to_dict() for k, p in players.items()},
-        "games": {k: g.to_dict() for k, g in games.items()},}
-
-
 def export_to_shared(players: dict, games: dict):
     folder = get_shared_folder()
     file_path = os.path.join(folder, "domino_backup.json")
@@ -149,3 +137,72 @@ def import_from_shared():
     players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
     games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
     return players, games
+
+"""
+Export/Import Data.
+    
+        {export date: {
+            "Players": player data,
+            "Games": gamescore data,
+            }
+        },
+    
+"""
+
+
+def get_export_dates():
+    exdates = [d for d in get_data().keys()]
+    return exdates
+
+
+def get_data():
+    folder = get_shared_folder()
+    file_path = os.path.join(folder, "domino_backup.json")
+    if not os.path.exists(file_path):
+        return {}
+    with open(file_path, "r") as f:
+        data = json.load(f)
+    return data
+
+
+def save_data(data):
+    folder = get_shared_folder()
+    file_path = os.path.join(folder, "domino_backup.json")
+    try:
+        with open(file_path, "w") as f:
+            json.dump(data, f, indent = 4)
+    except Exception as e:
+        print(e)
+        return
+    print("Data exported to file")
+
+
+def export_data(players: dict, games: dict):
+    data = {}
+    date = datetime.now()
+    fdate = f"{date:%m/%d/%y %I:%M%p}"
+    exdata = {
+        "players": {k: p.to_dict() for k, p in players.items()},
+        "games": {k: g.to_dict() for k, g in games.items()},}
+    try:
+        data = get_data()
+    except Exception as e:
+        print(e)
+        return
+    data[fdate] = exdata
+    save_data(data)
+
+
+def import_data(import_date):
+    exdata = get_data()
+    data = {}
+    try:
+        data = exdata.get(import_date)
+    except Exception as e:
+        print(e)
+        return
+    players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
+    games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
+    del exdata[import_date]
+    save_data(exdata)
+    return players,games

@@ -8,7 +8,7 @@ import utils
 class OptionsScreen(MDScreen):
     
     def export_data(self):
-        path = utils.export_to_shared(
+        path = utils.export_data(
             self.app.players,
             self.app.games
         )

@@ -207,6 +207,18 @@ class DominoApp(MDApp):
 
     def go_back(self):
         self.root.current = "menu"
+    
+    
+    def import_data(self, date):
+        self.players, self.games = utils.import_data(date)
+       # players = {k:models.Player.from_dict(p) for k,p in data['players'].items()}
+#        games = {id:models.GameScore.from_dict(g) for id,g in data['games'].items()}
+#        self.players = players
+#        self.games = games
+        print("Data imported!")
+        utils.save_games(self.games, self.data_dir)
+        utils.save_players(self.players, self.data_dir)
+        self.root.current = "menu"
 
 
     @property
