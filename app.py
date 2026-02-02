@@ -211,8 +211,8 @@ class DominoApp(MDApp):
         self.root.current = "menu"
     
     
-    def import_data(self, date):
-        self.players, self.games = utils.import_data(date)
+    def import_data(self, data):
+        self.players, self.games = utils.load_data(data)
        # players = {k:models.Player.from_dict(p) for k,p in data['players'].items()}
 #        games = {id:models.GameScore.from_dict(g) for id,g in data['games'].items()}
 #        self.players = players

@@ -401,9 +401,10 @@
         spacing: dp(10)
         
         MDTopAppBar:
-            title: "Choose the date"
+            title: "Paste data"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
 
-        ScrollView:
-            MDList:
-                id: import_list
+        MDTextField:
+            id: import_field
+            multiline: True
+            on_text_validate:root.import_data(self.text)

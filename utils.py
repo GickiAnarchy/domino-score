@@ -151,6 +151,17 @@ def save_data(data):
     print("Data exported to file")
 
 
+def load_data(data):
+    try:
+        players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
+        games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
+    except Exception as e:
+        print(e)
+        return
+    save_data(data)
+    return players, games 
+
+
 def export_data(players: dict, games: dict):
     data = {}
     date = datetime.now()
