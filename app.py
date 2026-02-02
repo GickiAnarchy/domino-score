@@ -62,6 +62,7 @@ class DominoApp(MDApp):
             ])
 
             # Check for "All Files Access" (Android 11/API 30+)
+            """
             Environment = autoclass("android.os.Environment")
             if not Environment.isExternalStorageManager():
                 print("Requesting All Files Access...")
@@ -82,6 +83,7 @@ class DominoApp(MDApp):
                 except Exception as e:
                     print(f"Error requesting permission: {e}")
                     toast("Could not open settings for file permission.")
+                    """
 
      
 

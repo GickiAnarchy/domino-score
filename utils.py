@@ -110,33 +110,7 @@ def load_games(f_path) -> dict:
     return data
 
 
-###
-# IMPORT / EXPORT
-###
 
-
-def export_to_shared(players: dict, games: dict):
-    folder = get_shared_folder()
-    file_path = os.path.join(folder, "domino_backup.json")
-    data = {
-        "players": {k: p.to_dict() for k, p in players.items()},
-        "games": {k: g.to_dict() for k, g in games.items()},
-    }
-    with open(file_path, "w") as f:
-        json.dump(data, f, indent=2)
-    return file_path
-
-
-def import_from_shared():
-    folder = get_shared_folder()
-    file_path = os.path.join(folder, "domino_backup.json")
-    if not os.path.exists(file_path):
-        raise FileNotFoundError("Backup not found")
-    with open(file_path, "r") as f:
-        data = json.load(f)
-    players = {k: models.Player.from_dict(v) for k, v in data["players"].items()}
-    games = {k: models.GameScore.from_dict(v) for k, v in data["games"].items()}
-    return players, games
 
 """
 Export/Import Data.
