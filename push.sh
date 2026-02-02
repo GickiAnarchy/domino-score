@@ -14,6 +14,4 @@ sleep 0.5
 
 echo "Done!!!!!!"
 
-sleep 2
-
-exit
+sleep 2 && exit
