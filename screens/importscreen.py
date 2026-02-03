@@ -9,11 +9,7 @@ class ImportScreen(MDScreen):
 
 
     def import_data(self, data):
-        if ["players","games"] in data.keys():
-            self.app.import_data(data)
-        else:
-            print("Import is wrong format")
-            self.root.current = "menu"
+        self.app.import_data(data)
 
 
     @property

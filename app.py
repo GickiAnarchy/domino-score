@@ -193,9 +193,14 @@ class DominoApp(MDApp):
     
     
     def import_data(self, data):
-        datas = json.loads(f"{data}")
-        self.players, self.games = utils.load_data(datas)
-        print("Data imported!")
+        try:
+            datas = json.loads(data)
+            self.players, self.games = utils.load_data(datas)
+        except Exception as e:
+            print(e)
+            toast(e)
+            return
+        toast("Data imported!")
         utils.save_games(self.games, self.data_dir)
         utils.save_players(self.players, self.data_dir)
         self.root.current = "menu"
