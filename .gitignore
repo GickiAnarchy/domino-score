@@ -14,3 +14,4 @@ __pycache__/*
 combine.py
 kivy_pydroid.py
 _buildozer.spec
+push.sh

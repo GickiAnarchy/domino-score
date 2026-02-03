@@ -23,6 +23,10 @@ class ExportScreen(MDScreen):
         Clipboard.copy(self.data)
 
 
+    def to_options(self):
+        self.manager.current = "options"
+
+
     @property
     def app(self):
         return MDApp.get_running_app()

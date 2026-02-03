@@ -14,7 +14,7 @@ from kivy.clock import Clock
 
 
 
-APP_VER = "v1.4.5"
+APP_VER = "v1.5"
 
 class DominoApp(MDApp):
 

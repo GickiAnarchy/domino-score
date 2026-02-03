@@ -394,6 +394,15 @@
         MDTopAppBar:
             title: "Options"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        
+        MDLabel:
+            text:"Collect all the player and game data into a json format that can be copied and stored."
+            halign:"center"
+            size_hint_y:None
+            size_hint_x: 0.7
+            pos_hint: {"center_x":0.5}
+            height:self.texture_size[1]
+            font_size:"16sp"
 
         Widget:
 
@@ -436,7 +445,7 @@
 
         MDTopAppBar:
             title: "Paste data"
-            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            left_action_items: [["arrow-left",lambda x: root.to_options()]]
             right_action_items: [["import", lambda x: None]]
             size_hint_y: None
             height: self.theme_cls.standard_increment
@@ -471,7 +480,7 @@
         
         MDTopAppBar:
             title: "Export Data"
-            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            left_action_items: [["arrow-left", lambda x: root.to_options()]]
             right_action_items: [["export", lambda x: None]]
             
         MDLabel:

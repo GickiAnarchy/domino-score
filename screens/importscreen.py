@@ -12,6 +12,10 @@ class ImportScreen(MDScreen):
         self.app.import_data(data)
 
 
+    def to_options(self):
+        self.manager.current = "options"
+    
+
     @property
     def app(self):
         return MDApp.get_running_app()
