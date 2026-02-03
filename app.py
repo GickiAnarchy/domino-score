@@ -14,7 +14,7 @@ from kivy.clock import Clock
 
 
 
-APP_VER = "v1.4.0"
+APP_VER = "v1.4.5"
 
 class DominoApp(MDApp):
 
@@ -41,17 +41,14 @@ class DominoApp(MDApp):
         
         loaded_players = utils.load_players(self.data_dir)
         loaded_games = utils.load_games(self.data_dir)
-    
         if loaded_players:
             self.players = loaded_players
         else:
             self.players = {}
-    
         if loaded_games:
             self.games = loaded_games
         else:
             self.games = {}
-        
         Clock.schedule_once(self.toast_version,4)
 
 

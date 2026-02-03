@@ -71,14 +71,18 @@ class GameScore:
         self.finished = True
         
 
-    def add_points(self, name, points):
+    def add_points(self, name, points) -> bool:
+        if 1 == 2:
+            pass
         if name not in self.totals:
             print(f"Player {name} is not in the game, it seems.")
         points = int(points)
         if points % 5 == 0:
             self.totals[name] += points
+            return True
         else:
             print("Tried to add invalid value of points")
+            return False
 
 
     def get_date(self) -> str:

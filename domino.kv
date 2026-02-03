@@ -125,6 +125,7 @@
         MDTopAppBar:
             title: "Select Players"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            right_action_items: [["account-check", lambda x: None]]
 
         ScrollView:
             spacing: dp(15)
@@ -176,6 +177,7 @@
         MDTopAppBar:
             title: "Create Player"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            right_action_items: [["account-plus", lambda x: None]]
         
         MDBoxLayout:
             orientation: "vertical"
@@ -217,7 +219,8 @@
         MDTopAppBar:
             title: "Player Stats"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
-            
+            right_action_items: [["trophy-outline", lambda x: None]]
+
         MDLabel:
             id: top_player_label
 
@@ -266,20 +269,52 @@
         padding: dp(10)
         spacing: dp(10)
 
+        # The area where player rows will be added dynamically
         ScrollView:
             MDBoxLayout:
                 id: score_box
                 orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
+                spacing: dp(20) # Add breathing room between players
+        
+        # Bottom Action Bar (Static)
+        MDBoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(10)
+            
+            # Primary Action: End the round
+            MDRaisedButton:
+                text: "END ROUND"
+                size_hint_x: 0.5
+                size_hint_y: 0.9
+                font_style: "H6"
+                md_bg_color: app.theme_cls.primary_color
+                pos_hint:{"center_x":0.5, "center_y":0.5}
+                on_release: root.commit_round()
+            
+            # Secondary Actions: Finish or Cancel
+            MDBoxLayout:
+                orientation: "vertical"
+                size_hint_x: 0.4
+                spacing: dp(15)
+                padding: dp(15)
 
-        MDRaisedButton:
-            text: "Finish Game"
-            on_release: root.finish_game()
-
-        MDFlatButton:
-            text: "Cancel Game"
-            on_release: root.cancel_game()
+                MDRaisedButton:
+                    text: "Finish Game"
+                    size_hint: (0.8,0.8)
+                    md_bg_color: .8, .2, .2, 1  # Reddish for caution
+                    pos_hint:{"center_x":0.5}
+                    on_release: root.finish_game()
+        
+                MDRaisedButton:
+                    text: "Cancel"
+                    size_hint: (0.8,0.8)
+                    md_bg_color: .5, .5, .5, 1  # Gray for cancel
+                    pos_hint:{"center_x":0.5}
+                    on_release: root.cancel_game()
 
 
 <HistoryScreen>:
@@ -293,6 +328,7 @@
         MDTopAppBar:
             title: "Game History"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            right_action_items: [["history", lambda x: None]]
 
         ScrollView:
             MDList:
@@ -397,21 +433,32 @@
 
     MDBoxLayout:
         orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-        
+
         MDTopAppBar:
             title: "Paste data"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            right_action_items: [["import", lambda x: None]]
+            size_hint_y: None
+            height: self.theme_cls.standard_increment
 
-        MDTextField:
-            id: import_field
-            multiline: True
-        
-        MyButton:
-            text:"Import"
-            on_release:root.import_data(import_field.text)
-            halign:"center"
+        ScrollView:
+
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: dp(10)
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDTextField:
+                    id: import_field
+                    multiline: True
+                    size_hint_y: None
+                    height: "200dp"
+
+                MyButton:
+                    text: "Import"
+                    on_release: root.import_data(import_field.text)
 
 
 <ExportScreen>:
@@ -425,6 +472,7 @@
         MDTopAppBar:
             title: "Export Data"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
+            right_action_items: [["export", lambda x: None]]
             
         MDLabel:
             id:export_label
@@ -435,3 +483,5 @@
             on_release: root.copy_data()
             pos_hint: {"center_x":0.5}
             disabled: True
+
+
