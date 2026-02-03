@@ -4,7 +4,7 @@ git add .
 
 sleep 0.5
 
-git commit -am "Auto push triggered [apk]"
+git commit -am "Auto push triggered [release]"
 
 sleep 0.5
 
