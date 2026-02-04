@@ -32,9 +32,25 @@ class HistoryScreen(MDScreen):
     def _build_label(self, game: models.GameScore):
         if not game.finished:
             return f"Unfinished game • {game.date[:10]}"
-        winner = game.winner or "?"
-        high = max(game.totals.values()) if game.totals else 0
-        return f"{winner} won ({high}) • {game.date[:10]}"
+        # 1. Guard against empty games to prevent errors
+        if not game.totals:
+            return "No Scores"
+        # 2. Find the highest score to identify the winner
+        # We assume game.totals is a dict like {'PlayerName': int(score)}
+        highest_score = max(game.totals.values())
+        lbls = []
+        for name, score in game.totals.items():
+            text_str = f"{name}({score})"
+            # 3. Check if this player is the winner (or tied for first)
+            if score == highest_score:
+                # Apply Markup: Bold ([b]) and Green Color ([color])
+                # You can change #00C853 to any hex code you prefer.
+                text_str = f"[b][color=#00C853]{text_str}[/color][/b]"
+            lbls.append(text_str)
+        # 4. Join the items with the pipe separator
+        results = " | ".join(lbls)
+        return f"{results}  {game.get_date()}"
+
 
 
     def open_game(self, game: models.GameScore):

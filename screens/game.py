@@ -64,7 +64,7 @@ class GameScreen(MDScreen):
                 text="0",
                 mode="rectangle",
                 pos_hint={"center_y": 0.5},
-                size_hint_x=0.4,
+                size_hint = (0.4,0.6),
                 input_filter="int",
                 hint_text="Add",
             )
@@ -86,7 +86,7 @@ class GameScreen(MDScreen):
                 btns.add_widget(
                     MDRaisedButton(
                         text=f"{pts:+}", 
-                        size_hint=(0.2, 1), 
+                        size_hint=(0.2, 0.9), 
                         md_bg_color=color,
                         elevation=0, # Flat look for calc buttons
                         on_release=lambda x, n=name, p=pts: self.update_input_field(n, p)
