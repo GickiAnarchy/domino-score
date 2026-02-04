@@ -46,6 +46,8 @@ class Player:
         )
 
 
+
+
 class GameScore:
 
     def __init__(self, players, id=None, **kwargs):
@@ -64,12 +66,19 @@ class GameScore:
         self.finished = kwargs.get(
             "finished", False
         )  # Used to verify the game is closed and complete
+        
+        self.rounds = kwargs.get(
+            "rounds", {name: [] for name in self.players}
+        )
 
 
     def finish_game(self):
         print("GameScore -> finish_game()")
         self.finished = True
-        
+
+
+    def end_round(self, name, pts):
+        self.rounds[name].append(pts)
 
     def add_points(self, name, points) -> bool:
         if 1 == 2:
@@ -108,6 +117,7 @@ class GameScore:
             "players": self.players,
             "totals": self.totals,
             "finished": self.finished,
+            "rounds": self.rounds,
         }
 
 
@@ -119,4 +129,5 @@ class GameScore:
             date=data.get("date"),
             totals=data.get("totals"),
             finished=data.get("finished", False),
+            rounds=data.get("rounds", {}),
         )

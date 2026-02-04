@@ -135,6 +135,7 @@ class GameScreen(MDScreen):
         for name, field in self.score_inputs.items():
             try:
                 round_points = int(field.text)
+                self.game.end_round(name, round_points)
             except ValueError:
                 round_points = 0
             

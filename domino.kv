@@ -13,7 +13,7 @@
     
     canvas.before:
         Color:
-            rgba: 0.7, 0, 0.1, 1
+            rgba: app.get_color()
         RoundedRectangle:
             pos: self.pos
             size: self.size
@@ -39,6 +39,16 @@
             height: dp(260)   # <-- creates space for logo + title + fact
             
             FitImage:
+                
+                canvas.before:
+                    Color:
+                        rgba: app.get_color()
+                        
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [25, 25, 25, 25]
+                    
                 source: "data/icon_1024.png"
                 size_hint: None, None
                 size: dp(120), dp(120)
@@ -49,11 +59,11 @@
                 
                 canvas.after:
                     Color:
-                        rgba: 1, 0, 0, 0.8  # White Border
+                        rgba: app.get_color()
                     
                     # The border line
                     Line:
-                        width: 2
+                        width: 5
                         # (x, y, width, height, radius)
                         # Note: The radius here (25) should match the radius in canvas.before
                         rounded_rectangle: (self.x, self.y, self.width, self.height, 25)
@@ -226,11 +236,11 @@
 
             canvas.before:
                 Color:
-                    rgba: 0, 0.8, 0, 0.8
+                    rgba: 0, 0.8, 0, 0.4
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
-                    radius: [25, 25, 25, 25]
+                    radius: [50, 50, 50, 50]
 
             pos_hint:{"center_x":0.5}
             halign:"center"

@@ -1,10 +1,12 @@
 import os
 import logging
 import json
+import random
 import ui_helpers
 import screens
 import models
 import utils
+import constants
 from kivy.utils import platform
 from kivymd.toast import toast
 from kivy.core.text import LabelBase
@@ -14,7 +16,7 @@ from kivy.clock import Clock
 
 
 
-APP_VER = "v1.5"
+APP_VER = "v1.7"
 
 class DominoApp(MDApp):
 
@@ -27,6 +29,7 @@ class DominoApp(MDApp):
         os.makedirs(self.data_dir, exist_ok=True)
         
         self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = random.choice(constants.COLORS)
 
         self._register_fonts()
 
@@ -50,6 +53,10 @@ class DominoApp(MDApp):
         else:
             self.games = {}
         Clock.schedule_once(self.toast_version,4)
+
+
+    def get_color(self):
+        return self.theme_cls.primary_color
 
 
     def request_permissions(self):
