@@ -12,6 +12,6 @@ git push
 
 sleep 0.5
 
-echo "Done!!!!!!"
+echo "Done!!!"
 
 sleep 2
