@@ -6,24 +6,23 @@ class Player:
 
     def __init__(self, name, **kwargs):
         self.name = name  # Player name
-
         self.wins = kwargs.get("wins", 0)  # Total wins
-
         self.losses = kwargs.get("losses", 0)  # Total losses
-
         self.highest_score = kwargs.get(
             "highest_score", 0
         )  # Players highest score ever
-        
         self.nickname = kwargs.get("nickname", "")
+
 
     @property
     def win_percentage(self):
         return (self.wins / (self.wins + self.losses) * 100)
 
+
     def reset_stats(self):
         self.wins = 0
         self.losses = 0
+
 
     def to_dict(self):
         p_dict = {
@@ -34,6 +33,7 @@ class Player:
             "nickname": self.nickname,
         }
         return p_dict
+
 
     @classmethod
     def from_dict(cls, data):
@@ -52,21 +52,16 @@ class GameScore:
 
     def __init__(self, players, id=None, **kwargs):
         self.id = id or str(uuid4())  # Used to identify games.
-
         self.date = kwargs.get(
             "date", datetime.now().isoformat()
         )  # Keep in isoformat in file and in memory, only format to string to display
-
         self.players = list(players)  # List of [Player.name]'s
-
-        self.totals = kwargs.get(
+        self.totals = kwargs. get(
             "totals", {name: 0 for name in self.players}
         )  # dict: {player_name:score}
-
         self.finished = kwargs.get(
             "finished", False
         )  # Used to verify the game is closed and complete
-        
         self.rounds = kwargs.get(
             "rounds", {name: [] for name in self.players}
         )
@@ -79,6 +74,7 @@ class GameScore:
 
     def end_round(self, name, pts):
         self.rounds[name].append(pts)
+
 
     def add_points(self, name, points) -> bool:
         if 1 == 2:
@@ -131,3 +127,29 @@ class GameScore:
             finished=data.get("finished", False),
             rounds=data.get("rounds", {}),
         )
+
+
+
+
+class DominoTile():
+    def __init__(self, value_top:int, value_bottom:int):
+        self.value_top = value_top
+        self.value_bottom = value_bottom
+        self.name = f"{str(self.value_top)}-{str(self.value_bottom)} Domino"
+
+
+    @property
+    def value_total(self) -> int:
+        return self.value_top + self.value_bottom
+
+
+    def __repr__(self):
+        return f"{str(self.value_top)}-{str(self.value_bottom)} Domino"
+
+
+    @staticmethod
+    def create_double_sixes():
+        return [
+            DominoTile(a, b)
+            for a in range(7)
+            for b in range(7)]

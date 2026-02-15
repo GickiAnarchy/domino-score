@@ -3,7 +3,7 @@
 #:import MDSeparator ui_helpers.MDSeparator
 #:import MDTopAppBar kivymd.uix.toolbar.MDTopAppBar
 #:import MDIconButton kivymd.uix.button.MDIconButton
-
+#:import CleanTextField ui_helpers.CleanTextField
 
 
 <MyButton@MDRaisedButton>:
@@ -18,8 +18,7 @@
             pos: self.pos
             size: self.size
             # The radius of the corners [top-left, top-right, bottom-right, bottom-left]
-            radius: [25, 25, 25, 25] 
-
+            radius: [25, 25, 25, 25]
 
 
 
@@ -100,8 +99,21 @@
             id: history_btn
             text: "Game History"
             on_release: app.root.current = "history"
+        
+        MyButton:
+            id: board_btn
+            text: "Board"
+            on_release: app.root.current = "board"
                 
         Widget:
+        
+        MDLabel:
+            text:"GickiStudios"
+            font_size: "10sp"
+            halign:"center"
+            size_hint:1,None
+            pos_hint: {"bottom":1}
+            
                 
         MDSeparator:
         
@@ -109,7 +121,7 @@
             size_hint_y: None
             height: dp(48)
             spacing: dp(20)
-            pos_hint: {"center_x": 0.5}
+            pos_hint:{"center_x":0.5}
             size_hint_x: None
             width: dp(260)  # controls how far apart they are
                     
@@ -218,59 +230,6 @@
                 on_release: root.save()
 
 
-<StatsScreen>:
-    name: "stats"
-
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
-        spacing: dp(10)
-    
-        MDTopAppBar:
-            title: "Player Stats"
-            left_action_items: [["arrow-left", lambda x: app.go_back()]]
-            right_action_items: [["trophy-outline", lambda x: None]]
-
-        MDLabel:
-            id: top_player_label
-
-            canvas.before:
-                Color:
-                    rgba: 0, 0.8, 0, 0.4
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [50, 50, 50, 50]
-
-            pos_hint:{"center_x":0.5}
-            halign:"center"
-
-        MDRaisedButton:
-            id: player_button
-            text: "Select Player"
-            on_release: root.open_menu()
-
-        MDLabel:
-            id: wins
-            text: "Wins: —"
-
-        MDLabel:
-            id: losses
-            text: "Losses: —"
-    
-        MDLabel:
-            id: games
-            text: "Games Played: —"
-
-        MDLabel:
-            id: winrate
-            text: "Win Rate: —"
-            
-        MDLabel:
-            id: highscore
-            text: "Highest Score: —"
-
-
 <GameScreen>:
     name: "game"
 
@@ -334,7 +293,7 @@
         orientation: "vertical"
         padding: dp(10)
         spacing: dp(10)
-        
+            
         MDTopAppBar:
             title: "Game History"
             left_action_items: [["arrow-left", lambda x: app.go_back()]]
@@ -343,6 +302,7 @@
         ScrollView:
             MDList:
                 id: history_list
+
 
 
 <EditGameScreen>:
@@ -461,7 +421,6 @@
             height: self.theme_cls.standard_increment
 
         ScrollView:
-
             MDBoxLayout:
                 orientation: "vertical"
                 padding: dp(10)
@@ -469,7 +428,7 @@
                 size_hint_y: None
                 height: self.minimum_height
 
-                MDTextField:
+                CleanTextField:
                     id: import_field
                     multiline: True
                     size_hint_y: None
@@ -504,3 +463,37 @@
             disabled: True
 
 
+<DominoTileWidget>:
+    size_hint: None, None
+    size: dp(80), dp(160)
+
+    canvas:
+        Color:
+            rgba: self.tile_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
+    
+
+<BoardScreen>:
+    name: "board"
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        RelativeLayout:
+            id: board_area
+
+        FloatLayout:
+            id: hand_area
+            size_hint_y: None
+            height: dp(180)
+            
+            canvas.before:
+                Color:
+                    rgba: 0.1, 0.1, 0.1, 0.3
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]

@@ -1,0 +1,26 @@
+# Updated BoardScreen section for domino.kv
+# Replace the existing <BoardScreen>: section with this
+
+<BoardScreen>:
+    name: "board"
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        # Board area - where tiles are placed (draggable)
+        RelativeLayout:
+            id: board_area
+
+        # Hand area - shows your current tiles (not draggable)
+        FloatLayout:
+            id: hand_area
+            size_hint_y: None
+            height: dp(180)
+            
+            canvas.before:
+                Color:
+                    rgba: 0.1, 0.1, 0.1, 0.3
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]

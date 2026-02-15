@@ -41,4 +41,6 @@ COLORS = [
     "BlueGray",
 ]
 
-THEME_BLK_RED = ["Black", "Red", "Gray"]
+RULES = [
+        "With all tiles face down, each player draws one. The player with the highest domino goes first (Leads).",
+        "The leading player can draw 7 or more tiles. As long as all players can have the same anount."]

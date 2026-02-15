@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import ui_helpers
+from domino_widgets import MyScreenManager
 import screens
 import models
 import utils
@@ -30,17 +31,19 @@ class DominoApp(MDApp):
         
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = random.choice(constants.COLORS)
+        self.theme_cls.accent_palette = random.choice(constants.COLORS)
 
         self._register_fonts()
-
-        sm = ScreenManager()
+        
+        sm = MyScreenManager()
         for cls, name in screens.ALL_SCREENS:
             sm.add_widget(cls(name=name))
         return sm
 
 
     def on_start(self):
-        self.request_permissions()
+        # commented for pydroid. Uncomment for build. 
+        #self.request_permissions()
         
         loaded_players = utils.load_players(self.data_dir)
         loaded_games = utils.load_games(self.data_dir)

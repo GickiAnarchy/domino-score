@@ -3,6 +3,26 @@ from kivy.properties import ListProperty, NumericProperty
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.app import MDApp
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.screen import MDScreen
+
+
+class CleanTextField(MDTextField):
+    """
+    A custom TextField that removes Carriage Returns (\r) 
+    from pasted text to prevent extra whitespace.
+    """
+    def insert_text(self, substring, from_undo=False):
+        # If the string contains the carriage return character
+        if '\r' in substring:
+            # Replace it with nothing (effectively removing it)
+            # You can also change this to replace with ' ' if you prefer spaces
+            substring = substring.replace('\r', '')
+        substring = substring.lstrip()
+            
+        # Pass the cleaned string to the standard Kivy insertion logic
+        return super().insert_text(substring, from_undo=from_undo)
 
 
 class MDSeparator(MDBoxLayout):
